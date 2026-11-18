@@ -630,3 +630,15 @@ dialog.motion-library { box-sizing: border-box; width: min(980px, calc(100vw - 2
 @media (max-width: 650px) { .motion-library-grid { grid-template-columns: minmax(0, 1fr); } dialog.motion-library { padding: 12px; } }
 #app.is-mobile .transport { flex-wrap: wrap; }
 #app.is-mobile #btnMotionLibrary { flex: 0 0 100%; }
+
+/* JIZURA改: 右側の「MP4書き出し」 */
+.right-mp4 { display:grid; gap:8px; margin-top:16px; padding-top:14px; border-top:1px solid var(--line); }
+.right-mp4-head { margin:0; font-size:13px; }
+.right-mp4 .right-mp4-go { padding:12px; font-size:15px; }
+.right-mp4 .right-mp4-settings { padding:9px 12px; }
+.right-mp4 progress { width:100%; }
+.right-mp4 .note { margin:0; }
+.right-mp4 .note.error { color:#ff6b6b; }
+.right-mp4-links { display:flex; flex-wrap:wrap; gap:8px; }
+.right-mp4-links a { color:var(--amber); }
+.right-mp4-status:empty, .right-mp4-info:empty { display:none; }

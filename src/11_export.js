@@ -144,12 +144,14 @@ async function encodeMP4({ plan, project, audio, onProgress, signal, range, file
   const fps = plan.fps;
   let ac = null;
   if (audio && audio.buffer && project.includeAudio !== false) ac = await J.pickAudioCodec(48000, Math.min(2, audio.buffer.numberOfChannels));
+  // audio: copy the music file's own AAC/Opus/MP3 when possible (no re-encoding, works without an AAC encoder)
+  let copy = null;
+  if (audio && audio.buffer && project.includeAudio !== false && audio.file) copy = await J.openAudioCopy(audio.file);
+  if (copy && copy.codec !== 'aac' && ac && ac.mux === 'aac') { copy.dispose(); copy = null; }   // re-encoding to AAC is more compatible than copying MP3/Opus
+  if (copy) ac = { codec: copy.codec, mux: copy.codec, sr: copy.sampleRate, copy: true };
   const store = file ? null : new BlockStore();
-  const target = file ? new Mp4Muxer.FileSystemWritableFileStreamTarget(file, { chunkSize: 8 * 1048576 })
-    : new Mp4Muxer.StreamTarget({ onData: (data, pos) => store.write(data, pos), chunked: true, chunkSize: 8 * 1048576 });
-  const muxOpts = { target, video: { codec: vc.mux, width: w, height: h, frameRate: fps }, fastStart: false, firstTimestampBehavior: 'offset' };
-  if (ac) muxOpts.audio = { codec: ac.mux, numberOfChannels: Math.min(2, audio.buffer.numberOfChannels), sampleRate: ac.sr };
-  const muxer = new Mp4Muxer.Muxer(muxOpts);
+  const muxer = new J.Mp4Writer({ target: file || { onWrite: (data, pos) => store.write(data, pos) }, video: { codec: vc.mux, width: w, height: h, frameRate: fps },
+    audio: ac ? { codec: ac.mux } : null, fastStart: false });
   let err = null, outFrames = 0;
   const venc = new VideoEncoder({ output: (chunk, meta) => { outFrames++; try { muxer.addVideoChunk(chunk, meta); } catch (e) { err = e; } }, error: e => { err = e; } });
   venc.configure(Object.assign({}, vc.cfg, { latencyMode: 'quality' }));
@@ -173,15 +175,23 @@ async function encodeMP4({ plan, project, audio, onProgress, signal, range, file
       while (venc.encodeQueueSize > 4 && !err) { await new Promise(r => setTimeout(r, 2)); if (!document.hidden && ++spins > 15000) throw new Error('エンコーダーが応答しません'); }
       // an encoder that accepts frames but never returns any has failed silently (seen with some GPU drivers)
       if (i === Math.min(total - 1, fps * 3) && outFrames === 0) { await venc.flush(); if (!outFrames) throw new Error('エンコーダーが出力を返しません'); }
+      await muxer.settle();
       if (i % 3 === 0) { onProgress && onProgress(i / total, `フレーム ${i + 1}/${total}${note || ''}`); await new Promise(r => setTimeout(r, 0)); }
     }
     await venc.flush();
     if (err) throw err;
-  } catch (e) { closeEnc(); throw e; }
+  } catch (e) { closeEnc(); await muxer.cancel(); copy && copy.dispose(); throw e; }
   finally { J.glyphs.maxRes = prevRes; }
   closeEnc();
   if (outFrames < total * 0.98) throw new Error(`動画のフレームが足りません（${outFrames}/${total}）`);
-  if (ac) {
+  if (ac && ac.copy) {
+    onProgress && onProgress(0.99, '音声をコピー中');
+    try {
+      const copied = await copy.copyTo(muxer, span.t0, span.dur);
+      if (!copied && audio.buffer.duration > span.t0 + 0.5) { const e = new Error('音声をコピーできませんでした。もう一度書き出してください'); e.jzFatal = true; throw e; }
+    } catch (e) { await muxer.cancel(); throw e; }
+    finally { copy.dispose(); }
+  } else if (ac) {
     onProgress && onProgress(0.99, '音声をエンコード中');
     const rs = await resample(audio.buffer, ac.sr, span.dur, span.t0);
     const chn = rs.numberOfChannels;
@@ -205,7 +215,7 @@ async function encodeMP4({ plan, project, audio, onProgress, signal, range, file
     if (!aChunks || aEnd < (Math.min(span.dur, audio.buffer.duration - span.t0) - 0.5) * 1e6) throw fatal('音声のエンコードが途中で止まりました（' + aChunks + '）。もう一度書き出してください');
   }
   onProgress && onProgress(0.995, 'ファイルを仕上げ中');
-  muxer.finalize();
+  await muxer.finalize();
   if (file) await file.close();
   onProgress && onProgress(1, '完了');
   const size = file ? null : store.end;

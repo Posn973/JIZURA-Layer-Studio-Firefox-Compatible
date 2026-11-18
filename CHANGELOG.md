@@ -1,3 +1,30 @@
+## 1.5.2-fc.1 — 2026-11-19（Firefox Compatible として公開）
+
+- 名称を「JIZURA Layer Studio Firefox Compatible」に。改変者 Posn973 の表記を追加し、公開URLを posn973.github.io に変更。
+
+## 1.5.2-kai.4 — 2026-11-19（JIZURA改）
+
+- Firefoxで書き出したMP4にWindowsでサムネイルが出ない問題の本当の原因を修正。FirefoxのH.264エンコーダーが渡す設定情報（avcC）のSPS/PPSが先頭バイト二重（67 67… / 68 68…）で壊れていたため、キーフレーム内の正しいSPS/PPSからavcCを作り直す（映像データは変更しない）。
+- Repair the broken avcC from Firefox's H.264 encoder (doubled NAL header bytes in SPS/PPS) by rebuilding it from the in-band SPS/PPS, so Windows can read the files.
+
+## 1.5.2-kai.3 — 2026-11-19（JIZURA改）
+
+- 左パネルの「簡易動画MP4を出力」「簡易動画設定…」を削除（右側の「MP4書き出し」「MP4書き出し設定」に一本化）。説明文は右側へ移動。
+- Remove the left-panel simple export and settings buttons; the right-hand MP4 export replaces them.
+
+## 1.5.2-kai.2 — 2026-11-19（JIZURA改）
+
+- Bフレーム付きのH.264（Firefox）で書き出したMP4が、Windowsのエクスプローラーでサムネイル表示されない問題を修正。Mediabunnyが書くマイナスの合成時刻オフセット（ctts version 1＋cslg）を、ffmpegと同じ ctts version 0＋編集リスト（edts/elst）に書き直す（映像・音声の中身は変更しない）。
+- 右側に「MP4書き出し」（オレンジ）と「MP4書き出し設定」を追加。かんたんでは一番下、詳細では「書き出し」タブの一番下。左の簡易動画MP4出力と同じ処理で、進捗・中止・保存リンクも表示。設定ダイアログの見出しを「MP4書き出し設定（簡易動画）」に変更。
+- Rewrite B-frame timing (ctts v1 + cslg) as ctts v0 + edit list so Windows shows thumbnails. Add an orange "MP4 export" button and "MP4 export settings" at the bottom of the Simple panel and of the Export tab.
+
+## 1.5.2-kai.1 — 2026-11-19（JIZURA改）
+
+- MP4の書き出しを mp4-muxer から Mediabunny（src/10b_mp4_writer.js）に変更。Bフレームを使うH.264エンコーダー（Firefox）で「Timestamps must be monotonically increasing」となり失敗していた問題を修正。通常のMP4・マット＋フロント・フロントのみ・簡易動画のすべてに反映。mp4-muxer は埋め込まない。
+- 音声：読み込んだ曲がAAC（.m4a など）なら、再エンコードせずにそのままMP4へコピー（無劣化・AACエンコーダーのないFirefoxでもAAC）。それ以外は AAC エンコード → 元のOpus/MP3をコピー → Opusエンコード の順で選ぶ。簡易動画もOpusに対応。
+- 画面比に「背景に合わせる」を追加。作業用背景（画像・動画）の縦横比で書き出す（短辺は既存と同じく1080／正方形寄りは1440、偶数に丸める）。背景がないときは16:9。
+- Write MP4 files with Mediabunny instead of mp4-muxer so H.264 encoders that emit B-frames (Firefox) work. Copy AAC audio from the loaded music file without re-encoding; fall back to AAC/Opus encoding. Add the "Match background" aspect ratio.
+
 ## 1.5.2 — 2026-10-25
 
 - プレビューループの初期値をOFFに変更。OFF・全体・行・カットの選択をブラウザのlocalStorageに保存し、次回起動時に復元。プロジェクトJSONには含めず、プロジェクト初期化でも保持。日英マニュアル・利用ガイドを更新。

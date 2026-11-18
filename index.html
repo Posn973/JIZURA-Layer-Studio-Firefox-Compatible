@@ -5,10 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>JIZURA Layer Studio — cityedge fork</title>
 <meta name="description" content="字幕フロントと二値・グレーマットを2本のMP4に。SRT・作業用背景・スペアナ合成に対応したJIZURAの非公式派生版。">
-<link rel="canonical" href="https://cityedge.github.io/jizura_layer_studio/">
-<meta property="og:url" content="https://cityedge.github.io/jizura_layer_studio/">
-<link rel="alternate" hreflang="ja" href="https://cityedge.github.io/jizura_layer_studio/">
-<link rel="alternate" hreflang="en" href="https://cityedge.github.io/jizura_layer_studio/en/">
+<link rel="canonical" href="https://posn973.github.io/JIZURA-Layer-Studio-Firefox-Compatible/">
+<meta property="og:url" content="https://posn973.github.io/JIZURA-Layer-Studio-Firefox-Compatible/">
+<link rel="alternate" hreflang="ja" href="https://posn973.github.io/JIZURA-Layer-Studio-Firefox-Compatible/">
+<link rel="alternate" hreflang="en" href="https://posn973.github.io/JIZURA-Layer-Studio-Firefox-Compatible/en/">
 <meta property="og:type" content="website">
 <meta property="og:title" content="JIZURA Layer Studio — cityedge fork">
 <meta property="og:description" content="字幕フロントと二値・グレーマットを2本のMP4に。SRT・作業用背景・スペアナ合成に対応したJIZURAの非公式派生版。">
@@ -649,6 +649,18 @@ dialog.motion-library { box-sizing: border-box; width: min(980px, calc(100vw - 2
 #app.is-mobile .transport { flex-wrap: wrap; }
 #app.is-mobile #btnMotionLibrary { flex: 0 0 100%; }
 
+/* JIZURA改: 右側の「MP4書き出し」 */
+.right-mp4 { display:grid; gap:8px; margin-top:16px; padding-top:14px; border-top:1px solid var(--line); }
+.right-mp4-head { margin:0; font-size:13px; }
+.right-mp4 .right-mp4-go { padding:12px; font-size:15px; }
+.right-mp4 .right-mp4-settings { padding:9px 12px; }
+.right-mp4 progress { width:100%; }
+.right-mp4 .note { margin:0; }
+.right-mp4 .note.error { color:#ff6b6b; }
+.right-mp4-links { display:flex; flex-wrap:wrap; gap:8px; }
+.right-mp4-links a { color:var(--amber); }
+.right-mp4-status:empty, .right-mp4-info:empty { display:none; }
+
 </style>
 </head>
 <body>
@@ -663,7 +675,7 @@ dialog.motion-library { box-sizing: border-box; width: min(980px, calc(100vw - 2
 </div>
 <div id="app">
   <header class="bar">
-    <div class="brand"><span class="mark" aria-hidden="true">字面</span><span class="word">JIZURA Layer Studio</span><span class="tag">cityedge fork</span><span class="ver">v1.5.2</span></div>
+    <div class="brand"><span class="mark" aria-hidden="true">字面</span><span class="word">JIZURA Layer Studio</span><span class="tag">Firefox Compatible</span><span class="ver">v1.5.2-fc.1</span></div>
     <div class="proj">
       <input id="songTitle" type="text" placeholder="曲名（タイトルカード・HUDに表示）" aria-label="曲名">
       <input id="songArtist" type="text" placeholder="アーティスト" aria-label="アーティスト">
@@ -817,7 +829,7 @@ dialog.motion-library { box-sizing: border-box; width: min(980px, calc(100vw - 2
         <div class="easy-sec">
           <h3>書き出し</h3>
           <div class="fields">
-            <label class="field">画面比<select id="eAspect"><option value="16:9">16:9</option><option value="9:16">9:16 縦</option><option value="4:3">4:3</option><option value="3:4">3:4 縦</option><option value="1:1">1:1</option><option value="4:5">4:5 縦</option><option value="21:9">21:9</option></select></label>
+            <label class="field">画面比<select id="eAspect"><option value="16:9">16:9</option><option value="9:16">9:16 縦</option><option value="4:3">4:3</option><option value="3:4">3:4 縦</option><option value="1:1">1:1</option><option value="4:5">4:5 縦</option><option value="21:9">21:9</option><option value="bg">背景に合わせる</option></select></label>
             <label class="field">解像度<select id="eRes"><option value="480">480p</option><option value="540">540p</option><option value="720">720p</option><option value="765">1360×766</option><option value="900">900p</option><option value="1080">1080p</option><option value="1440">1440p</option><option value="2160">4K</option></select></label>
             <label class="field">fps<select id="eFps"><option>30</option><option>24</option><option>60</option></select></label>
             <label class="field field-wide">背景<select id="eKey"><option value="off">通常（スタイルの背景）</option><option value="green">グリーンバック（合成用）</option><option value="black">ブラックバック（合成用）</option></select></label>
@@ -895,7 +907,7 @@ dialog.motion-library { box-sizing: border-box; width: min(980px, calc(100vw - 2
 
       <div class="tabpane" data-pane="out" hidden>
         <div class="fields">
-          <label class="field">画面比<select id="outAspect"><option value="16:9">16:9</option><option value="9:16">9:16 縦</option><option value="4:3">4:3</option><option value="3:4">3:4 縦</option><option value="1:1">1:1</option><option value="4:5">4:5 縦</option><option value="21:9">21:9</option></select></label>
+          <label class="field">画面比<select id="outAspect"><option value="16:9">16:9</option><option value="9:16">9:16 縦</option><option value="4:3">4:3</option><option value="3:4">3:4 縦</option><option value="1:1">1:1</option><option value="4:5">4:5 縦</option><option value="21:9">21:9</option><option value="bg">背景に合わせる</option></select></label>
           <label class="field">解像度<select id="outRes"><option value="480">480p</option><option value="540">540p</option><option value="720">720p</option><option value="765">1360×766</option><option value="900">900p</option><option value="1080">1080p</option><option value="1440">1440p</option><option value="2160">4K</option></select></label>
           <label class="field">fps<select id="outFps"><option>30</option><option>24</option><option>60</option></select></label>
           <label class="field">画質<select id="outQuality"><option value="standard">標準</option><option value="high">高</option><option value="max">最高</option></select></label>
@@ -945,8 +957,8 @@ dialog.motion-library { box-sizing: border-box; width: min(980px, calc(100vw - 2
 <dialog id="termsDlg" class="terms publication-dialog" aria-labelledby="termsTitle">
   <form method="dialog">
     <h2 id="termsTitle" tabindex="-1">利用について</h2>
-    <div class="terms-main"><p class="terms-big">JIZURA Layer Studio</p><p>cityedge fork · v1.5.2</p></div>
-    <p>本アプリは、hakoniwa氏の「JIZURA」を基に、cityedgeが字幕レイヤー制作向けに改変した非公式派生版です。原版の作者が本派生版の開発・保守を担当するものではありません。</p>
+    <div class="terms-main"><p class="terms-big">JIZURA Layer Studio</p><p>Firefox Compatible (Posn973) · cityedge fork · v1.5.2-fc.1</p></div>
+    <p>本アプリは、hakoniwa氏の「JIZURA」を基に、cityedgeが字幕レイヤー制作向けに改変した非公式派生版です。さらにPosn973が、Firefoxでの書き出し対応・AAC音声のそのままコピー・背景に合わせた画面比などを加えた版（Firefox Compatible）です。原版の作者・cityedgeが本版の開発・保守を担当するものではありません。</p>
     <p><a href="https://github.com/852wa/JIZURA" target="_blank" rel="noopener">原版 JIZURA — hakoniwa</a></p>
     <p>出力動画を利用するために、本アプリのMITライセンス表示を動画へ付ける必要はありません。歌詞・音楽・画像・動画・フォントなど、使用する素材の権利と利用条件は個別に確認してください。</p>
     <p class="muted terms-note">選択した素材はブラウザ内で処理し、アプリからサーバーへ送信しません。設定と字幕はブラウザの保存領域に自動保存します。フォント取得時にはGoogle Fontsへ接続します。素材ファイルはプロジェクトJSONに含みません。</p>
@@ -955,6 +967,7 @@ dialog.motion-library { box-sizing: border-box; width: min(980px, calc(100vw - 2
 
 Copyright (c) 2026 hakoniwa
 Copyright (c) 2026 cityedge (modifications for JIZURA Layer Studio)
+Copyright (c) 2026 Posn973 (modifications for JIZURA Layer Studio Firefox Compatible)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the &quot;Software&quot;), to deal
@@ -989,9 +1002,10 @@ Upstream: https://github.com/Vanilagy/mediabunny
 No changes have been made to Mediabunny. Preserve its license and source availability
 notice when redistributing the standalone HTML or a packaged copy.
 
-## mp4-muxer 5.2.2 (bundled)
+## mp4-muxer 5.2.2 (no longer bundled)
 
-`vendor/mp4-muxer.min.js` is embedded in `index.html` and is used to write MP4 files.
+In the Firefox Compatible edition MP4 files are written with Mediabunny (`src/10b_mp4_writer.js`);
+`vendor/mp4-muxer.min.js` is kept in the repository but is not embedded in the HTML editions.
 Source: https://github.com/Vanilagy/mp4-muxer — licensed under the MIT License:
 
 ```
@@ -1419,7 +1433,7 @@ Exhibit B - &quot;Incompatible With Secondary Licenses&quot; Notice
   defined by the Mozilla Public License, v. 2.0.
 </pre></details>
     <p><button type="button" class="guide-open">利用ガイド</button></p>
-    <div class="terms-foot"><span class="muted">Original © 2026 hakoniwa<br>Modifications © 2026 cityedge · MIT</span><button value="close" class="primary" autofocus>閉じる</button></div>
+    <div class="terms-foot"><span class="muted">Original © 2026 hakoniwa<br>Modifications © 2026 cityedge<br>Modifications © 2026 Posn973 · MIT</span><button value="close" class="primary" autofocus>閉じる</button></div>
   </form>
 </dialog>
 
@@ -1427,7 +1441,7 @@ Exhibit B - &quot;Incompatible With Secondary Licenses&quot; Notice
   <form method="dialog">
     <h2 id="guideTitle" tabindex="-1">JIZURA Layer Studio 利用ガイド</h2>
     <p>字幕の演出を作り、背景・音源付きの動画、または編集ソフトで重ねるフロント／マット動画として保存できます。</p>
-    <p><a class="full-manual" href="user_guide.md" target="_blank" rel="noopener">v1.5.2 詳細ユーザーマニュアル（Markdown）</a>には、各設定・合成手順・保存データを詳しく掲載しています。</p>
+    <p><a class="full-manual" href="user_guide.md" target="_blank" rel="noopener">v1.5.2-fc.1 詳細ユーザーマニュアル（Markdown）</a>には、各設定・合成手順・保存データを詳しく掲載しています。</p>
     <h3>まず1本作る</h3>
     <ol class="guide-steps">
       <li><strong>字幕と素材を読み込む</strong><p>「SRTを読み込む」でUTF-8のSRTを選び、音源と作業用背景（画像・動画）を読み込みます。SRTなしで字幕を直接入力することもできます。保存済みプロジェクトを再開する場合はJSONを開き、素材だけを読み直してください。SRTを読み直すと、復元した字幕・フィラー・個別演出を置き換えます。</p></li>
@@ -1495,18 +1509,10 @@ Exhibit B - &quot;Incompatible With Secondary Licenses&quot; Notice
     <p><strong>「プロジェクト初期化」</strong>は現在の字幕・フィラー・区切り・演出・ロック・素材の読み込み・スペアナ・透明度・出力・タイトル設定・再生位置・履歴を初期状態へ戻します。出力の一時保存リンクも消え、自動保存は初期状態に置き換わります。確認後はUndoできません。</p>
     <p><strong>共通ライブラリは削除しません。</strong>ユーザーテーマなど曲をまたいで使うデータと、画面の言語・表示モード・プレビュー音量は保持します。PC上の素材、保存済みJSON、出力動画も削除しません。共通データの削除はそれぞれの管理画面で行います。</p>
     <p>「利用について」は右ペイン最下部にあります。権利・ライセンス・素材の取り扱いを確認できます。</p>
-    <div class="terms-foot"><span class="muted">cityedge fork · v1.5.2</span><button value="close" class="primary" autofocus>閉じる</button></div>
+    <div class="terms-foot"><span class="muted">cityedge fork · v1.5.2-fc.1</span><button value="close" class="primary" autofocus>閉じる</button></div>
   </form>
 </dialog>
 
-<script>
-/*! mp4-muxer v5.2.2 | MIT License | (c) 2023 Vanilagy | see THIRD_PARTY_NOTICES.md */
-"use strict";var Mp4Muxer=(()=>{var we=Object.defineProperty,at=Object.getOwnPropertyDescriptor,nt=Object.getOwnPropertyNames,ot=Object.prototype.hasOwnProperty,ht=(e,t)=>{for(var s in t)we(e,s,{get:t[s],enumerable:!0})},lt=(e,t,s,r)=>{if(t&&typeof t=="object"||typeof t=="function")for(let a of nt(t))!ot.call(e,a)&&a!==s&&we(e,a,{get:()=>t[a],enumerable:!(r=at(t,a))||r.enumerable});return e},ft=e=>lt(we({},"__esModule",{value:!0}),e),ve=(e,t,s)=>{if(!t.has(e))throw TypeError("Cannot "+s)},i=(e,t,s)=>(ve(e,t,"read from private field"),s?s.call(e):t.get(e)),d=(e,t,s)=>{if(t.has(e))throw TypeError("Cannot add the same private member more than once");t instanceof WeakSet?t.add(e):t.set(e,s)},C=(e,t,s,r)=>(ve(e,t,"write to private field"),r?r.call(e,s):t.set(e,s),s),ut=(e,t,s,r)=>({set _(a){C(e,t,a,s)},get _(){return i(e,t,r)}}),m=(e,t,s)=>(ve(e,t,"access private method"),s),Re={};ht(Re,{ArrayBufferTarget:()=>qe,FileSystemWritableFileStreamTarget:()=>Xe,Muxer:()=>vi,StreamTarget:()=>Te});var p=new Uint8Array(8),z=new DataView(p.buffer),y=e=>[(e%256+256)%256],c=e=>(z.setUint16(0,e,!1),[p[0],p[1]]),dt=e=>(z.setInt16(0,e,!1),[p[0],p[1]]),Pe=e=>(z.setUint32(0,e,!1),[p[1],p[2],p[3]]),n=e=>(z.setUint32(0,e,!1),[p[0],p[1],p[2],p[3]]),mt=e=>(z.setInt32(0,e,!1),[p[0],p[1],p[2],p[3]]),x=e=>(z.setUint32(0,Math.floor(e/2**32),!1),z.setUint32(4,e,!1),[p[0],p[1],p[2],p[3],p[4],p[5],p[6],p[7]]),ge=e=>(z.setInt16(0,2**8*e,!1),[p[0],p[1]]),A=e=>(z.setInt32(0,2**16*e,!1),[p[0],p[1],p[2],p[3]]),ye=e=>(z.setInt32(0,2**30*e,!1),[p[0],p[1],p[2],p[3]]),E=(e,t=!1)=>{let s=Array(e.length).fill(null).map((r,a)=>e.charCodeAt(a));return t&&s.push(0),s},se=e=>e&&e[e.length-1],Ce=e=>{let t;for(let s of e)(!t||s.presentationTimestamp>t.presentationTimestamp)&&(t=s);return t},O=(e,t,s=!0)=>{let r=e*t;return s?Math.round(r):r},Le=e=>{let t=e*(Math.PI/180),s=Math.cos(t),r=Math.sin(t);return[s,r,0,-r,s,0,0,0,1]},Ve=Le(0),je=e=>[A(e[0]),A(e[1]),ye(e[2]),A(e[3]),A(e[4]),ye(e[5]),A(e[6]),A(e[7]),ye(e[8])],X=e=>!e||typeof e!="object"?e:Array.isArray(e)?e.map(X):Object.fromEntries(Object.entries(e).map(([t,s])=>[t,X(s)])),V=e=>e>=0&&e<2**32,v=(e,t,s)=>({type:e,contents:t&&new Uint8Array(t.flat(10)),children:s}),w=(e,t,s,r,a)=>v(e,[y(t),Pe(s),r??[]],a),pt=e=>{let t=512;return e.fragmented?v("ftyp",[E("iso5"),n(t),E("iso5"),E("iso6"),E("mp41")]):v("ftyp",[E("isom"),n(t),E("isom"),e.holdsAvc?E("avc1"):[],E("mp41")])},Se=e=>({type:"mdat",largeSize:e}),ct=e=>({type:"free",size:e}),re=(e,t,s=!1)=>v("moov",null,[wt(t,e),...e.map(r=>vt(r,t)),s?Gt(e):null]),wt=(e,t)=>{let s=O(Math.max(0,...t.filter(l=>l.samples.length>0).map(l=>{const u=Ce(l.samples);return u.presentationTimestamp+u.duration})),Ae),r=Math.max(...t.map(l=>l.id))+1,a=!V(e)||!V(s),o=a?x:n;return w("mvhd",+a,0,[o(e),o(e),n(Ae),o(s),A(1),ge(1),Array(10).fill(0),je(Ve),Array(24).fill(0),n(r)])},vt=(e,t)=>v("trak",null,[gt(e,t),yt(e,t)]),gt=(e,t)=>{let s=Ce(e.samples),r=O(s?s.presentationTimestamp+s.duration:0,Ae),a=!V(t)||!V(r),o=a?x:n,l;return e.info.type==="video"?l=typeof e.info.rotation=="number"?Le(e.info.rotation):e.info.rotation:l=Ve,w("tkhd",+a,3,[o(t),o(t),n(e.id),n(0),o(r),Array(8).fill(0),c(0),c(0),ge(e.info.type==="audio"?1:0),c(0),je(l),A(e.info.type==="video"?e.info.width:0),A(e.info.type==="video"?e.info.height:0)])},yt=(e,t)=>v("mdia",null,[Ct(e,t),St(e.info.type==="video"?"vide":"soun"),Tt(e)]),Ct=(e,t)=>{let s=Ce(e.samples),r=O(s?s.presentationTimestamp+s.duration:0,e.timescale),a=!V(t)||!V(r),o=a?x:n;return w("mdhd",+a,0,[o(t),o(t),n(e.timescale),o(r),c(21956),c(0)])},St=e=>w("hdlr",0,0,[E("mhlr"),E(e),n(0),n(0),n(0),E("mp4-muxer-hdlr",!0)]),Tt=e=>v("minf",null,[e.info.type==="video"?bt():_t(),kt(),At(e)]),bt=()=>w("vmhd",0,1,[c(0),c(0),c(0),c(0)]),_t=()=>w("smhd",0,0,[c(0),c(0)]),kt=()=>v("dinf",null,[Et()]),Et=()=>w("dref",0,0,[n(1)],[zt()]),zt=()=>w("url ",0,1),At=e=>{const t=e.compositionTimeOffsetTable.length>1||e.compositionTimeOffsetTable.some(s=>s.sampleCompositionTimeOffset!==0);return v("stbl",null,[Ot(e),Vt(e),jt(e),$t(e),Ht(e),qt(e),t?Xt(e):null])},Ot=e=>w("stsd",0,0,[n(1)],[e.info.type==="video"?Mt(ri[e.info.codec],e):Rt(ni[e.info.codec],e)]),Mt=(e,t)=>v(e,[Array(6).fill(0),c(1),c(0),c(0),Array(12).fill(0),c(t.info.width),c(t.info.height),n(4718592),n(4718592),n(0),c(1),Array(32).fill(0),c(24),dt(65535)],[ai[t.info.codec](t),t.info.decoderConfig.colorSpace?Ut(t):null]),Bt={bt709:1,bt470bg:5,smpte170m:6},It={bt709:1,smpte170m:6,"iec61966-2-1":13},Dt={rgb:0,bt709:1,bt470bg:5,smpte170m:6},Ut=e=>v("colr",[E("nclx"),c(Bt[e.info.decoderConfig.colorSpace.primaries]),c(It[e.info.decoderConfig.colorSpace.transfer]),c(Dt[e.info.decoderConfig.colorSpace.matrix]),y((e.info.decoderConfig.colorSpace.fullRange?1:0)<<7)]),xt=e=>e.info.decoderConfig&&v("avcC",[...new Uint8Array(e.info.decoderConfig.description)]),Wt=e=>e.info.decoderConfig&&v("hvcC",[...new Uint8Array(e.info.decoderConfig.description)]),Ft=e=>{if(!e.info.decoderConfig)return null;let t=e.info.decoderConfig;if(!t.colorSpace)throw new Error("'colorSpace' is required in the decoder config for VP9.");let s=t.codec.split("."),r=Number(s[1]),a=Number(s[2]),u=(Number(s[3])<<4)+(0<<1)+Number(t.colorSpace.fullRange);return w("vpcC",1,0,[y(r),y(a),y(u),y(2),y(2),y(2),c(0)])},Nt=()=>{let s=(1<<7)+1;return v("av1C",[s,0,0,0])},Rt=(e,t)=>v(e,[Array(6).fill(0),c(1),c(0),c(0),n(0),c(t.info.numberOfChannels),c(16),c(0),c(0),A(t.info.sampleRate)],[oi[t.info.codec](t)]),Pt=e=>{let t=new Uint8Array(e.info.decoderConfig.description);return w("esds",0,0,[n(58753152),y(32+t.byteLength),c(1),y(0),n(75530368),y(18+t.byteLength),y(64),y(21),Pe(0),n(130071),n(130071),n(92307584),y(t.byteLength),...t,n(109084800),y(1),y(2)])},Lt=e=>{let t=3840,s=0;const r=e.info.decoderConfig?.description;if(r){if(r.byteLength<18)throw new TypeError("Invalid decoder description provided for Opus; must be at least 18 bytes long.");const a=ArrayBuffer.isView(r)?new DataView(r.buffer,r.byteOffset,r.byteLength):new DataView(r);t=a.getUint16(10,!0),s=a.getInt16(14,!0)}return v("dOps",[y(0),y(e.info.numberOfChannels),c(t),n(e.info.sampleRate),ge(s),y(0)])},Vt=e=>w("stts",0,0,[n(e.timeToSampleTable.length),e.timeToSampleTable.map(t=>[n(t.sampleCount),n(t.sampleDelta)])]),jt=e=>{if(e.samples.every(s=>s.type==="key"))return null;let t=[...e.samples.entries()].filter(([,s])=>s.type==="key");return w("stss",0,0,[n(t.length),t.map(([s])=>n(s+1))])},$t=e=>w("stsc",0,0,[n(e.compactlyCodedChunkTable.length),e.compactlyCodedChunkTable.map(t=>[n(t.firstChunk),n(t.samplesPerChunk),n(1)])]),Ht=e=>w("stsz",0,0,[n(0),n(e.samples.length),e.samples.map(t=>n(t.size))]),qt=e=>e.finalizedChunks.length>0&&se(e.finalizedChunks).offset>=2**32?w("co64",0,0,[n(e.finalizedChunks.length),e.finalizedChunks.map(t=>x(t.offset))]):w("stco",0,0,[n(e.finalizedChunks.length),e.finalizedChunks.map(t=>n(t.offset))]),Xt=e=>w("ctts",0,0,[n(e.compositionTimeOffsetTable.length),e.compositionTimeOffsetTable.map(t=>[n(t.sampleCount),n(t.sampleCompositionTimeOffset)])]),Gt=e=>v("mvex",null,e.map(Zt)),Zt=e=>w("trex",0,0,[n(e.id),n(1),n(0),n(0),n(0)]),$e=(e,t)=>v("moof",null,[Kt(e),...t.map(Qt)]),Kt=e=>w("mfhd",0,0,[n(e)]),He=e=>{let t=0,s=0,r=0,a=0,o=e.type==="delta";return s|=+o,o?t|=1:t|=2,t<<24|s<<16|r<<8|a},Qt=e=>v("traf",null,[Jt(e),Yt(e),ei(e)]),Jt=e=>{let t=0;t|=8,t|=16,t|=32,t|=131072;let s=e.currentChunk.samples[1]??e.currentChunk.samples[0],r={duration:s.timescaleUnitsToNextSample,size:s.size,flags:He(s)};return w("tfhd",0,t,[n(e.id),n(r.duration),n(r.size),n(r.flags)])},Yt=e=>w("tfdt",1,0,[x(O(e.currentChunk.startTimestamp,e.timescale))]),ei=e=>{let t=e.currentChunk.samples.map(D=>D.timescaleUnitsToNextSample),s=e.currentChunk.samples.map(D=>D.size),r=e.currentChunk.samples.map(He),a=e.currentChunk.samples.map(D=>O(D.presentationTimestamp-D.decodeTimestamp,e.timescale)),o=new Set(t),l=new Set(s),u=new Set(r),g=new Set(a),b=u.size===2&&r[0]!==r[1],U=o.size>1,ie=l.size>1,st=!b&&u.size>1,rt=g.size>1||[...g].some(D=>D!==0),L=0;return L|=1,L|=4*+b,L|=256*+U,L|=512*+ie,L|=1024*+st,L|=2048*+rt,w("trun",1,L,[n(e.currentChunk.samples.length),n(e.currentChunk.offset-e.currentChunk.moofOffset||0),b?n(r[0]):[],e.currentChunk.samples.map((D,ce)=>[U?n(t[ce]):[],ie?n(s[ce]):[],st?n(r[ce]):[],rt?mt(a[ce]):[]])])},ti=e=>v("mfra",null,[...e.map(ii),si()]),ii=(e,t)=>w("tfra",1,0,[n(e.id),n(63),n(e.finalizedChunks.length),e.finalizedChunks.map(r=>[x(O(r.startTimestamp,e.timescale)),x(r.moofOffset),n(t+1),n(1),n(1)])]),si=()=>w("mfro",0,0,[n(0)]),ri={avc:"avc1",hevc:"hvc1",vp9:"vp09",av1:"av01"},ai={avc:xt,hevc:Wt,vp9:Ft,av1:Nt},ni={aac:"mp4a",opus:"Opus"},oi={aac:Pt,opus:Lt},hi=Symbol("isTarget"),ae=class{},qe=class extends ae{constructor(){super(...arguments),this.buffer=null}},Te=class extends ae{constructor(e){if(super(),this.options=e,typeof e!="object")throw new TypeError("StreamTarget requires an options object to be passed to its constructor.");if(e.onData){if(typeof e.onData!="function")throw new TypeError("options.onData, when provided, must be a function.");if(e.onData.length<2)throw new TypeError("options.onData, when provided, must be a function that takes in at least two arguments (data and position). Ignoring the position argument, which specifies the byte offset at which the data is to be written, can lead to broken outputs.")}if(e.chunked!==void 0&&typeof e.chunked!="boolean")throw new TypeError("options.chunked, when provided, must be a boolean.");if(e.chunkSize!==void 0&&(!Number.isInteger(e.chunkSize)||e.chunkSize<1024))throw new TypeError("options.chunkSize, when provided, must be an integer and not smaller than 1024.")}},Xe=class extends ae{constructor(e,t){if(super(),this.stream=e,this.options=t,!(e instanceof FileSystemWritableFileStream))throw new TypeError("FileSystemWritableFileStreamTarget requires a FileSystemWritableFileStream instance.");if(t!==void 0&&typeof t!="object")throw new TypeError("FileSystemWritableFileStreamTarget's options, when provided, must be an object.");if(t&&t.chunkSize!==void 0&&(!Number.isInteger(t.chunkSize)||t.chunkSize<=0))throw new TypeError("options.chunkSize, when provided, must be a positive integer")}},W,j,Ge=class{constructor(){this.pos=0,d(this,W,new Uint8Array(8)),d(this,j,new DataView(i(this,W).buffer)),this.offsets=new WeakMap}seek(e){this.pos=e}writeU32(e){i(this,j).setUint32(0,e,!1),this.write(i(this,W).subarray(0,4))}writeU64(e){i(this,j).setUint32(0,Math.floor(e/2**32),!1),i(this,j).setUint32(4,e,!1),this.write(i(this,W).subarray(0,8))}writeAscii(e){for(let t=0;t<e.length;t++)i(this,j).setUint8(t%8,e.charCodeAt(t)),t%8===7&&this.write(i(this,W));e.length%8!==0&&this.write(i(this,W).subarray(0,e.length%8))}writeBox(e){if(this.offsets.set(e,this.pos),e.contents&&!e.children)this.writeBoxHeader(e,e.size??e.contents.byteLength+8),this.write(e.contents);else{let t=this.pos;if(this.writeBoxHeader(e,0),e.contents&&this.write(e.contents),e.children)for(let a of e.children)a&&this.writeBox(a);let s=this.pos,r=e.size??s-t;this.seek(t),this.writeBoxHeader(e,r),this.seek(s)}}writeBoxHeader(e,t){this.writeU32(e.largeSize?1:t),this.writeAscii(e.type),e.largeSize&&this.writeU64(t)}measureBoxHeader(e){return 8+(e.largeSize?8:0)}patchBox(e){let t=this.pos;this.seek(this.offsets.get(e)),this.writeBox(e),this.seek(t)}measureBox(e){if(e.contents&&!e.children)return this.measureBoxHeader(e)+e.contents.byteLength;{let t=this.measureBoxHeader(e);if(e.contents&&(t+=e.contents.byteLength),e.children)for(let s of e.children)s&&(t+=this.measureBox(s));return t}}};W=new WeakMap,j=new WeakMap;var ne,F,G,Z,oe,be,li=class extends Ge{constructor(e){super(),d(this,oe),d(this,ne,void 0),d(this,F,new ArrayBuffer(2**16)),d(this,G,new Uint8Array(i(this,F))),d(this,Z,0),C(this,ne,e)}write(e){m(this,oe,be).call(this,this.pos+e.byteLength),i(this,G).set(e,this.pos),this.pos+=e.byteLength,C(this,Z,Math.max(i(this,Z),this.pos))}finalize(){m(this,oe,be).call(this,this.pos),i(this,ne).buffer=i(this,F).slice(0,Math.max(i(this,Z),this.pos))}};ne=new WeakMap,F=new WeakMap,G=new WeakMap,Z=new WeakMap,oe=new WeakSet,be=function(e){let t=i(this,F).byteLength;for(;t<e;)t*=2;if(t===i(this,F).byteLength)return;let s=new ArrayBuffer(t),r=new Uint8Array(s);r.set(i(this,G),0),C(this,F,s),C(this,G,r)};var fi=2**24,ui=2,K,N,Q,B,_,he,_e,ke,Ze,Ee,Ke,J,le,ze=class extends Ge{constructor(e){super(),d(this,he),d(this,ke),d(this,Ee),d(this,J),d(this,K,void 0),d(this,N,[]),d(this,Q,void 0),d(this,B,void 0),d(this,_,[]),C(this,K,e),C(this,Q,e.options?.chunked??!1),C(this,B,e.options?.chunkSize??fi)}write(e){i(this,N).push({data:e.slice(),start:this.pos}),this.pos+=e.byteLength}flush(){if(i(this,N).length===0)return;let e=[],t=[...i(this,N)].sort((s,r)=>s.start-r.start);e.push({start:t[0].start,size:t[0].data.byteLength});for(let s=1;s<t.length;s++){let r=e[e.length-1],a=t[s];a.start<=r.start+r.size?r.size=Math.max(r.size,a.start+a.data.byteLength-r.start):e.push({start:a.start,size:a.data.byteLength})}for(let s of e){s.data=new Uint8Array(s.size);for(let r of i(this,N))s.start<=r.start&&r.start<s.start+s.size&&s.data.set(r.data,r.start-s.start);i(this,Q)?(m(this,he,_e).call(this,s.data,s.start),m(this,J,le).call(this)):i(this,K).options.onData?.(s.data,s.start)}i(this,N).length=0}finalize(){i(this,Q)&&m(this,J,le).call(this,!0)}};K=new WeakMap,N=new WeakMap,Q=new WeakMap,B=new WeakMap,_=new WeakMap,he=new WeakSet,_e=function(e,t){let s=i(this,_).findIndex(u=>u.start<=t&&t<u.start+i(this,B));s===-1&&(s=m(this,Ee,Ke).call(this,t));let r=i(this,_)[s],a=t-r.start,o=e.subarray(0,Math.min(i(this,B)-a,e.byteLength));r.data.set(o,a);let l={start:a,end:a+o.byteLength};if(m(this,ke,Ze).call(this,r,l),r.written[0].start===0&&r.written[0].end===i(this,B)&&(r.shouldFlush=!0),i(this,_).length>ui){for(let u=0;u<i(this,_).length-1;u++)i(this,_)[u].shouldFlush=!0;m(this,J,le).call(this)}o.byteLength<e.byteLength&&m(this,he,_e).call(this,e.subarray(o.byteLength),t+o.byteLength)},ke=new WeakSet,Ze=function(e,t){let s=0,r=e.written.length-1,a=-1;for(;s<=r;){let o=Math.floor(s+(r-s+1)/2);e.written[o].start<=t.start?(s=o+1,a=o):r=o-1}for(e.written.splice(a+1,0,t),(a===-1||e.written[a].end<t.start)&&a++;a<e.written.length-1&&e.written[a].end>=e.written[a+1].start;)e.written[a].end=Math.max(e.written[a].end,e.written[a+1].end),e.written.splice(a+1,1)},Ee=new WeakSet,Ke=function(e){let s={start:Math.floor(e/i(this,B))*i(this,B),data:new Uint8Array(i(this,B)),written:[],shouldFlush:!1};return i(this,_).push(s),i(this,_).sort((r,a)=>r.start-a.start),i(this,_).indexOf(s)},J=new WeakSet,le=function(e=!1){for(let t=0;t<i(this,_).length;t++){let s=i(this,_)[t];if(!(!s.shouldFlush&&!e)){for(let r of s.written)i(this,K).options.onData?.(s.data.subarray(r.start,r.end),s.start+r.start);i(this,_).splice(t--,1)}}};var di=class extends ze{constructor(e){super(new Te({onData:(t,s)=>e.stream.write({type:"write",data:t,position:s}),chunked:!0,chunkSize:e.options?.chunkSize}))}},Ae=1e3,mi=["avc","hevc","vp9","av1"],pi=["aac","opus"],ci=2082844800,wi=["strict","offset","cross-track-offset"],h,f,fe,k,T,S,$,H,Oe,R,P,Y,Me,Qe,Be,Je,Ie,Ye,De,et,Ue,tt,ue,xe,M,I,We,it,ee,de,me,Fe,q,te,pe,Ne,vi=class{constructor(e){if(d(this,Me),d(this,Be),d(this,Ie),d(this,De),d(this,Ue),d(this,ue),d(this,M),d(this,We),d(this,ee),d(this,me),d(this,q),d(this,pe),d(this,h,void 0),d(this,f,void 0),d(this,fe,void 0),d(this,k,void 0),d(this,T,null),d(this,S,null),d(this,$,Math.floor(Date.now()/1e3)+ci),d(this,H,[]),d(this,Oe,1),d(this,R,[]),d(this,P,[]),d(this,Y,!1),m(this,Me,Qe).call(this,e),e.video=X(e.video),e.audio=X(e.audio),e.fastStart=X(e.fastStart),this.target=e.target,C(this,h,{firstTimestampBehavior:"strict",...e}),e.target instanceof qe)C(this,f,new li(e.target));else if(e.target instanceof Te)C(this,f,new ze(e.target));else if(e.target instanceof Xe)C(this,f,new di(e.target));else throw new Error(`Invalid target: ${e.target}`);m(this,De,et).call(this),m(this,Be,Je).call(this)}addVideoChunk(e,t,s,r){if(!(e instanceof EncodedVideoChunk))throw new TypeError("addVideoChunk's first argument (sample) must be of type EncodedVideoChunk.");if(t&&typeof t!="object")throw new TypeError("addVideoChunk's second argument (meta), when provided, must be an object.");if(s!==void 0&&(!Number.isFinite(s)||s<0))throw new TypeError("addVideoChunk's third argument (timestamp), when provided, must be a non-negative real number.");if(r!==void 0&&!Number.isFinite(r))throw new TypeError("addVideoChunk's fourth argument (compositionTimeOffset), when provided, must be a real number.");let a=new Uint8Array(e.byteLength);e.copyTo(a),this.addVideoChunkRaw(a,e.type,s??e.timestamp,e.duration,t,r)}addVideoChunkRaw(e,t,s,r,a,o){if(!(e instanceof Uint8Array))throw new TypeError("addVideoChunkRaw's first argument (data) must be an instance of Uint8Array.");if(t!=="key"&&t!=="delta")throw new TypeError("addVideoChunkRaw's second argument (type) must be either 'key' or 'delta'.");if(!Number.isFinite(s)||s<0)throw new TypeError("addVideoChunkRaw's third argument (timestamp) must be a non-negative real number.");if(!Number.isFinite(r)||r<0)throw new TypeError("addVideoChunkRaw's fourth argument (duration) must be a non-negative real number.");if(a&&typeof a!="object")throw new TypeError("addVideoChunkRaw's fifth argument (meta), when provided, must be an object.");if(o!==void 0&&!Number.isFinite(o))throw new TypeError("addVideoChunkRaw's sixth argument (compositionTimeOffset), when provided, must be a real number.");if(m(this,pe,Ne).call(this),!i(this,h).video)throw new Error("No video track declared.");if(typeof i(this,h).fastStart=="object"&&i(this,T).samples.length===i(this,h).fastStart.expectedVideoChunks)throw new Error(`Cannot add more video chunks than specified in 'fastStart' (${i(this,h).fastStart.expectedVideoChunks}).`);let l=m(this,ue,xe).call(this,i(this,T),e,t,s,r,a,o);if(i(this,h).fastStart==="fragmented"&&i(this,S)){for(;i(this,P).length>0&&i(this,P)[0].decodeTimestamp<=l.decodeTimestamp;){let u=i(this,P).shift();m(this,M,I).call(this,i(this,S),u)}l.decodeTimestamp<=i(this,S).lastDecodeTimestamp?m(this,M,I).call(this,i(this,T),l):i(this,R).push(l)}else m(this,M,I).call(this,i(this,T),l)}addAudioChunk(e,t,s){if(!(e instanceof EncodedAudioChunk))throw new TypeError("addAudioChunk's first argument (sample) must be of type EncodedAudioChunk.");if(t&&typeof t!="object")throw new TypeError("addAudioChunk's second argument (meta), when provided, must be an object.");if(s!==void 0&&(!Number.isFinite(s)||s<0))throw new TypeError("addAudioChunk's third argument (timestamp), when provided, must be a non-negative real number.");let r=new Uint8Array(e.byteLength);e.copyTo(r),this.addAudioChunkRaw(r,e.type,s??e.timestamp,e.duration,t)}addAudioChunkRaw(e,t,s,r,a){if(!(e instanceof Uint8Array))throw new TypeError("addAudioChunkRaw's first argument (data) must be an instance of Uint8Array.");if(t!=="key"&&t!=="delta")throw new TypeError("addAudioChunkRaw's second argument (type) must be either 'key' or 'delta'.");if(!Number.isFinite(s)||s<0)throw new TypeError("addAudioChunkRaw's third argument (timestamp) must be a non-negative real number.");if(!Number.isFinite(r)||r<0)throw new TypeError("addAudioChunkRaw's fourth argument (duration) must be a non-negative real number.");if(a&&typeof a!="object")throw new TypeError("addAudioChunkRaw's fifth argument (meta), when provided, must be an object.");if(m(this,pe,Ne).call(this),!i(this,h).audio)throw new Error("No audio track declared.");if(typeof i(this,h).fastStart=="object"&&i(this,S).samples.length===i(this,h).fastStart.expectedAudioChunks)throw new Error(`Cannot add more audio chunks than specified in 'fastStart' (${i(this,h).fastStart.expectedAudioChunks}).`);let o=m(this,ue,xe).call(this,i(this,S),e,t,s,r,a);if(i(this,h).fastStart==="fragmented"&&i(this,T)){for(;i(this,R).length>0&&i(this,R)[0].decodeTimestamp<=o.decodeTimestamp;){let l=i(this,R).shift();m(this,M,I).call(this,i(this,T),l)}o.decodeTimestamp<=i(this,T).lastDecodeTimestamp?m(this,M,I).call(this,i(this,S),o):i(this,P).push(o)}else m(this,M,I).call(this,i(this,S),o)}finalize(){if(i(this,Y))throw new Error("Cannot finalize a muxer more than once.");if(i(this,h).fastStart==="fragmented"){for(let t of i(this,R))m(this,M,I).call(this,i(this,T),t);for(let t of i(this,P))m(this,M,I).call(this,i(this,S),t);m(this,me,Fe).call(this,!1)}else i(this,T)&&m(this,ee,de).call(this,i(this,T)),i(this,S)&&m(this,ee,de).call(this,i(this,S));let e=[i(this,T),i(this,S)].filter(Boolean);if(i(this,h).fastStart==="in-memory"){let t;for(let r=0;r<2;r++){let a=re(e,i(this,$)),o=i(this,f).measureBox(a);t=i(this,f).measureBox(i(this,k));let l=i(this,f).pos+o+t;for(let u of i(this,H)){u.offset=l;for(let{data:g}of u.samples)l+=g.byteLength,t+=g.byteLength}if(l<2**32)break;t>=2**32&&(i(this,k).largeSize=!0)}let s=re(e,i(this,$));i(this,f).writeBox(s),i(this,k).size=t,i(this,f).writeBox(i(this,k));for(let r of i(this,H))for(let a of r.samples)i(this,f).write(a.data),a.data=null}else if(i(this,h).fastStart==="fragmented"){let t=i(this,f).pos,s=ti(e);i(this,f).writeBox(s);let r=i(this,f).pos-t;i(this,f).seek(i(this,f).pos-4),i(this,f).writeU32(r)}else{let t=i(this,f).offsets.get(i(this,k)),s=i(this,f).pos-t;i(this,k).size=s,i(this,k).largeSize=s>=2**32,i(this,f).patchBox(i(this,k));let r=re(e,i(this,$));if(typeof i(this,h).fastStart=="object"){i(this,f).seek(i(this,fe)),i(this,f).writeBox(r);let a=t-i(this,f).pos;i(this,f).writeBox(ct(a))}else i(this,f).writeBox(r)}m(this,q,te).call(this),i(this,f).finalize(),C(this,Y,!0)}};return h=new WeakMap,f=new WeakMap,fe=new WeakMap,k=new WeakMap,T=new WeakMap,S=new WeakMap,$=new WeakMap,H=new WeakMap,Oe=new WeakMap,R=new WeakMap,P=new WeakMap,Y=new WeakMap,Me=new WeakSet,Qe=function(e){if(typeof e!="object")throw new TypeError("The muxer requires an options object to be passed to its constructor.");if(!(e.target instanceof ae))throw new TypeError("The target must be provided and an instance of Target.");if(e.video){if(!mi.includes(e.video.codec))throw new TypeError(`Unsupported video codec: ${e.video.codec}`);if(!Number.isInteger(e.video.width)||e.video.width<=0)throw new TypeError(`Invalid video width: ${e.video.width}. Must be a positive integer.`);if(!Number.isInteger(e.video.height)||e.video.height<=0)throw new TypeError(`Invalid video height: ${e.video.height}. Must be a positive integer.`);const t=e.video.rotation;if(typeof t=="number"&&![0,90,180,270].includes(t))throw new TypeError(`Invalid video rotation: ${t}. Has to be 0, 90, 180 or 270.`);if(Array.isArray(t)&&(t.length!==9||t.some(s=>typeof s!="number")))throw new TypeError(`Invalid video transformation matrix: ${t.join()}`);if(e.video.frameRate!==void 0&&(!Number.isInteger(e.video.frameRate)||e.video.frameRate<=0))throw new TypeError(`Invalid video frame rate: ${e.video.frameRate}. Must be a positive integer.`)}if(e.audio){if(!pi.includes(e.audio.codec))throw new TypeError(`Unsupported audio codec: ${e.audio.codec}`);if(!Number.isInteger(e.audio.numberOfChannels)||e.audio.numberOfChannels<=0)throw new TypeError(`Invalid number of audio channels: ${e.audio.numberOfChannels}. Must be a positive integer.`);if(!Number.isInteger(e.audio.sampleRate)||e.audio.sampleRate<=0)throw new TypeError(`Invalid audio sample rate: ${e.audio.sampleRate}. Must be a positive integer.`)}if(e.firstTimestampBehavior&&!wi.includes(e.firstTimestampBehavior))throw new TypeError(`Invalid first timestamp behavior: ${e.firstTimestampBehavior}`);if(typeof e.fastStart=="object"){if(e.video){if(e.fastStart.expectedVideoChunks===void 0)throw new TypeError("'fastStart' is an object but is missing property 'expectedVideoChunks'.");if(!Number.isInteger(e.fastStart.expectedVideoChunks)||e.fastStart.expectedVideoChunks<0)throw new TypeError("'expectedVideoChunks' must be a non-negative integer.")}if(e.audio){if(e.fastStart.expectedAudioChunks===void 0)throw new TypeError("'fastStart' is an object but is missing property 'expectedAudioChunks'.");if(!Number.isInteger(e.fastStart.expectedAudioChunks)||e.fastStart.expectedAudioChunks<0)throw new TypeError("'expectedAudioChunks' must be a non-negative integer.")}}else if(![!1,"in-memory","fragmented"].includes(e.fastStart))throw new TypeError("'fastStart' option must be false, 'in-memory', 'fragmented' or an object.");if(e.minFragmentDuration!==void 0&&(!Number.isFinite(e.minFragmentDuration)||e.minFragmentDuration<0))throw new TypeError("'minFragmentDuration' must be a non-negative number.")},Be=new WeakSet,Je=function(){if(i(this,f).writeBox(pt({holdsAvc:i(this,h).video?.codec==="avc",fragmented:i(this,h).fastStart==="fragmented"})),C(this,fe,i(this,f).pos),i(this,h).fastStart==="in-memory")C(this,k,Se(!1));else if(i(this,h).fastStart!=="fragmented"){if(typeof i(this,h).fastStart=="object"){let e=m(this,Ie,Ye).call(this);i(this,f).seek(i(this,f).pos+e)}C(this,k,Se(!0)),i(this,f).writeBox(i(this,k))}m(this,q,te).call(this)},Ie=new WeakSet,Ye=function(){if(typeof i(this,h).fastStart!="object")return;let e=0,t=[i(this,h).fastStart.expectedVideoChunks,i(this,h).fastStart.expectedAudioChunks];for(let s of t)s&&(e+=8*Math.ceil(.6666666666666666*s),e+=4*s,e+=12*Math.ceil(.6666666666666666*s),e+=4*s,e+=8*s);return e+=4096,e},De=new WeakSet,et=function(){if(i(this,h).video&&C(this,T,{id:1,info:{type:"video",codec:i(this,h).video.codec,width:i(this,h).video.width,height:i(this,h).video.height,rotation:i(this,h).video.rotation??0,decoderConfig:null},timescale:i(this,h).video.frameRate??57600,samples:[],finalizedChunks:[],currentChunk:null,firstDecodeTimestamp:void 0,lastDecodeTimestamp:-1,timeToSampleTable:[],compositionTimeOffsetTable:[],lastTimescaleUnits:null,lastSample:null,compactlyCodedChunkTable:[]}),i(this,h).audio&&(C(this,S,{id:i(this,h).video?2:1,info:{type:"audio",codec:i(this,h).audio.codec,numberOfChannels:i(this,h).audio.numberOfChannels,sampleRate:i(this,h).audio.sampleRate,decoderConfig:null},timescale:i(this,h).audio.sampleRate,samples:[],finalizedChunks:[],currentChunk:null,firstDecodeTimestamp:void 0,lastDecodeTimestamp:-1,timeToSampleTable:[],compositionTimeOffsetTable:[],lastTimescaleUnits:null,lastSample:null,compactlyCodedChunkTable:[]}),i(this,h).audio.codec==="aac")){let e=m(this,Ue,tt).call(this,2,i(this,h).audio.sampleRate,i(this,h).audio.numberOfChannels);i(this,S).info.decoderConfig={codec:i(this,h).audio.codec,description:e,numberOfChannels:i(this,h).audio.numberOfChannels,sampleRate:i(this,h).audio.sampleRate}}},Ue=new WeakSet,tt=function(e,t,s){let a=[96e3,88200,64e3,48e3,44100,32e3,24e3,22050,16e3,12e3,11025,8e3,7350].indexOf(t),o=s,l="";l+=e.toString(2).padStart(5,"0"),l+=a.toString(2).padStart(4,"0"),a===15&&(l+=t.toString(2).padStart(24,"0")),l+=o.toString(2).padStart(4,"0");let u=Math.ceil(l.length/8)*8;l=l.padEnd(u,"0");let g=new Uint8Array(l.length/8);for(let b=0;b<l.length;b+=8)g[b/8]=parseInt(l.slice(b,b+8),2);return g},ue=new WeakSet,xe=function(e,t,s,r,a,o,l){let u=r/1e6,g=(r-(l??0))/1e6,b=a/1e6,U=m(this,We,it).call(this,u,g,e);return u=U.presentationTimestamp,g=U.decodeTimestamp,o?.decoderConfig&&(e.info.decoderConfig===null?e.info.decoderConfig=o.decoderConfig:Object.assign(e.info.decoderConfig,o.decoderConfig)),{presentationTimestamp:u,decodeTimestamp:g,duration:b,data:t,size:t.byteLength,type:s,timescaleUnitsToNextSample:O(b,e.timescale)}},M=new WeakSet,I=function(e,t){i(this,h).fastStart!=="fragmented"&&e.samples.push(t);const s=O(t.presentationTimestamp-t.decodeTimestamp,e.timescale);if(e.lastTimescaleUnits!==null){let a=O(t.decodeTimestamp,e.timescale,!1),o=Math.round(a-e.lastTimescaleUnits);if(e.lastTimescaleUnits+=o,e.lastSample.timescaleUnitsToNextSample=o,i(this,h).fastStart!=="fragmented"){let l=se(e.timeToSampleTable);l.sampleCount===1?(l.sampleDelta=o,l.sampleCount++):l.sampleDelta===o?l.sampleCount++:(l.sampleCount--,e.timeToSampleTable.push({sampleCount:2,sampleDelta:o}));const u=se(e.compositionTimeOffsetTable);u.sampleCompositionTimeOffset===s?u.sampleCount++:e.compositionTimeOffsetTable.push({sampleCount:1,sampleCompositionTimeOffset:s})}}else e.lastTimescaleUnits=0,i(this,h).fastStart!=="fragmented"&&(e.timeToSampleTable.push({sampleCount:1,sampleDelta:O(t.duration,e.timescale)}),e.compositionTimeOffsetTable.push({sampleCount:1,sampleCompositionTimeOffset:s}));e.lastSample=t;let r=!1;if(!e.currentChunk)r=!0;else{let a=t.presentationTimestamp-e.currentChunk.startTimestamp;if(i(this,h).fastStart==="fragmented"){let o=i(this,T)??i(this,S);const l=i(this,h).minFragmentDuration??1;e===o&&t.type==="key"&&a>=l&&(r=!0,m(this,me,Fe).call(this))}else r=a>=.5}r&&(e.currentChunk&&m(this,ee,de).call(this,e),e.currentChunk={startTimestamp:t.presentationTimestamp,samples:[]}),e.currentChunk.samples.push(t)},We=new WeakSet,it=function(e,t,s){const r=i(this,h).firstTimestampBehavior==="strict",a=s.lastDecodeTimestamp===-1;if(r&&a&&t!==0)throw new Error(`The first chunk for your media track must have a timestamp of 0 (received DTS=${t}).Non-zero first timestamps are often caused by directly piping frames or audio data from a MediaStreamTrack into the encoder. Their timestamps are typically relative to the age of thedocument, which is probably what you want.
-
-If you want to offset all timestamps of a track such that the first one is zero, set firstTimestampBehavior: 'offset' in the options.
-`);if(i(this,h).firstTimestampBehavior==="offset"||i(this,h).firstTimestampBehavior==="cross-track-offset"){s.firstDecodeTimestamp===void 0&&(s.firstDecodeTimestamp=t);let l;i(this,h).firstTimestampBehavior==="offset"?l=s.firstDecodeTimestamp:l=Math.min(i(this,T)?.firstDecodeTimestamp??1/0,i(this,S)?.firstDecodeTimestamp??1/0),t-=l,e-=l}if(t<s.lastDecodeTimestamp)throw new Error(`Timestamps must be monotonically increasing (DTS went from ${s.lastDecodeTimestamp*1e6} to ${t*1e6}).`);return s.lastDecodeTimestamp=t,{presentationTimestamp:e,decodeTimestamp:t}},ee=new WeakSet,de=function(e){if(i(this,h).fastStart==="fragmented")throw new Error("Can't finalize individual chunks if 'fastStart' is set to 'fragmented'.");if(e.currentChunk){if(e.finalizedChunks.push(e.currentChunk),i(this,H).push(e.currentChunk),(e.compactlyCodedChunkTable.length===0||se(e.compactlyCodedChunkTable).samplesPerChunk!==e.currentChunk.samples.length)&&e.compactlyCodedChunkTable.push({firstChunk:e.finalizedChunks.length,samplesPerChunk:e.currentChunk.samples.length}),i(this,h).fastStart==="in-memory"){e.currentChunk.offset=0;return}e.currentChunk.offset=i(this,f).pos;for(let t of e.currentChunk.samples)i(this,f).write(t.data),t.data=null;m(this,q,te).call(this)}},me=new WeakSet,Fe=function(e=!0){if(i(this,h).fastStart!=="fragmented")throw new Error("Can't finalize a fragment unless 'fastStart' is set to 'fragmented'.");let t=[i(this,T),i(this,S)].filter(u=>u&&u.currentChunk);if(t.length===0)return;let s=ut(this,Oe)._++;if(s===1){let u=re(t,i(this,$),!0);i(this,f).writeBox(u)}let r=i(this,f).pos,a=$e(s,t);i(this,f).writeBox(a);{let u=Se(!1),g=0;for(let U of t)for(let ie of U.currentChunk.samples)g+=ie.size;let b=i(this,f).measureBox(u)+g;b>=4294967296&&(u.largeSize=!0,b=i(this,f).measureBox(u)+g),u.size=b,i(this,f).writeBox(u)}for(let u of t){u.currentChunk.offset=i(this,f).pos,u.currentChunk.moofOffset=r;for(let g of u.currentChunk.samples)i(this,f).write(g.data),g.data=null}let o=i(this,f).pos;i(this,f).seek(i(this,f).offsets.get(a));let l=$e(s,t);i(this,f).writeBox(l),i(this,f).seek(o);for(let u of t)u.finalizedChunks.push(u.currentChunk),i(this,H).push(u.currentChunk),u.currentChunk=null;e&&m(this,q,te).call(this)},q=new WeakSet,te=function(){i(this,f)instanceof ze&&i(this,f).flush()},pe=new WeakSet,Ne=function(){if(i(this,Y))throw new Error("Cannot add new video or audio chunks after the file has been finalized.")},ft(Re)})();typeof module=="object"&&typeof module.exports=="object"&&Object.assign(module.exports,Mp4Muxer);
-
-</script>
 <script>
 /*!
  * Copyright (c) 2026-present, Vanilagy and contributors
@@ -4516,7 +4522,7 @@ J.plan = (project, audio) => {
   const zoneOf = () => (zones ? Object.assign({}, zones[0]) : null);
   if (zones && en.bg) en.bg.bigChar = false;               // the one background that draws the lyric itself (big, centred)
   const plan = {
-    version: 1, generator: 'JIZURA', appVersion: '1.5.2', title, artist, W, H, fps: project.fps || 30,
+    version: 1, generator: 'JIZURA', appVersion: '1.5.2-fc.1', title, artist, W, H, fps: project.fps || 30,
     duration: tm.duration, styleKey: project.style, style: st, fx, seed: project.seed,
     lines: [], cuts: [], events: [], beats: audio && audio.beats ? audio.beats.slice() : [],
     hud: fx.hud === 'on' ? true : fx.hud === 'off' ? false : !!st.hud,
@@ -5311,7 +5317,17 @@ J.previewPlan = (project, group, key) => {
   };
 };
 
+/* 'bg': the aspect of the loaded background image / video (J.backgroundAspect = [w, h]; 16:9 until one is loaded).
+   The short side follows the presets: 1080 for frames at least 4:3 wide (or tall), 1440 for squarer ones. */
+J.backgroundAspect = null;
 J.designSize = (aspect) => {
+  if (aspect === 'bg') {
+    const a = J.backgroundAspect;
+    if (!a || !(a[0] > 0) || !(a[1] > 0)) return [1920, 1080];
+    const r = Math.min(4, Math.max(0.25, a[0] / a[1])), long = Math.max(r, 1 / r);
+    const short = long >= 4 / 3 - 0.01 ? 1080 : 1440;
+    return r >= 1 ? [Math.round(short * r / 2) * 2, short] : [short, Math.round(short / r / 2) * 2];
+  }
   if (aspect === '9:16') return [1080, 1920];
   if (aspect === '1:1') return [1440, 1440];
   if (aspect === '4:5') return [1440, 1800];
@@ -6362,6 +6378,285 @@ J.beatGrid = (bpm, offset, duration) => {
 })();
 
 /* ============================================================
+   JIZURA改 — MP4 writer on Mediabunny (replaces mp4-muxer)
+   mp4-muxer rejects chunks whose timestamps go backwards, which is
+   what an H.264 encoder that uses B-frames returns (Firefox does).
+   Mediabunny's EncodedVideoPacketSource reorders B-frames itself.
+   The encoder callbacks stay synchronous: packets are queued in order
+   and written one after another; finalize() waits for the queue.
+   ============================================================ */
+(() => {
+'use strict';
+const MB = () => {
+  if (typeof Mediabunny === 'undefined') throw new Error('Mediabunny が読み込まれていません');
+  return Mediabunny;
+};
+/* codecs that may be copied into an MP4 without re-encoding (widely playable ones only) */
+J.MP4_COPY_AUDIO = ['aac', 'opus', 'mp3'];
+
+J.Mp4Writer = class {
+  /* target: 'buffer' | { onWrite(data, position) } | FileSystemWritableFileStream
+     video: { codec: 'avc'|'vp9'|'av1', width, height, frameRate }
+     audio: { codec: 'aac'|'opus'|'mp3' } (optional)
+     fastStart: false | 'in-memory' */
+  constructor({ target = 'buffer', video, audio = null, fastStart = 'in-memory' }) {
+    const M = MB();
+    if (target === 'buffer') { this.buffer = new M.BufferTarget(); this.target = this.buffer; }
+    else if (typeof target.onWrite === 'function') {
+      this.target = new M.StreamTarget(new WritableStream({ write: c => target.onWrite(c.data, c.position) }), { chunked: true, chunkSize: 8 * 1048576 });
+    } else {
+      // a FileSystemWritableFileStream stays ours (the caller closes or truncates it); Mediabunny writes through a wrapper
+      this.target = new M.StreamTarget(new WritableStream({ write: c => target.write({ type: 'write', position: c.position, data: c.data }) }), { chunked: true, chunkSize: 8 * 1048576 });
+    }
+    this.output = new M.Output({ format: new M.Mp4OutputFormat({ fastStart }), target: this.target });
+    this.video = new M.EncodedVideoPacketSource(video.codec);
+    this.output.addVideoTrack(this.video, video.frameRate ? { frameRate: video.frameRate } : undefined);
+    if (audio) { this.audio = new M.EncodedAudioPacketSource(audio.codec); this.output.addAudioTrack(this.audio); }
+    this.error = null; this.queued = 0; this.firstVideo = null; this.firstAudio = null;
+    this.chain = this.output.start().catch(e => { this.error = this.error || e; });
+  }
+  push(fn) {
+    this.queued++;
+    this.chain = this.chain.then(async () => {
+      try { if (!this.error) await fn(); } catch (e) { this.error = this.error || e; } finally { this.queued--; }
+    });
+  }
+  /* timestamps are moved so that each track starts at 0 (like mp4-muxer's firstTimestampBehavior: 'offset') */
+  shift(packet, key) {
+    if (this[key] === null) this[key] = packet.timestamp;
+    const t = packet.timestamp - this[key];
+    return t === packet.timestamp ? packet : packet.clone({ timestamp: t });
+  }
+  addVideoChunk(chunk, meta) {
+    if (this.error) throw this.error;
+    const packet = this.shift(MB().EncodedPacket.fromEncodedChunk(chunk), 'firstVideo');
+    const desc = meta?.decoderConfig?.description;
+    if (desc && /^avc[13]/.test(meta.decoderConfig.codec || '')) {
+      const fixed = J.repairAvcC(desc, packet.data);
+      if (fixed) meta = { ...meta, decoderConfig: { ...meta.decoderConfig, description: fixed } };
+    }
+    this.push(() => this.video.add(packet, meta));
+  }
+  addAudioChunk(chunk, meta) {
+    if (this.error) throw this.error;
+    const packet = this.shift(MB().EncodedPacket.fromEncodedChunk(chunk), 'firstAudio');
+    this.push(() => this.audio.add(packet, meta));
+  }
+  /* an already encoded packet (audio copied from the source file); its timestamp is used as is */
+  addAudioPacket(packet, meta) {
+    if (this.error) throw this.error;
+    this.push(() => this.audio.add(packet, meta));
+  }
+  /* let the writer catch up when it falls far behind the encoder */
+  async settle(limit = 48) {
+    if (this.queued > limit) await this.chain;
+    if (this.error) throw this.error;
+  }
+  async finalize() {
+    await this.chain;
+    if (this.error) { await this.cancel(); throw this.error; }
+    await this.output.finalize();
+    return this.buffer ? J.fixMp4CompositionOffsets(this.buffer.buffer) : null;
+  }
+  async cancel() { try { if (this.output.state !== 'finalized' && this.output.state !== 'canceled') await this.output.cancel(); } catch (e) {} }
+};
+
+/* ---------- H.264 decoder config (avcC) check ----------
+   Firefox (Windows) hands out an avcC whose SPS/PPS start with the NAL header byte twice
+   (67 67 64 00 28… / 68 68 …). VLC / MPC recover from the SPS/PPS inside the frames, but
+   Windows (Explorer thumbnails, Films & TV) reads the broken avcC and gives up.
+   Returns a repaired avcC (Uint8Array), or null when the given one is fine. */
+const readParamSets = (a) => {
+  const sps = [], pps = []; let o = 6;
+  const nSps = a[5] & 31;
+  for (let i = 0; i < nSps; i++) { const n = (a[o] << 8) | a[o + 1]; sps.push(a.subarray(o + 2, o + 2 + n)); o += 2 + n; }
+  const nPps = a[o++];
+  for (let i = 0; i < nPps; i++) { const n = (a[o] << 8) | a[o + 1]; pps.push(a.subarray(o + 2, o + 2 + n)); o += 2 + n; }
+  if (o > a.length || !sps.length || !pps.length) throw new Error('short avcC');
+  return { sps, pps };
+};
+const buildAvcC = (sps, pps, lengthSize) => {
+  const s = sps[0], high = [100, 110, 122, 244, 44, 83, 86, 118, 128, 138, 139, 134, 135].includes(s[1]);
+  const size = 7 + sps.reduce((t, x) => t + 2 + x.length, 0) + pps.reduce((t, x) => t + 2 + x.length, 0) + (high ? 4 : 0);
+  const a = new Uint8Array(size); let o = 0;
+  a[o++] = 1; a[o++] = s[1]; a[o++] = s[2]; a[o++] = s[3]; a[o++] = 0xfc | (lengthSize - 1); a[o++] = 0xe0 | sps.length;
+  for (const x of sps) { a[o++] = x.length >> 8; a[o++] = x.length & 255; a.set(x, o); o += x.length; }
+  a[o++] = pps.length;
+  for (const x of pps) { a[o++] = x.length >> 8; a[o++] = x.length & 255; a.set(x, o); o += x.length; }
+  if (high) { a[o++] = 0xfd; a[o++] = 0xf8; a[o++] = 0xf8; a[o++] = 0; }   // 4:2:0, 8-bit, no SPS extensions
+  return a;
+};
+J.repairAvcC = (description, sample) => {
+  try {
+    const a = description instanceof Uint8Array ? description : ArrayBuffer.isView(description)
+      ? new Uint8Array(description.buffer, description.byteOffset, description.byteLength) : new Uint8Array(description);
+    if (a.length < 7 || a[0] !== 1) return null;
+    const lengthSize = (a[4] & 3) + 1, { sps, pps } = readParamSets(a);
+    const good = sps.every(s => (s[0] & 31) === 7 && s[1] === a[1] && s[3] === a[3]) && pps.every(p => (p[0] & 31) === 8 && p[1] !== p[0]);
+    if (good) return null;
+    // 1) best: the SPS / PPS the encoder put inside the key frame
+    const inSps = [], inPps = [];
+    if (sample) for (let o = 0; o + lengthSize <= sample.length;) {
+      let n = 0; for (let k = 0; k < lengthSize; k++) n = n * 256 + sample[o + k];
+      const nal = sample.subarray(o + lengthSize, o + lengthSize + n); o += lengthSize + n;
+      if (!n || o > sample.length) break;
+      if ((nal[0] & 31) === 7) inSps.push(nal.slice()); else if ((nal[0] & 31) === 8) inPps.push(nal.slice());
+    }
+    if (inSps.length && inPps.length) return buildAvcC(inSps, inPps, lengthSize);
+    // 2) otherwise drop the doubled NAL header byte
+    const strip = x => (x.length > 1 && x[0] === x[1]) ? x.subarray(1) : x;
+    return buildAvcC(sps.map(strip), pps.map(strip), lengthSize);
+  } catch (e) { console.warn('avcC check skipped', e); return null; }
+};
+
+/* ---------- B-frame timing in the form Windows understands ----------
+   With B-frames Mediabunny writes 'ctts' version 1 (negative composition offsets) plus 'cslg'.
+   Windows Media Foundation (Explorer thumbnails, Films & TV) does not read that form, so the file
+   plays in VLC / MPC but gets no thumbnail. Rewrite it the way ffmpeg does: 'ctts' version 0 with
+   all offsets shifted up by S, and an edit list ('edts/elst', media_time = S) that hides the shift.
+   Works on a whole file in memory; chunk offsets are patched when 'moov' sits before 'mdat'. */
+const CONTAINERS = new Set(['moov', 'trak', 'mdia', 'minf', 'stbl', 'edts', 'dinf', 'udta', 'mvex']);
+const str4 = (u, o) => String.fromCharCode(u[o], u[o + 1], u[o + 2], u[o + 3]);
+function parseBoxes(u, start, end) {
+  const out = [];
+  for (let o = start; o + 8 <= end;) {
+    const dv = new DataView(u.buffer, u.byteOffset + o);
+    let size = dv.getUint32(0), head = 8;
+    const type = str4(u, o + 4);
+    if (size === 1) { size = Number(dv.getBigUint64(8)); head = 16; } else if (size === 0) size = end - o;
+    if (size < head || o + size > end) throw new Error('bad box ' + type);
+    const box = { type, start: o, size, head };
+    if (CONTAINERS.has(type)) box.children = parseBoxes(u, o + head, o + size);
+    else box.data = u.subarray(o + head, o + size);
+    out.push(box); o += size;
+  }
+  return out;
+}
+const boxBytes = (type, payload) => {
+  const b = new Uint8Array(8 + payload.length), dv = new DataView(b.buffer);
+  dv.setUint32(0, b.length); for (let i = 0; i < 4; i++) b[4 + i] = type.charCodeAt(i);
+  b.set(payload, 8); return b;
+};
+function serialize(box) {
+  if (!box.children) return box.raw || boxBytes(box.type, box.data);
+  const parts = box.children.map(serialize), len = parts.reduce((s, p) => s + p.length, 0);
+  const payload = new Uint8Array(len); let o = 0; for (const p of parts) { payload.set(p, o); o += p.length; }
+  return boxBytes(box.type, payload);
+}
+const child = (box, type) => box.children?.find(c => c.type === type);
+J.fixMp4CompositionOffsets = (input) => {
+  const u = input instanceof Uint8Array ? input : new Uint8Array(input);
+  try {
+    const top = parseBoxes(u, 0, u.length), moov = top.find(b => b.type === 'moov'), mdat = top.find(b => b.type === 'mdat');
+    if (!moov) return input;
+    let changed = false;
+    for (const trak of moov.children.filter(b => b.type === 'trak')) {
+      const mdia = child(trak, 'mdia'), stbl = child(child(mdia, 'minf'), 'stbl');
+      const ctts = stbl && child(stbl, 'ctts');
+      if (!ctts || ctts.data[0] !== 1) continue;
+      const dv = new DataView(ctts.data.buffer, ctts.data.byteOffset, ctts.data.length), n = dv.getUint32(4);
+      let min = 0;
+      for (let i = 0; i < n; i++) min = Math.min(min, dv.getInt32(8 + i * 8 + 4));
+      const shift = -min;
+      const data = new Uint8Array(ctts.data); const w = new DataView(data.buffer);
+      w.setUint32(0, 0);                                         // version 0, flags 0
+      for (let i = 0; i < n; i++) w.setUint32(8 + i * 8 + 4, dv.getInt32(8 + i * 8 + 4) + shift);
+      ctts.data = data;
+      stbl.children = stbl.children.filter(b => b.type !== 'cslg');
+      if (shift) {
+        // presentation length in the movie timescale, from tkhd
+        const tk = child(trak, 'tkhd').data, tv = new DataView(tk.buffer, tk.byteOffset, tk.length);
+        const duration = tk[0] === 1 ? Number(tv.getBigUint64(4 + 8 + 8 + 4 + 4)) : tv.getUint32(4 + 4 + 4 + 4 + 4);
+        let edts = child(trak, 'edts');
+        if (edts) {                                             // keep existing edits, move their media start by the shift
+          for (const elst of edts.children.filter(b => b.type === 'elst')) {
+            const e = new Uint8Array(elst.data), ev = new DataView(e.buffer), v = e[0], count = ev.getUint32(4), step = v === 1 ? 20 : 12;
+            for (let i = 0; i < count; i++) {
+              const at = 8 + i * step + (v === 1 ? 8 : 4);
+              if (v === 1) { const t = ev.getBigInt64(at); if (t >= 0n) ev.setBigInt64(at, t + BigInt(shift)); }
+              else { const t = ev.getInt32(at); if (t >= 0) ev.setInt32(at, t + shift); }
+            }
+            elst.data = e;
+          }
+        } else {
+          const e = new Uint8Array(4 + 4 + 12), ev = new DataView(e.buffer);
+          ev.setUint32(4, 1); ev.setUint32(8, duration); ev.setInt32(12, shift); ev.setUint16(16, 1); ev.setUint16(18, 0);
+          edts = { type: 'edts', children: [{ type: 'elst', data: e }] };
+          const at = trak.children.findIndex(b => b.type === 'mdia');
+          trak.children.splice(at, 0, edts);                   // edts goes before mdia, as ffmpeg writes it
+        }
+      }
+      changed = true;
+    }
+    if (!changed) return input;
+    const newMoov = serialize(moov), delta = newMoov.length - moov.size;
+    if (delta && mdat && moov.start < mdat.start) {             // fast start: sample data moved by delta
+      const walk = box => {
+        if (box.children) return box.children.forEach(walk);
+        if (box.type === 'stco' || box.type === 'co64') {
+          const d = new Uint8Array(box.data), v = new DataView(d.buffer), count = v.getUint32(4);
+          for (let i = 0; i < count; i++) {
+            if (box.type === 'stco') v.setUint32(8 + i * 4, v.getUint32(8 + i * 4) + delta);
+            else v.setBigUint64(8 + i * 8, v.getBigUint64(8 + i * 8) + BigInt(delta));
+          }
+          box.data = d;
+        }
+      };
+      walk(moov);
+    }
+    const finalMoov = serialize(moov);
+    const out = new Uint8Array(u.length - moov.size + finalMoov.length);
+    out.set(u.subarray(0, moov.start), 0);
+    out.set(finalMoov, moov.start);
+    out.set(u.subarray(moov.start + moov.size), moov.start + finalMoov.length);
+    return out.buffer;
+  } catch (e) {
+    console.warn('MP4 timing rewrite skipped', e);
+    return input;
+  }
+};
+
+/* ---------- audio copied from the loaded music file (no re-encoding) ----------
+   Works in every browser, including those without an AAC encoder (Firefox).
+   Returns null when the file's audio can't be copied into an MP4. */
+J.openAudioCopy = async (file) => {
+  if (!file || typeof Mediabunny === 'undefined') return null;
+  const M = Mediabunny;
+  let input = null;
+  try {
+    input = new M.Input({ source: new M.BlobSource(file), formats: M.ALL_FORMATS });
+    const track = await input.getPrimaryAudioTrack();
+    if (!track || !J.MP4_COPY_AUDIO.includes(track.codec)) { input.dispose?.(); return null; }
+    const config = await track.getDecoderConfig();
+    if (!config) { input.dispose?.(); return null; }
+    return {
+      codec: track.codec, config, channels: track.numberOfChannels, sampleRate: track.sampleRate,
+      /* writes the packets for the timeline span [t0, t0 + dur) shifted to start at 0; returns the copied seconds */
+      async copyTo(writer, t0, dur, signal) {
+        const sink = new M.EncodedPacketSink(track), end = t0 + dur;
+        let first = true, last = 0, n = 0;
+        for await (const p of sink.packets()) {
+          if (signal?.aborted) throw new DOMException('Cancelled', 'AbortError');
+          if (p.timestamp < t0 - 1e-6) continue;          // before the span (also drops encoder priming at a negative time)
+          if (p.timestamp >= end - 1e-6) break;
+          const q = p.clone({ timestamp: p.timestamp - t0 });
+          writer.addAudioPacket(q, first ? { decoderConfig: config } : undefined);
+          first = false; last = q.timestamp + q.duration; n++;
+          if (n % 200 === 0) await writer.settle();
+        }
+        return n ? last : 0;
+      },
+      dispose() { try { input.dispose?.(); } catch (e) {} },
+    };
+  } catch (e) {
+    console.warn('audio copy unavailable', e);
+    try { input?.dispose?.(); } catch (_) {}
+    return null;
+  }
+};
+})();
+
+/* ============================================================
    JIZURA — export: MP4 (WebCodecs + mp4-muxer), PNG sequence ZIP,
    file saving (artifact download capability or plain browser download)
    ============================================================ */
@@ -6507,12 +6802,14 @@ async function encodeMP4({ plan, project, audio, onProgress, signal, range, file
   const fps = plan.fps;
   let ac = null;
   if (audio && audio.buffer && project.includeAudio !== false) ac = await J.pickAudioCodec(48000, Math.min(2, audio.buffer.numberOfChannels));
+  // audio: copy the music file's own AAC/Opus/MP3 when possible (no re-encoding, works without an AAC encoder)
+  let copy = null;
+  if (audio && audio.buffer && project.includeAudio !== false && audio.file) copy = await J.openAudioCopy(audio.file);
+  if (copy && copy.codec !== 'aac' && ac && ac.mux === 'aac') { copy.dispose(); copy = null; }   // re-encoding to AAC is more compatible than copying MP3/Opus
+  if (copy) ac = { codec: copy.codec, mux: copy.codec, sr: copy.sampleRate, copy: true };
   const store = file ? null : new BlockStore();
-  const target = file ? new Mp4Muxer.FileSystemWritableFileStreamTarget(file, { chunkSize: 8 * 1048576 })
-    : new Mp4Muxer.StreamTarget({ onData: (data, pos) => store.write(data, pos), chunked: true, chunkSize: 8 * 1048576 });
-  const muxOpts = { target, video: { codec: vc.mux, width: w, height: h, frameRate: fps }, fastStart: false, firstTimestampBehavior: 'offset' };
-  if (ac) muxOpts.audio = { codec: ac.mux, numberOfChannels: Math.min(2, audio.buffer.numberOfChannels), sampleRate: ac.sr };
-  const muxer = new Mp4Muxer.Muxer(muxOpts);
+  const muxer = new J.Mp4Writer({ target: file || { onWrite: (data, pos) => store.write(data, pos) }, video: { codec: vc.mux, width: w, height: h, frameRate: fps },
+    audio: ac ? { codec: ac.mux } : null, fastStart: false });
   let err = null, outFrames = 0;
   const venc = new VideoEncoder({ output: (chunk, meta) => { outFrames++; try { muxer.addVideoChunk(chunk, meta); } catch (e) { err = e; } }, error: e => { err = e; } });
   venc.configure(Object.assign({}, vc.cfg, { latencyMode: 'quality' }));
@@ -6536,15 +6833,23 @@ async function encodeMP4({ plan, project, audio, onProgress, signal, range, file
       while (venc.encodeQueueSize > 4 && !err) { await new Promise(r => setTimeout(r, 2)); if (!document.hidden && ++spins > 15000) throw new Error('エンコーダーが応答しません'); }
       // an encoder that accepts frames but never returns any has failed silently (seen with some GPU drivers)
       if (i === Math.min(total - 1, fps * 3) && outFrames === 0) { await venc.flush(); if (!outFrames) throw new Error('エンコーダーが出力を返しません'); }
+      await muxer.settle();
       if (i % 3 === 0) { onProgress && onProgress(i / total, `フレーム ${i + 1}/${total}${note || ''}`); await new Promise(r => setTimeout(r, 0)); }
     }
     await venc.flush();
     if (err) throw err;
-  } catch (e) { closeEnc(); throw e; }
+  } catch (e) { closeEnc(); await muxer.cancel(); copy && copy.dispose(); throw e; }
   finally { J.glyphs.maxRes = prevRes; }
   closeEnc();
   if (outFrames < total * 0.98) throw new Error(`動画のフレームが足りません（${outFrames}/${total}）`);
-  if (ac) {
+  if (ac && ac.copy) {
+    onProgress && onProgress(0.99, '音声をコピー中');
+    try {
+      const copied = await copy.copyTo(muxer, span.t0, span.dur);
+      if (!copied && audio.buffer.duration > span.t0 + 0.5) { const e = new Error('音声をコピーできませんでした。もう一度書き出してください'); e.jzFatal = true; throw e; }
+    } catch (e) { await muxer.cancel(); throw e; }
+    finally { copy.dispose(); }
+  } else if (ac) {
     onProgress && onProgress(0.99, '音声をエンコード中');
     const rs = await resample(audio.buffer, ac.sr, span.dur, span.t0);
     const chn = rs.numberOfChannels;
@@ -6568,7 +6873,7 @@ async function encodeMP4({ plan, project, audio, onProgress, signal, range, file
     if (!aChunks || aEnd < (Math.min(span.dur, audio.buffer.duration - span.t0) - 0.5) * 1e6) throw fatal('音声のエンコードが途中で止まりました（' + aChunks + '）。もう一度書き出してください');
   }
   onProgress && onProgress(0.995, 'ファイルを仕上げ中');
-  muxer.finalize();
+  await muxer.finalize();
   if (file) await file.close();
   onProgress && onProgress(1, '完了');
   const size = file ? null : store.end;
@@ -37352,9 +37657,8 @@ J.exportLayerPair = async ({ plan, project, spectrum = null, range = null, signa
     try {
       if (spectrum) reader = await J.createSpectrumReader(spectrum, w, h, t0, fps, total, signal, project.layerMode);
       for (const name of frontOnly ? ['front'] : ['front', 'matte']) {
-        const target = new Mp4Muxer.ArrayBufferTarget();
-        const mux = new Mp4Muxer.Muxer({ target, video: { codec: codec.mux, width: w, height: h, frameRate: fps }, fastStart: 'in-memory', firstTimestampBehavior: 'offset' });
-        const state = { name, target, mux, error: null, count: 0 };
+        const mux = new J.Mp4Writer({ video: { codec: codec.mux, width: w, height: h, frameRate: fps }, fastStart: 'in-memory' });
+        const state = { name, mux, error: null, count: 0 };
         state.encoder = new VideoEncoder({ output(chunk, meta) { try { mux.addVideoChunk(chunk, meta); state.count++; } catch (e) { state.error = e; } }, error(e) { state.error = e; } });
         writers.push(state); state.encoder.configure(Object.assign({}, codec.cfg, { latencyMode: 'quality' }));
       }
@@ -37377,6 +37681,7 @@ J.exportLayerPair = async ({ plan, project, spectrum = null, range = null, signa
           if (performance.now() > deadline) throw new Error('Encoder timeout');
           await new Promise(r => setTimeout(r, 5));
         }
+        for (const s of writers) await s.mux.settle();
         if (i % 3 === 0) { onProgress?.(i / total, (i + 1) + ' / ' + total); await new Promise(r => setTimeout(r, 0)); }
       }
       for (const s of writers) {
@@ -37384,11 +37689,11 @@ J.exportLayerPair = async ({ plan, project, spectrum = null, range = null, signa
         clearTimeout(s.flushTimer); abort(signal);
         if (s.error) throw s.error;
         if (s.count !== total) throw new Error('Incomplete video frames');
-        s.mux.finalize();
+        s.buffer = await s.mux.finalize();
       }
       const files = writers.map(s => ({
         name: (spectrum ? 'combined_front' : 'subtitle_front') + (mode === 'alpha' ? '_alpha' : '') + (s.name === 'matte' ? '_matte_dark' : '') + '.mp4',
-        blob: new Blob([s.target.buffer], { type: 'video/mp4' }),
+        blob: new Blob([s.buffer], { type: 'video/mp4' }),
       }));
       const manifest = { format: frontOnly ? 'jizura-layer-front-v1' : mode === 'alpha' ? 'jizura-premultiplied-layer-pair-v1' : 'jizura-binary-layer-pair-v1', layerMode: mode, layerBackgroundOpacity: render.backgroundOpacity, width: w, height: h, fps, frames: total, timelineStart: t0, duration: total / fps,
         exteriorBloom: 'removed', matte: frontOnly ? null : mode === 'alpha' ? 'alpha=1-matte/255; white=transparent, black=opaque; do not threshold' : 'white=transparent, black=opaque; threshold decoded luminance at 128', front: mode === 'alpha' ? 'premultiplied RGB; composite=front+background*(matte/255); no audio' : 'RGB on black, no audio', composite: 'subtitle over spectrum', spectrumLayout: spectrum ? J.normalizeSpectrumLayout(project.spectrumLayout) : null };
@@ -37398,7 +37703,7 @@ J.exportLayerPair = async ({ plan, project, spectrum = null, range = null, signa
       if (signal?.aborted || e.name === 'AbortError') throw e;
       errors.push(codec.label + ': ' + e.message);
     } finally {
-      for (const s of writers) { clearTimeout(s.flushTimer); try { s.encoder.close(); } catch (_) {} }
+      for (const s of writers) { clearTimeout(s.flushTimer); try { s.encoder.close(); } catch (_) {} if (!s.buffer) await s.mux.cancel(); }
       await reader?.close();
     }
   }
@@ -37890,24 +38195,33 @@ J.exportSimpleVideo = async ({ plan, project, background = null, spectrum = null
   const settings = J.normalizeSimpleExport(project.simpleExport), span = J.simpleExportSpan(settings.duration, plan.fps, range);
   await J.ensureSimpleTitleFont(settings.title);
   const [w, h] = J.outputSize(project), fps = plan.fps;
-  let audioConfig = null;
+  /* audio, in order of preference:
+     1. the music file's own AAC, copied as is (no quality loss; works in Firefox, which has no AAC encoder)
+     2. AAC encoded by the browser (Chrome / Edge)
+     3. the music file's own Opus / MP3, copied as is
+     4. Opus encoded by the browser (Firefox) */
+  let audioConfig = null, audioCopy = null;
   if (settings.includeAudio && audio?.buffer) {
-    audioConfig = { codec: 'mp4a.40.2', sampleRate: 48000, numberOfChannels: Math.min(2, audio.buffer.numberOfChannels), bitrate: 192000 };
-    if (typeof AudioEncoder === 'undefined' || !await AudioEncoder.isConfigSupported(audioConfig).then(r => r.supported).catch(() => false))
-      throw new Error(tr('この環境ではAAC音声を出力できません。「音源を含めない」を選ぶか対応環境で出力してください。', 'AAC audio encoding is unavailable. Select “Exclude audio” or use a supported environment.'));
+    const channels = Math.min(2, audio.buffer.numberOfChannels);
+    const encodable = async codec => typeof AudioEncoder !== 'undefined' && await AudioEncoder.isConfigSupported({ codec, sampleRate: 48000, numberOfChannels: channels, bitrate: 192000 }).then(r => r.supported).catch(() => false);
+    audioCopy = audio.file ? await J.openAudioCopy(audio.file) : null;
+    if (audioCopy && audioCopy.codec !== 'aac' && await encodable('mp4a.40.2')) { audioCopy.dispose(); audioCopy = null; }
+    if (audioCopy) audioConfig = { copy: true, mux: audioCopy.codec };
+    else if (await encodable('mp4a.40.2')) audioConfig = { codec: 'mp4a.40.2', mux: 'aac', sampleRate: 48000, numberOfChannels: channels, bitrate: 192000 };
+    else if (await encodable('opus')) audioConfig = { codec: 'opus', mux: 'opus', sampleRate: 48000, numberOfChannels: channels, bitrate: 192000 };
+    else throw new Error(tr('この環境では音声を出力できません。「音源を含めない」を選ぶか、AAC（.m4a）の音源を読み込んでください。', 'Audio encoding is unavailable. Select “Exclude audio” or load an AAC (.m4a) music file.'));
   }
   abort(signal);
   const attempts = (await J.videoAttempts(w, h, fps, J.videoBitrate(w, h, fps, project.quality || 'high'))).filter(c => c.mux === 'avc');
   if (!attempts.length) throw new Error(tr('H.264 MP4出力に対応していません。', 'H.264 MP4 encoding is unavailable.'));
   const errors = [];
   for (const codec of attempts) {
-    let reader = null, backgroundReader = null, encoder = null, error = null, count = 0, audioPhase = false;
+    let reader = null, backgroundReader = null, encoder = null, mux = null, done = false, error = null, count = 0, audioPhase = false;
     try {
       abort(signal);
       if (spectrum) reader = await J.createSpectrumReader(spectrum, w, h, span.t0, fps, span.frames, signal, project.layerMode);
       if (background?.video) backgroundReader = await J.VideoBackgroundReader.create(background, span, fps, signal);
-      const target = new Mp4Muxer.ArrayBufferTarget(), mux = new Mp4Muxer.Muxer({ target, video: { codec: 'avc', width: w, height: h, frameRate: fps },
-        ...(audioConfig ? { audio: { codec: 'aac', sampleRate: audioConfig.sampleRate, numberOfChannels: audioConfig.numberOfChannels } } : {}), fastStart: 'in-memory', firstTimestampBehavior: 'offset' });
+      mux = new J.Mp4Writer({ video: { codec: 'avc', width: w, height: h, frameRate: fps }, audio: audioConfig ? { codec: audioConfig.mux } : null, fastStart: 'in-memory' });
       encoder = new VideoEncoder({ output(chunk, meta) { try { mux.addVideoChunk(chunk, meta); count++; } catch (e) { error = e; } }, error(e) { error = e; } });
       encoder.configure({ ...codec.cfg, latencyMode: 'quality' });
       const mode = J.normalizeLayerMode(project.layerMode);
@@ -37933,19 +38247,25 @@ J.exportSimpleVideo = async ({ plan, project, background = null, spectrum = null
         const frame = new VideoFrame(canvas, { timestamp: Math.round(i * 1e6 / fps), duration: Math.round((i + 1) * 1e6 / fps) - Math.round(i * 1e6 / fps) });
         try { encoder.encode(frame, { keyFrame: i % (fps * 2) === 0 }); } finally { frame.close(); }
         await drain(encoder, () => error, signal);
+        await mux.settle();
         if (i % 3 === 0) { onProgress?.((audioConfig ? 0.9 : 0.99) * (i + 1) / span.frames, `${i + 1} / ${span.frames}`); await tick(); }
       }
       await bounded(encoder.flush(), signal); if (error) throw error;
       if (count !== span.frames) throw new Error(tr('映像フレームが不足しています。', 'Encoded video frames are incomplete.'));
-      if (audioConfig) { audioPhase = true; await encodeSound(audio.buffer, mux, span, audioConfig, signal, onProgress); }
-      abort(signal); mux.finalize(); onProgress?.(1, tr('完了', 'Done'));
-      return { files: [{ name: 'simple_video.mp4', blob: new Blob([target.buffer], { type: 'video/mp4' }) }], ...span, audio: !!audioConfig };
+      if (audioConfig?.copy) {
+        audioPhase = true; onProgress?.(0.95, tr('音声をコピー中', 'Copying audio'));
+        const copied = await audioCopy.copyTo(mux, span.t0, span.duration, signal);
+        if (!copied && audio.buffer.duration > span.t0 + 0.5) throw new Error(tr('音声をコピーできませんでした。', 'Could not copy the audio.'));
+      } else if (audioConfig) { audioPhase = true; await encodeSound(audio.buffer, mux, span, audioConfig, signal, onProgress); }
+      abort(signal); const buffer = await mux.finalize(); done = true; audioCopy?.dispose(); onProgress?.(1, tr('完了', 'Done'));
+      return { files: [{ name: 'simple_video.mp4', blob: new Blob([buffer], { type: 'video/mp4' }) }], ...span, audio: audioConfig ? audioConfig.mux : null };
     } catch (e) {
-      if (signal?.aborted || e.name === 'AbortError') throw new DOMException('Cancelled', 'AbortError');
-      if (audioPhase) throw e;
+      if (signal?.aborted || e.name === 'AbortError') { audioCopy?.dispose(); throw new DOMException('Cancelled', 'AbortError'); }
+      if (audioPhase) { audioCopy?.dispose(); throw e; }
       errors.push(codec.label + ': ' + e.message);
-    } finally { try { encoder?.close(); } catch (_) {} await Promise.allSettled([reader?.close(), backgroundReader?.close()]); }
+    } finally { try { encoder?.close(); } catch (_) {} if (!done) await mux?.cancel(); await Promise.allSettled([reader?.close(), backgroundReader?.close()]); }
   }
+  audioCopy?.dispose();
   throw new Error(tr('簡易動画の出力に失敗しました。', 'Simple export failed. ') + errors.join(' / '));
 };
 })();
@@ -40679,7 +40999,7 @@ const previewLive = new Set();
 let previewObs = null, previewRaf = 0, previewLast = 0;
 function previewCacheKey(g, k) {
   const p = S.project;
-  return [p.style, p.aspect, g, k, p.colors && p.colors.enabled ? JSON.stringify(p.colors) : '', JSON.stringify(p.fonts || {})].join('|');
+  return [p.style, p.aspect === 'bg' ? 'bg' + J.backgroundAspect : p.aspect, g, k, p.colors && p.colors.enabled ? JSON.stringify(p.colors) : '', JSON.stringify(p.fonts || {})].join('|');
 }
 function getPreviewPlan(g, k) {
   const id = previewCacheKey(g, k);
@@ -41170,7 +41490,7 @@ function bind() {
   };
   document.querySelectorAll('.terms-open').forEach(b => b.addEventListener('click', openTerms));
   dlg.addEventListener('click', e => { if (e.target === dlg) dlg.close ? dlg.close() : dlg.removeAttribute('open'); });   // click on the backdrop
-  $('btnSave').addEventListener('click', () => J.saveFile(baseName() + '.jizura.json', JSON.stringify(Object.assign({}, S.project, { appVersion: '1.5.2' }), null, 1)));
+  $('btnSave').addEventListener('click', () => J.saveFile(baseName() + '.jizura.json', JSON.stringify(Object.assign({}, S.project, { appVersion: '1.5.2-fc.1' }), null, 1)));
   audioNameDefault = $('audioName').textContent;
   $('btnClearLyrics').addEventListener('click', clearLyrics);
   $('btnReset').addEventListener('click', () => {
@@ -41254,6 +41574,7 @@ async function loadAudioFile(f) {
     pause();
     const a = await J.analyzeAudio(f);
     if (my !== audioSeq) return false;
+    a.file = f;                               // kept so MP4 export can copy its AAC as is
     pause(); AP.load(f, a.buffer); S.audio = a;
     $('audioName').textContent = `${f.name}（${J.fmtTime(S.audio.duration)}・約${S.audio.bpm}BPM）`;
     S.project.audioName = f.name;
@@ -41356,7 +41677,7 @@ function boot() {
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
 J.ui = S;
 // Shared editor hooks used by the layer interface
-J.uiApi = { toast, replan, syncUI, syncOmakaseThemes, pause, seek, flushSave, loadAudioFile, restartPreview, exportRange, exportRangeLines, pushEdit, edGo,
+J.uiApi = { toast, replan, syncUI, syncOut, syncOmakaseThemes, pause, seek, flushSave, loadAudioFile, restartPreview, exportRange, exportRangeLines, pushEdit, edGo,
   audioLike, cueRerollTarget,
   applyMotionProject(project, index, resume) {
     if (S.exporting) return;
@@ -41449,7 +41770,10 @@ let showingCueError = false;
 function status(text, error = false) {
   const draftError = [...cueDrafts.values()].find(d => d.error)?.error;
   const s = $('layerStatus'); s.textContent = draftError || text; s.classList.toggle('error', !!draftError || error);
+  // the right-hand「MP4書き出し」shows the messages of its own export (and of the cue error that blocks it)
+  if (rightSimple || draftError) document.querySelectorAll('.right-mp4-status').forEach(r => { r.textContent = draftError || text; r.classList.toggle('error', !!draftError || error); });
 }
+let rightSimple = false;
 function syncCueErrors() {
   const error = [...cueDrafts.values()].find(d => d.error)?.error;
   J.layerCueEditsInvalid = !!error;
@@ -41485,7 +41809,8 @@ async function loadMedia(key, file, videoOnly) {
   if (key === 'front') J.ui.project.spectrumMode = 'external';
   if (m.video) { m.el.addEventListener('seeked', dirty); m.el.addEventListener('loadeddata', dirty); }
   $('layerName-' + key).textContent = file.name;
-  if (key !== 'background') J.uiApi.replan();
+  if (key === 'background') setBackgroundAspect(m);
+  if (key !== 'background' || J.ui.project.aspect === 'bg') J.uiApi.replan();
   status(tr('読み込みました。素材はこの作業中だけ保持します。', 'Loaded. Media is kept for this editing session only.'));
   J.syncLayerUI(); dirty();
 }
@@ -41550,9 +41875,15 @@ function spectrumControls(panel) {
 }
 
 
+/* 画面比「背景に合わせる」: remember the background's size; the export/preview size follows it */
+function setBackgroundAspect(m) {
+  J.backgroundAspect = m && m.width > 0 && m.height > 0 ? [m.width, m.height] : null;
+  J.uiApi.syncOut?.();
+}
 function clearMedia(key) {
   session.generation[key] = (session.generation[key] || 0) + 1;
   session[key]?.dispose(); session[key] = null; $('layerName-' + key).textContent = tr('未選択', 'None');
+  if (key === 'background') { setBackgroundAspect(null); if (J.ui.project.aspect === 'bg') J.uiApi.replan(); }
   if (key !== 'background') {
     J.uiApi.replan();
     if (key === 'matte' && session.front) status(tr('マットを解除しました。RGB 000000だけを透明にします。', 'Matte removed. Only RGB 000000 is transparent.'));
@@ -41562,6 +41893,7 @@ function clearMedia(key) {
 let downloadUrls = [];
 function clearDownloads() {
   $('layerDownloads')?.replaceChildren();
+  document.querySelectorAll('.right-mp4-links').forEach(d => d.replaceChildren());
   downloadUrls.forEach(url => URL.revokeObjectURL(url)); downloadUrls = [];
 }
 // Called by the single project-reset transaction, including confirm() fallback.
@@ -41587,6 +41919,9 @@ function offerDownloads(files, title) {
     a.href = URL.createObjectURL(file.blob); downloadUrls.push(a.href);
     a.download = prefix + '_' + file.name; a.title = a.download;
     $('layerDownloads').append(a);
+    if (file.name === 'simple_video.mp4') document.querySelectorAll('.right-mp4-links').forEach(d => {
+      const b = el('a', tr('MP4を保存', 'Save MP4')); b.href = a.href; b.download = a.download; b.title = a.download; d.append(b);
+    });
     return a;
   });
   // Keep these links alive so each file can also be saved by an explicit user click.
@@ -41614,6 +41949,9 @@ async function exportVideo(simple, frontOnly = false) {
     const disabled = controls.map(e => e.disabled);
     controls.forEach(e => { e.disabled = true; }); $('layerCancel').disabled = false;
     $('layerCancel').hidden = false; $('layerProgress').hidden = false;
+    rightSimple = simple;
+    document.querySelectorAll('.right-mp4-cancel').forEach(b => { b.disabled = !simple; b.hidden = !simple; });
+    document.querySelectorAll('.right-mp4-progress').forEach(p => { p.value = 0; p.hidden = !simple; });
     clearDownloads();
     status(tr('フォントを準備中…', 'Preparing fonts…'));
     try {
@@ -41622,7 +41960,7 @@ async function exportVideo(simple, frontOnly = false) {
       const missing = J.missingUserFonts(J.fontsOfPlan(plan));
       if (missing.length) throw new Error(tr('旧フォントファイルの指定を、PCにインストール済みの書体または標準書体に変更してください: ', 'Replace legacy file-font selections with installed PC fonts or built-in fonts: ') + missing.join(', '));
       const args = { plan, project, spectrum, range, signal: ac.signal,
-        onProgress(p, m) { $('layerProgress').value = p; status((simple ? tr('簡易動画を生成中 ', 'Encoding simple video ') : frontOnly ? tr('フロント動画を生成中 ', 'Encoding front video ') : tr('ペア動画を生成中 ', 'Encoding pair ')) + m); } };
+        onProgress(p, m) { $('layerProgress').value = p; if (simple) document.querySelectorAll('.right-mp4-progress').forEach(r => { r.value = p; }); status((simple ? tr('簡易動画を生成中 ', 'Encoding simple video ') : frontOnly ? tr('フロント動画を生成中 ', 'Encoding front video ') : tr('ペア動画を生成中 ', 'Encoding pair ')) + m); } };
       const pair = simple ? await J.exportSimpleVideo({ ...args, background: session.background, audio: J.ui.audio }) : frontOnly ? await J.exportLayerFront(args) : await J.exportLayerPair(args);
       if (ac.signal.aborted) throw new DOMException('Cancelled', 'AbortError');
       offerDownloads(pair.files, project.title);
@@ -41630,6 +41968,7 @@ async function exportVideo(simple, frontOnly = false) {
     } finally {
       controls.forEach((e, i) => { e.disabled = disabled[i]; });
       J.ui.exporting = null; session.busy = false; $('layerCancel').hidden = true; dirty(); J.syncLayerUI();
+      document.querySelectorAll('.right-mp4-cancel').forEach(b => { b.hidden = true; });
     }
   } catch (e) { status(e.name === 'AbortError' ? tr('出力を中止しました。', 'Export cancelled.') : e.message, e.name !== 'AbortError'); }
 }
@@ -41671,9 +42010,35 @@ function syncSimpleExportUI() {
     + (settings.includeAudio && J.ui.audio?.buffer ? tr(' 音源あり。', ' Audio included.') : tr(' 音声なし。', ' No audio.'))
     + (!settings.title.enabled ? tr(' タイトルなし。', ' No title.') : settings.title.all ? tr(' タイトル：全編。', ' Title: whole video.') : tr(` タイトル：${settings.title.start}〜${settings.title.end}秒。`, ` Title: ${settings.title.start}–${settings.title.end}s.`))
     + (settings.title.enabled && !J.simpleTitleWindow(settings.title, span) ? tr(' タイトル区間は出力範囲外です。', ' Title is outside the export range.') : '');
+  document.querySelectorAll('.right-mp4-go').forEach(b => { b.disabled = !!reason; });
+  document.querySelectorAll('.right-mp4-info').forEach(p => { p.textContent = help.textContent; p.classList.toggle('error', !!reason); });
   if ($('simpleSettingsInfo')) { $('simpleSettingsInfo').textContent = help.textContent; $('simpleSettingsInfo').classList.toggle('error', !!reason); }
 }
 J.syncSimpleExportUI = syncSimpleExportUI;
+/* 右側の「MP4書き出し」: the simple video export (background + spectrum + subtitles + audio),
+   at the bottom of the かんたん panel and of the 詳細 → 書き出し tab. Same export and settings as the left panel. */
+function mountRightExport() {
+  const places = [document.getElementById('easyPanel'), document.querySelector('.tabpane[data-pane="out"]')];
+  for (const place of places) {
+    if (!place) continue;
+    const box = el('div', null, place.id === 'easyPanel' ? 'right-mp4 easy-sec' : 'right-mp4');
+    box.append(el('h3', tr('MP4書き出し', 'MP4 export'), 'right-mp4-head'));
+    const go = el('button', tr('MP4書き出し', 'Export MP4'), 'primary right-mp4-go'); go.type = 'button';
+    go.addEventListener('click', () => exportVideo(true));
+    const settings = el('button', tr('MP4書き出し設定', 'MP4 export settings'), 'right-mp4-settings'); settings.type = 'button';
+    settings.addEventListener('click', () => $('simpleSettingsOpen')?.click());
+    const info = el('p', null, 'note right-mp4-info');
+    const progress = el('progress', null, 'right-mp4-progress'); progress.max = 1; progress.value = 0; progress.hidden = true;
+    const cancel = el('button', tr('出力を中止', 'Cancel export'), 'ghost small right-mp4-cancel'); cancel.type = 'button'; cancel.hidden = true;
+    cancel.addEventListener('click', () => J.ui.exporting?.abort());
+    const statusLine = el('p', null, 'note right-mp4-status'); statusLine.setAttribute('role', 'status');
+    const about = el('p', tr('画像・動画背景＋スペアナ＋字幕を1本のMP4にします。背景動画は0秒から再生し、終了後は最終フレームを保持。背景の音声は使わず、読み込んだ音源だけを使用します。',
+      'Exports an image/video background, spectrum and subtitles as one MP4. Background video starts at zero and holds its final frame. Only separately loaded audio is used, not the background soundtrack.'), 'note right-mp4-about');
+    const links = el('div', null, 'right-mp4-links');
+    box.append(go, settings, info, progress, cancel, statusLine, links, about);
+    place.append(box);
+  }
+}
 function simpleExportControls(panel) {
   panel.append(button('simpleExport', tr('簡易動画MP4を出力', 'Export simple video MP4'), () => exportVideo(true)));
   const controls = el('div', null, 'simple-export-controls');
@@ -41692,8 +42057,9 @@ function simpleExportControls(panel) {
   audio.append(check, document.createTextNode(tr('音源を含めない', 'Exclude audio')));
   controls.append(label, audio); J.mountSimpleSettings(panel, controls);
   const help = el('p', null, 'note'); help.id = 'simpleExportInfo'; help.setAttribute('role', 'status'); panel.append(help);
-  panel.append(el('p', tr('画像・動画背景＋スペアナ＋字幕を1本のMP4にします。背景動画は0秒から再生し、終了後は最終フレームを保持。背景の音声は使わず、読み込んだ音源だけを使用します。',
-    'Exports an image/video background, spectrum and subtitles as one MP4. Background video starts at zero and holds its final frame. Only separately loaded audio is used, not the background soundtrack.'), 'note'));
+  // JIZURA改: the left button / settings button / info are replaced by the right-hand「MP4書き出し」.
+  // They stay in the page (hidden) because the export and settings code is keyed to their ids.
+  for (const e of [panel.querySelector('#simpleExport'), panel.querySelector('#simpleSettingsOpen'), help]) if (e) { e.hidden = true; e.style.display = 'none'; }
 }
 function cueTable() {
   const root = $('layerCues'), cues = J.ui.project.subtitleCues;
@@ -41974,6 +42340,7 @@ function boot() {
   const downloads = el('div'); downloads.id = 'layerDownloads';
   panel.append(progress, cancel, output, downloads);
   simpleExportControls(panel);
+  mountRightExport();
   const left = document.querySelector('.col-left');
   left.prepend(panel);
   $('lineList').closest('.sec').classList.add('layer-cut-list');
@@ -42231,7 +42598,7 @@ J.syncSimpleTitleUI = changed => {
 J.mountSimpleSettings = (panel, outputControls) => {
   const open = el('button', tr('簡易動画設定…', 'Simple video settings…')); open.id = 'simpleSettingsOpen'; open.type = 'button'; panel.append(open);
   dialog = el('dialog', null, 'simple-settings-dialog'); dialog.id = 'simpleSettingsDlg'; dialog.setAttribute('aria-labelledby', 'simpleSettingsHeading');
-  const head = el('h2', tr('簡易動画設定', 'Simple video settings')); head.id = 'simpleSettingsHeading';
+  const head = el('h2', tr('MP4書き出し設定（簡易動画）', 'MP4 export settings (simple video)')); head.id = 'simpleSettingsHeading';
   dialog.append(head, el('p', tr('変更はその場で反映・保存されます。タイトルは背景付きプレビューと簡易MP4にだけ表示します。', 'Changes apply and save immediately. Titles appear only in background-composite previews and simple MP4 exports.'), 'note'));
   const layout = el('div', null, 'simple-settings-layout'), controls = el('div', null, 'simple-settings-fields');
   controls.append(outputControls);

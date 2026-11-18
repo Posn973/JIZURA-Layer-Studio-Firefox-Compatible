@@ -13,9 +13,10 @@ Upstream: https://github.com/Vanilagy/mediabunny
 No changes have been made to Mediabunny. Preserve its license and source availability
 notice when redistributing the standalone HTML or a packaged copy.
 
-## mp4-muxer 5.2.2 (bundled)
+## mp4-muxer 5.2.2 (no longer bundled)
 
-`vendor/mp4-muxer.min.js` is embedded in `index.html` and is used to write MP4 files.
+In the Firefox Compatible edition MP4 files are written with Mediabunny (`src/10b_mp4_writer.js`);
+`vendor/mp4-muxer.min.js` is kept in the repository but is not embedded in the HTML editions.
 Source: https://github.com/Vanilagy/mp4-muxer — licensed under the MIT License:
 
 ```

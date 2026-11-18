@@ -175,24 +175,33 @@ J.exportSimpleVideo = async ({ plan, project, background = null, spectrum = null
   const settings = J.normalizeSimpleExport(project.simpleExport), span = J.simpleExportSpan(settings.duration, plan.fps, range);
   await J.ensureSimpleTitleFont(settings.title);
   const [w, h] = J.outputSize(project), fps = plan.fps;
-  let audioConfig = null;
+  /* audio, in order of preference:
+     1. the music file's own AAC, copied as is (no quality loss; works in Firefox, which has no AAC encoder)
+     2. AAC encoded by the browser (Chrome / Edge)
+     3. the music file's own Opus / MP3, copied as is
+     4. Opus encoded by the browser (Firefox) */
+  let audioConfig = null, audioCopy = null;
   if (settings.includeAudio && audio?.buffer) {
-    audioConfig = { codec: 'mp4a.40.2', sampleRate: 48000, numberOfChannels: Math.min(2, audio.buffer.numberOfChannels), bitrate: 192000 };
-    if (typeof AudioEncoder === 'undefined' || !await AudioEncoder.isConfigSupported(audioConfig).then(r => r.supported).catch(() => false))
-      throw new Error(tr('この環境ではAAC音声を出力できません。「音源を含めない」を選ぶか対応環境で出力してください。', 'AAC audio encoding is unavailable. Select “Exclude audio” or use a supported environment.'));
+    const channels = Math.min(2, audio.buffer.numberOfChannels);
+    const encodable = async codec => typeof AudioEncoder !== 'undefined' && await AudioEncoder.isConfigSupported({ codec, sampleRate: 48000, numberOfChannels: channels, bitrate: 192000 }).then(r => r.supported).catch(() => false);
+    audioCopy = audio.file ? await J.openAudioCopy(audio.file) : null;
+    if (audioCopy && audioCopy.codec !== 'aac' && await encodable('mp4a.40.2')) { audioCopy.dispose(); audioCopy = null; }
+    if (audioCopy) audioConfig = { copy: true, mux: audioCopy.codec };
+    else if (await encodable('mp4a.40.2')) audioConfig = { codec: 'mp4a.40.2', mux: 'aac', sampleRate: 48000, numberOfChannels: channels, bitrate: 192000 };
+    else if (await encodable('opus')) audioConfig = { codec: 'opus', mux: 'opus', sampleRate: 48000, numberOfChannels: channels, bitrate: 192000 };
+    else throw new Error(tr('この環境では音声を出力できません。「音源を含めない」を選ぶか、AAC（.m4a）の音源を読み込んでください。', 'Audio encoding is unavailable. Select “Exclude audio” or load an AAC (.m4a) music file.'));
   }
   abort(signal);
   const attempts = (await J.videoAttempts(w, h, fps, J.videoBitrate(w, h, fps, project.quality || 'high'))).filter(c => c.mux === 'avc');
   if (!attempts.length) throw new Error(tr('H.264 MP4出力に対応していません。', 'H.264 MP4 encoding is unavailable.'));
   const errors = [];
   for (const codec of attempts) {
-    let reader = null, backgroundReader = null, encoder = null, error = null, count = 0, audioPhase = false;
+    let reader = null, backgroundReader = null, encoder = null, mux = null, done = false, error = null, count = 0, audioPhase = false;
     try {
       abort(signal);
       if (spectrum) reader = await J.createSpectrumReader(spectrum, w, h, span.t0, fps, span.frames, signal, project.layerMode);
       if (background?.video) backgroundReader = await J.VideoBackgroundReader.create(background, span, fps, signal);
-      const target = new Mp4Muxer.ArrayBufferTarget(), mux = new Mp4Muxer.Muxer({ target, video: { codec: 'avc', width: w, height: h, frameRate: fps },
-        ...(audioConfig ? { audio: { codec: 'aac', sampleRate: audioConfig.sampleRate, numberOfChannels: audioConfig.numberOfChannels } } : {}), fastStart: 'in-memory', firstTimestampBehavior: 'offset' });
+      mux = new J.Mp4Writer({ video: { codec: 'avc', width: w, height: h, frameRate: fps }, audio: audioConfig ? { codec: audioConfig.mux } : null, fastStart: 'in-memory' });
       encoder = new VideoEncoder({ output(chunk, meta) { try { mux.addVideoChunk(chunk, meta); count++; } catch (e) { error = e; } }, error(e) { error = e; } });
       encoder.configure({ ...codec.cfg, latencyMode: 'quality' });
       const mode = J.normalizeLayerMode(project.layerMode);
@@ -218,19 +227,25 @@ J.exportSimpleVideo = async ({ plan, project, background = null, spectrum = null
         const frame = new VideoFrame(canvas, { timestamp: Math.round(i * 1e6 / fps), duration: Math.round((i + 1) * 1e6 / fps) - Math.round(i * 1e6 / fps) });
         try { encoder.encode(frame, { keyFrame: i % (fps * 2) === 0 }); } finally { frame.close(); }
         await drain(encoder, () => error, signal);
+        await mux.settle();
         if (i % 3 === 0) { onProgress?.((audioConfig ? 0.9 : 0.99) * (i + 1) / span.frames, `${i + 1} / ${span.frames}`); await tick(); }
       }
       await bounded(encoder.flush(), signal); if (error) throw error;
       if (count !== span.frames) throw new Error(tr('映像フレームが不足しています。', 'Encoded video frames are incomplete.'));
-      if (audioConfig) { audioPhase = true; await encodeSound(audio.buffer, mux, span, audioConfig, signal, onProgress); }
-      abort(signal); mux.finalize(); onProgress?.(1, tr('完了', 'Done'));
-      return { files: [{ name: 'simple_video.mp4', blob: new Blob([target.buffer], { type: 'video/mp4' }) }], ...span, audio: !!audioConfig };
+      if (audioConfig?.copy) {
+        audioPhase = true; onProgress?.(0.95, tr('音声をコピー中', 'Copying audio'));
+        const copied = await audioCopy.copyTo(mux, span.t0, span.duration, signal);
+        if (!copied && audio.buffer.duration > span.t0 + 0.5) throw new Error(tr('音声をコピーできませんでした。', 'Could not copy the audio.'));
+      } else if (audioConfig) { audioPhase = true; await encodeSound(audio.buffer, mux, span, audioConfig, signal, onProgress); }
+      abort(signal); const buffer = await mux.finalize(); done = true; audioCopy?.dispose(); onProgress?.(1, tr('完了', 'Done'));
+      return { files: [{ name: 'simple_video.mp4', blob: new Blob([buffer], { type: 'video/mp4' }) }], ...span, audio: audioConfig ? audioConfig.mux : null };
     } catch (e) {
-      if (signal?.aborted || e.name === 'AbortError') throw new DOMException('Cancelled', 'AbortError');
-      if (audioPhase) throw e;
+      if (signal?.aborted || e.name === 'AbortError') { audioCopy?.dispose(); throw new DOMException('Cancelled', 'AbortError'); }
+      if (audioPhase) { audioCopy?.dispose(); throw e; }
       errors.push(codec.label + ': ' + e.message);
-    } finally { try { encoder?.close(); } catch (_) {} await Promise.allSettled([reader?.close(), backgroundReader?.close()]); }
+    } finally { try { encoder?.close(); } catch (_) {} if (!done) await mux?.cancel(); await Promise.allSettled([reader?.close(), backgroundReader?.close()]); }
   }
+  audioCopy?.dispose();
   throw new Error(tr('簡易動画の出力に失敗しました。', 'Simple export failed. ') + errors.join(' / '));
 };
 })();

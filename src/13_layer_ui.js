@@ -76,7 +76,10 @@ let showingCueError = false;
 function status(text, error = false) {
   const draftError = [...cueDrafts.values()].find(d => d.error)?.error;
   const s = $('layerStatus'); s.textContent = draftError || text; s.classList.toggle('error', !!draftError || error);
+  // the right-hand「MP4書き出し」shows the messages of its own export (and of the cue error that blocks it)
+  if (rightSimple || draftError) document.querySelectorAll('.right-mp4-status').forEach(r => { r.textContent = draftError || text; r.classList.toggle('error', !!draftError || error); });
 }
+let rightSimple = false;
 function syncCueErrors() {
   const error = [...cueDrafts.values()].find(d => d.error)?.error;
   J.layerCueEditsInvalid = !!error;
@@ -112,7 +115,8 @@ async function loadMedia(key, file, videoOnly) {
   if (key === 'front') J.ui.project.spectrumMode = 'external';
   if (m.video) { m.el.addEventListener('seeked', dirty); m.el.addEventListener('loadeddata', dirty); }
   $('layerName-' + key).textContent = file.name;
-  if (key !== 'background') J.uiApi.replan();
+  if (key === 'background') setBackgroundAspect(m);
+  if (key !== 'background' || J.ui.project.aspect === 'bg') J.uiApi.replan();
   status(tr('読み込みました。素材はこの作業中だけ保持します。', 'Loaded. Media is kept for this editing session only.'));
   J.syncLayerUI(); dirty();
 }
@@ -177,9 +181,15 @@ function spectrumControls(panel) {
 }
 
 
+/* 画面比「背景に合わせる」: remember the background's size; the export/preview size follows it */
+function setBackgroundAspect(m) {
+  J.backgroundAspect = m && m.width > 0 && m.height > 0 ? [m.width, m.height] : null;
+  J.uiApi.syncOut?.();
+}
 function clearMedia(key) {
   session.generation[key] = (session.generation[key] || 0) + 1;
   session[key]?.dispose(); session[key] = null; $('layerName-' + key).textContent = tr('未選択', 'None');
+  if (key === 'background') { setBackgroundAspect(null); if (J.ui.project.aspect === 'bg') J.uiApi.replan(); }
   if (key !== 'background') {
     J.uiApi.replan();
     if (key === 'matte' && session.front) status(tr('マットを解除しました。RGB 000000だけを透明にします。', 'Matte removed. Only RGB 000000 is transparent.'));
@@ -189,6 +199,7 @@ function clearMedia(key) {
 let downloadUrls = [];
 function clearDownloads() {
   $('layerDownloads')?.replaceChildren();
+  document.querySelectorAll('.right-mp4-links').forEach(d => d.replaceChildren());
   downloadUrls.forEach(url => URL.revokeObjectURL(url)); downloadUrls = [];
 }
 // Called by the single project-reset transaction, including confirm() fallback.
@@ -214,6 +225,9 @@ function offerDownloads(files, title) {
     a.href = URL.createObjectURL(file.blob); downloadUrls.push(a.href);
     a.download = prefix + '_' + file.name; a.title = a.download;
     $('layerDownloads').append(a);
+    if (file.name === 'simple_video.mp4') document.querySelectorAll('.right-mp4-links').forEach(d => {
+      const b = el('a', tr('MP4を保存', 'Save MP4')); b.href = a.href; b.download = a.download; b.title = a.download; d.append(b);
+    });
     return a;
   });
   // Keep these links alive so each file can also be saved by an explicit user click.
@@ -241,6 +255,9 @@ async function exportVideo(simple, frontOnly = false) {
     const disabled = controls.map(e => e.disabled);
     controls.forEach(e => { e.disabled = true; }); $('layerCancel').disabled = false;
     $('layerCancel').hidden = false; $('layerProgress').hidden = false;
+    rightSimple = simple;
+    document.querySelectorAll('.right-mp4-cancel').forEach(b => { b.disabled = !simple; b.hidden = !simple; });
+    document.querySelectorAll('.right-mp4-progress').forEach(p => { p.value = 0; p.hidden = !simple; });
     clearDownloads();
     status(tr('フォントを準備中…', 'Preparing fonts…'));
     try {
@@ -249,7 +266,7 @@ async function exportVideo(simple, frontOnly = false) {
       const missing = J.missingUserFonts(J.fontsOfPlan(plan));
       if (missing.length) throw new Error(tr('旧フォントファイルの指定を、PCにインストール済みの書体または標準書体に変更してください: ', 'Replace legacy file-font selections with installed PC fonts or built-in fonts: ') + missing.join(', '));
       const args = { plan, project, spectrum, range, signal: ac.signal,
-        onProgress(p, m) { $('layerProgress').value = p; status((simple ? tr('簡易動画を生成中 ', 'Encoding simple video ') : frontOnly ? tr('フロント動画を生成中 ', 'Encoding front video ') : tr('ペア動画を生成中 ', 'Encoding pair ')) + m); } };
+        onProgress(p, m) { $('layerProgress').value = p; if (simple) document.querySelectorAll('.right-mp4-progress').forEach(r => { r.value = p; }); status((simple ? tr('簡易動画を生成中 ', 'Encoding simple video ') : frontOnly ? tr('フロント動画を生成中 ', 'Encoding front video ') : tr('ペア動画を生成中 ', 'Encoding pair ')) + m); } };
       const pair = simple ? await J.exportSimpleVideo({ ...args, background: session.background, audio: J.ui.audio }) : frontOnly ? await J.exportLayerFront(args) : await J.exportLayerPair(args);
       if (ac.signal.aborted) throw new DOMException('Cancelled', 'AbortError');
       offerDownloads(pair.files, project.title);
@@ -257,6 +274,7 @@ async function exportVideo(simple, frontOnly = false) {
     } finally {
       controls.forEach((e, i) => { e.disabled = disabled[i]; });
       J.ui.exporting = null; session.busy = false; $('layerCancel').hidden = true; dirty(); J.syncLayerUI();
+      document.querySelectorAll('.right-mp4-cancel').forEach(b => { b.hidden = true; });
     }
   } catch (e) { status(e.name === 'AbortError' ? tr('出力を中止しました。', 'Export cancelled.') : e.message, e.name !== 'AbortError'); }
 }
@@ -298,9 +316,35 @@ function syncSimpleExportUI() {
     + (settings.includeAudio && J.ui.audio?.buffer ? tr(' 音源あり。', ' Audio included.') : tr(' 音声なし。', ' No audio.'))
     + (!settings.title.enabled ? tr(' タイトルなし。', ' No title.') : settings.title.all ? tr(' タイトル：全編。', ' Title: whole video.') : tr(` タイトル：${settings.title.start}〜${settings.title.end}秒。`, ` Title: ${settings.title.start}–${settings.title.end}s.`))
     + (settings.title.enabled && !J.simpleTitleWindow(settings.title, span) ? tr(' タイトル区間は出力範囲外です。', ' Title is outside the export range.') : '');
+  document.querySelectorAll('.right-mp4-go').forEach(b => { b.disabled = !!reason; });
+  document.querySelectorAll('.right-mp4-info').forEach(p => { p.textContent = help.textContent; p.classList.toggle('error', !!reason); });
   if ($('simpleSettingsInfo')) { $('simpleSettingsInfo').textContent = help.textContent; $('simpleSettingsInfo').classList.toggle('error', !!reason); }
 }
 J.syncSimpleExportUI = syncSimpleExportUI;
+/* 右側の「MP4書き出し」: the simple video export (background + spectrum + subtitles + audio),
+   at the bottom of the かんたん panel and of the 詳細 → 書き出し tab. Same export and settings as the left panel. */
+function mountRightExport() {
+  const places = [document.getElementById('easyPanel'), document.querySelector('.tabpane[data-pane="out"]')];
+  for (const place of places) {
+    if (!place) continue;
+    const box = el('div', null, place.id === 'easyPanel' ? 'right-mp4 easy-sec' : 'right-mp4');
+    box.append(el('h3', tr('MP4書き出し', 'MP4 export'), 'right-mp4-head'));
+    const go = el('button', tr('MP4書き出し', 'Export MP4'), 'primary right-mp4-go'); go.type = 'button';
+    go.addEventListener('click', () => exportVideo(true));
+    const settings = el('button', tr('MP4書き出し設定', 'MP4 export settings'), 'right-mp4-settings'); settings.type = 'button';
+    settings.addEventListener('click', () => $('simpleSettingsOpen')?.click());
+    const info = el('p', null, 'note right-mp4-info');
+    const progress = el('progress', null, 'right-mp4-progress'); progress.max = 1; progress.value = 0; progress.hidden = true;
+    const cancel = el('button', tr('出力を中止', 'Cancel export'), 'ghost small right-mp4-cancel'); cancel.type = 'button'; cancel.hidden = true;
+    cancel.addEventListener('click', () => J.ui.exporting?.abort());
+    const statusLine = el('p', null, 'note right-mp4-status'); statusLine.setAttribute('role', 'status');
+    const about = el('p', tr('画像・動画背景＋スペアナ＋字幕を1本のMP4にします。背景動画は0秒から再生し、終了後は最終フレームを保持。背景の音声は使わず、読み込んだ音源だけを使用します。',
+      'Exports an image/video background, spectrum and subtitles as one MP4. Background video starts at zero and holds its final frame. Only separately loaded audio is used, not the background soundtrack.'), 'note right-mp4-about');
+    const links = el('div', null, 'right-mp4-links');
+    box.append(go, settings, info, progress, cancel, statusLine, links, about);
+    place.append(box);
+  }
+}
 function simpleExportControls(panel) {
   panel.append(button('simpleExport', tr('簡易動画MP4を出力', 'Export simple video MP4'), () => exportVideo(true)));
   const controls = el('div', null, 'simple-export-controls');
@@ -319,8 +363,9 @@ function simpleExportControls(panel) {
   audio.append(check, document.createTextNode(tr('音源を含めない', 'Exclude audio')));
   controls.append(label, audio); J.mountSimpleSettings(panel, controls);
   const help = el('p', null, 'note'); help.id = 'simpleExportInfo'; help.setAttribute('role', 'status'); panel.append(help);
-  panel.append(el('p', tr('画像・動画背景＋スペアナ＋字幕を1本のMP4にします。背景動画は0秒から再生し、終了後は最終フレームを保持。背景の音声は使わず、読み込んだ音源だけを使用します。',
-    'Exports an image/video background, spectrum and subtitles as one MP4. Background video starts at zero and holds its final frame. Only separately loaded audio is used, not the background soundtrack.'), 'note'));
+  // JIZURA改: the left button / settings button / info are replaced by the right-hand「MP4書き出し」.
+  // They stay in the page (hidden) because the export and settings code is keyed to their ids.
+  for (const e of [panel.querySelector('#simpleExport'), panel.querySelector('#simpleSettingsOpen'), help]) if (e) { e.hidden = true; e.style.display = 'none'; }
 }
 function cueTable() {
   const root = $('layerCues'), cues = J.ui.project.subtitleCues;
@@ -601,6 +646,7 @@ function boot() {
   const downloads = el('div'); downloads.id = 'layerDownloads';
   panel.append(progress, cancel, output, downloads);
   simpleExportControls(panel);
+  mountRightExport();
   const left = document.querySelector('.col-left');
   left.prepend(panel);
   $('lineList').closest('.sec').classList.add('layer-cut-list');

@@ -1430,7 +1430,7 @@ const previewLive = new Set();
 let previewObs = null, previewRaf = 0, previewLast = 0;
 function previewCacheKey(g, k) {
   const p = S.project;
-  return [p.style, p.aspect, g, k, p.colors && p.colors.enabled ? JSON.stringify(p.colors) : '', JSON.stringify(p.fonts || {})].join('|');
+  return [p.style, p.aspect === 'bg' ? 'bg' + J.backgroundAspect : p.aspect, g, k, p.colors && p.colors.enabled ? JSON.stringify(p.colors) : '', JSON.stringify(p.fonts || {})].join('|');
 }
 function getPreviewPlan(g, k) {
   const id = previewCacheKey(g, k);
@@ -2005,6 +2005,7 @@ async function loadAudioFile(f) {
     pause();
     const a = await J.analyzeAudio(f);
     if (my !== audioSeq) return false;
+    a.file = f;                               // kept so MP4 export can copy its AAC as is
     pause(); AP.load(f, a.buffer); S.audio = a;
     $('audioName').textContent = `${f.name}（${J.fmtTime(S.audio.duration)}・約${S.audio.bpm}BPM）`;
     S.project.audioName = f.name;
@@ -2107,7 +2108,7 @@ function boot() {
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
 J.ui = S;
 // Shared editor hooks used by the layer interface
-J.uiApi = { toast, replan, syncUI, syncOmakaseThemes, pause, seek, flushSave, loadAudioFile, restartPreview, exportRange, exportRangeLines, pushEdit, edGo,
+J.uiApi = { toast, replan, syncUI, syncOut, syncOmakaseThemes, pause, seek, flushSave, loadAudioFile, restartPreview, exportRange, exportRangeLines, pushEdit, edGo,
   audioLike, cueRerollTarget,
   applyMotionProject(project, index, resume) {
     if (S.exporting) return;

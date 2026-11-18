@@ -1057,7 +1057,17 @@ J.previewPlan = (project, group, key) => {
   };
 };
 
+/* 'bg': the aspect of the loaded background image / video (J.backgroundAspect = [w, h]; 16:9 until one is loaded).
+   The short side follows the presets: 1080 for frames at least 4:3 wide (or tall), 1440 for squarer ones. */
+J.backgroundAspect = null;
 J.designSize = (aspect) => {
+  if (aspect === 'bg') {
+    const a = J.backgroundAspect;
+    if (!a || !(a[0] > 0) || !(a[1] > 0)) return [1920, 1080];
+    const r = Math.min(4, Math.max(0.25, a[0] / a[1])), long = Math.max(r, 1 / r);
+    const short = long >= 4 / 3 - 0.01 ? 1080 : 1440;
+    return r >= 1 ? [Math.round(short * r / 2) * 2, short] : [short, Math.round(short / r / 2) * 2];
+  }
   if (aspect === '9:16') return [1080, 1920];
   if (aspect === '1:1') return [1440, 1440];
   if (aspect === '4:5') return [1440, 1800];

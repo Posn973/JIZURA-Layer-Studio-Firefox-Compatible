@@ -34,7 +34,7 @@ J.syncSimpleTitleUI = changed => {
 J.mountSimpleSettings = (panel, outputControls) => {
   const open = el('button', tr('簡易動画設定…', 'Simple video settings…')); open.id = 'simpleSettingsOpen'; open.type = 'button'; panel.append(open);
   dialog = el('dialog', null, 'simple-settings-dialog'); dialog.id = 'simpleSettingsDlg'; dialog.setAttribute('aria-labelledby', 'simpleSettingsHeading');
-  const head = el('h2', tr('簡易動画設定', 'Simple video settings')); head.id = 'simpleSettingsHeading';
+  const head = el('h2', tr('MP4書き出し設定（簡易動画）', 'MP4 export settings (simple video)')); head.id = 'simpleSettingsHeading';
   dialog.append(head, el('p', tr('変更はその場で反映・保存されます。タイトルは背景付きプレビューと簡易MP4にだけ表示します。', 'Changes apply and save immediately. Titles appear only in background-composite previews and simple MP4 exports.'), 'note'));
   const layout = el('div', null, 'simple-settings-layout'), controls = el('div', null, 'simple-settings-fields');
   controls.append(outputControls);

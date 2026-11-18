@@ -1,4 +1,19 @@
-# JIZURA Layer Studio
+# JIZURA Layer Studio Firefox Compatible
+
+**[公開アプリを開く](https://posn973.github.io/JIZURA-Layer-Studio-Firefox-Compatible/)** · [English](https://posn973.github.io/JIZURA-Layer-Studio-Firefox-Compatible/en/)
+
+[JIZURA Layer Studio（cityedge fork）](https://github.com/cityedge/jizura_layer_studio) をPosn973が改変した版です。主な変更点：
+
+- **Firefoxで MP4 を書き出せる**：MP4の書き込みを mp4-muxer から Mediabunny に変更し、Bフレームを使うH.264エンコーダー（Firefox）に対応。Firefoxのエンコーダーが渡す壊れた設定情報（avcC）も自動で修復し、Windowsのサムネイル・標準プレーヤーで扱える形で保存します。
+- **AAC音声をそのままコピー**：読み込んだ曲がAAC（.m4a など）なら再エンコードせずにMP4へ入れます（無劣化。AACエンコーダーのないFirefoxでもAAC）。それ以外はAAC → Opus の順でエンコード。
+- **画面比「背景に合わせる」**：作業用背景（画像・動画）の縦横比で書き出し（例：3:2の背景 → 1620×1080）。
+- **右側に「MP4書き出し」「MP4書き出し設定」**：かんたんパネルの一番下、詳細の「書き出し」タブの一番下に配置（左パネルの簡易動画出力ボタンは削除）。
+
+詳しくは [CHANGELOG.md](CHANGELOG.md) を参照してください。原版の作者（hakoniwa氏）・cityedge氏は本版の開発・保守を担当していません。ライセンスはMITです（[LICENSE](LICENSE)）。
+
+---
+
+以下は元の JIZURA Layer Studio（cityedge fork）の説明です。
 
 **字幕レイヤー制作ツール · cityedge fork · v1.5.2**
 

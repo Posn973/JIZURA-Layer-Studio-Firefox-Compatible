@@ -1,3 +1,13 @@
+# JIZURA Layer Studio Firefox Compatible
+
+**[Open the app](https://posn973.github.io/JIZURA-Layer-Studio-Firefox-Compatible/en/)** · [日本語](https://posn973.github.io/JIZURA-Layer-Studio-Firefox-Compatible/)
+
+A modified version of [JIZURA Layer Studio (cityedge fork)](https://github.com/cityedge/jizura_layer_studio) by Posn973: MP4 export works in Firefox (Mediabunny muxer with B-frame support and avcC repair), AAC audio from the music file is copied without re-encoding, a "Match background" aspect ratio, and an orange "MP4 export" button on the right panel. See [CHANGELOG.md](CHANGELOG.md). MIT License.
+
+---
+
+The original README of JIZURA Layer Studio (cityedge fork) follows.
+
 # JIZURA Layer Studio
 **Animated subtitle layers · cityedge fork · v1.5.2**
 

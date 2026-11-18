@@ -423,9 +423,8 @@ J.exportLayerPair = async ({ plan, project, spectrum = null, range = null, signa
     try {
       if (spectrum) reader = await J.createSpectrumReader(spectrum, w, h, t0, fps, total, signal, project.layerMode);
       for (const name of frontOnly ? ['front'] : ['front', 'matte']) {
-        const target = new Mp4Muxer.ArrayBufferTarget();
-        const mux = new Mp4Muxer.Muxer({ target, video: { codec: codec.mux, width: w, height: h, frameRate: fps }, fastStart: 'in-memory', firstTimestampBehavior: 'offset' });
-        const state = { name, target, mux, error: null, count: 0 };
+        const mux = new J.Mp4Writer({ video: { codec: codec.mux, width: w, height: h, frameRate: fps }, fastStart: 'in-memory' });
+        const state = { name, mux, error: null, count: 0 };
         state.encoder = new VideoEncoder({ output(chunk, meta) { try { mux.addVideoChunk(chunk, meta); state.count++; } catch (e) { state.error = e; } }, error(e) { state.error = e; } });
         writers.push(state); state.encoder.configure(Object.assign({}, codec.cfg, { latencyMode: 'quality' }));
       }
@@ -448,6 +447,7 @@ J.exportLayerPair = async ({ plan, project, spectrum = null, range = null, signa
           if (performance.now() > deadline) throw new Error('Encoder timeout');
           await new Promise(r => setTimeout(r, 5));
         }
+        for (const s of writers) await s.mux.settle();
         if (i % 3 === 0) { onProgress?.(i / total, (i + 1) + ' / ' + total); await new Promise(r => setTimeout(r, 0)); }
       }
       for (const s of writers) {
@@ -455,11 +455,11 @@ J.exportLayerPair = async ({ plan, project, spectrum = null, range = null, signa
         clearTimeout(s.flushTimer); abort(signal);
         if (s.error) throw s.error;
         if (s.count !== total) throw new Error('Incomplete video frames');
-        s.mux.finalize();
+        s.buffer = await s.mux.finalize();
       }
       const files = writers.map(s => ({
         name: (spectrum ? 'combined_front' : 'subtitle_front') + (mode === 'alpha' ? '_alpha' : '') + (s.name === 'matte' ? '_matte_dark' : '') + '.mp4',
-        blob: new Blob([s.target.buffer], { type: 'video/mp4' }),
+        blob: new Blob([s.buffer], { type: 'video/mp4' }),
       }));
       const manifest = { format: frontOnly ? 'jizura-layer-front-v1' : mode === 'alpha' ? 'jizura-premultiplied-layer-pair-v1' : 'jizura-binary-layer-pair-v1', layerMode: mode, layerBackgroundOpacity: render.backgroundOpacity, width: w, height: h, fps, frames: total, timelineStart: t0, duration: total / fps,
         exteriorBloom: 'removed', matte: frontOnly ? null : mode === 'alpha' ? 'alpha=1-matte/255; white=transparent, black=opaque; do not threshold' : 'white=transparent, black=opaque; threshold decoded luminance at 128', front: mode === 'alpha' ? 'premultiplied RGB; composite=front+background*(matte/255); no audio' : 'RGB on black, no audio', composite: 'subtitle over spectrum', spectrumLayout: spectrum ? J.normalizeSpectrumLayout(project.spectrumLayout) : null };
@@ -469,7 +469,7 @@ J.exportLayerPair = async ({ plan, project, spectrum = null, range = null, signa
       if (signal?.aborted || e.name === 'AbortError') throw e;
       errors.push(codec.label + ': ' + e.message);
     } finally {
-      for (const s of writers) { clearTimeout(s.flushTimer); try { s.encoder.close(); } catch (_) {} }
+      for (const s of writers) { clearTimeout(s.flushTimer); try { s.encoder.close(); } catch (_) {} if (!s.buffer) await s.mux.cancel(); }
       await reader?.close();
     }
   }
