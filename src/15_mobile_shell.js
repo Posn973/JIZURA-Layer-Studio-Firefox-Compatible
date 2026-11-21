@@ -53,8 +53,7 @@ function ensureAlpha() {
   sel.value = 'alpha';
   sel.dispatchEvent(new Event('change', { bubbles: true }));   // 既存の処理で保存・表示を更新
 }
-try { view = localStorage.getItem('jizura.mview') || 'omakase'; } catch (e) {}
-if (!VIEWS.some(v => v[0] === view)) view = 'omakase';
+view = 'lyrics';   // 起動したときはいつも「1 歌詞」から
 
 function el(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
 // 移動した部品は、元の位置に目印を残して戻せるようにする
@@ -80,7 +79,8 @@ function build() {
     b.addEventListener('click', () => show(key, true));
     (key === 'omakase' || key === 'pro' ? rowA : rowB).append(b);
   }
-  nav.append(rowA, rowB);
+  const omkNote = el('p', 'm-omk-note', tr('歌詞と曲を入れると「おまかせ」が使えます', 'Add lyrics and a song to use "Auto"')); omkNote.id = 'mOmkNote';
+  nav.append(rowA, rowB, omkNote);
   const stage = el('div', 'm-stage');
   const views = {};
   for (const [key] of VIEWS) { views[key] = el('div', 'm-view'); views[key].dataset.mview = key; }
@@ -276,7 +276,8 @@ async function loadLyricFile(file) {
   let text = decodeText(await file.arrayBuffer()).replace(/^﻿/, '').replace(/\r\n?/g, '\n');
   if (/\.lrc$/i.test(file.name)) text = cleanLrc(text);
   text = text.replace(/\n+$/, '');
-  if (J.uiApi.loadLyrics(text)) toast(tr('「' + file.name + '」を読み込みました（「元に戻す」で戻せます）', 'Loaded "' + file.name + '" (Undo to revert)'));
+  if (J.uiApi.loadLyrics(text)) setTimeout(syncOmakase, 300);
+  if (J.ui && !J.ui.exporting) toast(tr('「' + file.name + '」を読み込みました（「元に戻す」で戻せます）', 'Loaded "' + file.name + '" (Undo to revert)'));
 }
 
 // 3 同期を開いたときの再生位置: 3 同期で最後に止めた位置から動いていなければそのまま、
@@ -304,6 +305,7 @@ function show(key, user) {
   if (mt && st && document.activeElement !== mt) mt.value = st.value;   // プロジェクトを開いた後などの最新の名前を出す
   shell.querySelector('.m-stage').hidden = !STAGE_VIEWS.has(key);
   syncNoSong();
+  syncOmakase();
   measure();
   if (user) { window.scrollTo({ top: 0 }); window.dispatchEvent(new Event('resize')); }
   updateRail();
@@ -317,6 +319,23 @@ function measure() {
   shell.style.setProperty('--m-stage', stage.hidden ? '0px' : stage.offsetHeight + 'px');
 }
 
+// 「おまかせ」は歌詞と曲がそろってから押せる。一度押せるようになったら、この作業中はそのまま
+// （プロジェクトを開いた・初期化したときは、もう一度そろうまで押せない）
+let omkUnlocked = false;
+function syncOmakase() {
+  if (!omkUnlocked && window.J && J.ui && J.ui.project) {
+    const p = J.ui.project;
+    const lyrics = Array.isArray(p.subtitleCues) ? p.subtitleCues.some(c => (c.text || '').trim()) : !!(p.lyrics || '').trim();
+    if (lyrics && J.ui.audio) omkUnlocked = true;
+  }
+  if (!shell) return;
+  const b = shell.querySelector('.m-nav-btn[data-mview="omakase"]');
+  if (b) b.disabled = !omkUnlocked;
+  const n = $('mOmkNote'); if (n) n.hidden = omkUnlocked;
+  if (!omkUnlocked && view === 'omakase') show('lyrics');
+  measure();
+}
+function lockOmakase() { omkUnlocked = false; setTimeout(syncOmakase, 300); }
 function syncNoSong() {
   const n = $('mNoSong'); if (!n) return;
   const name = $('audioName');
@@ -386,9 +405,12 @@ function boot() {
   sync();
   // 曲の読み込み状態は表示の文字が変わるので、それを見て注意書きを出し入れする
   // プロジェクトを開いたら、3 同期は頭から
-  const fp = $('fileProject'); if (fp) fp.addEventListener('change', () => { syncLeftT = null; });
+  const fp = $('fileProject'); if (fp) fp.addEventListener('change', () => { syncLeftT = null; lockOmakase(); });
+  // 初期化したら「おまかせ」はもう一度そろうまで押せない
+  const rd = $('resetDlg'); if (rd) rd.addEventListener('close', () => { if (rd.returnValue === 'reset') lockOmakase(); });
+  const ly = $('lyrics'); if (ly) ly.addEventListener('input', () => setTimeout(syncOmakase, 400));
   const name = $('audioName');
-  if (name) new MutationObserver(syncNoSong).observe(name, { childList: true, characterData: true, subtree: true });
+  if (name) new MutationObserver(() => { syncNoSong(); syncOmakase(); }).observe(name, { childList: true, characterData: true, subtree: true });
   window.addEventListener('load', () => { measure(); updateRail(); });
 }
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();

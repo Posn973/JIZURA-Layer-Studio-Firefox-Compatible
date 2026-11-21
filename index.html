@@ -13,6 +13,10 @@
 <meta property="og:title" content="JIZURA Layer Studio — cityedge fork">
 <meta property="og:description" content="字幕フロントと二値・グレーマットを2本のMP4に。SRT・作業用背景・スペアナ合成に対応したJIZURAの非公式派生版。">
 <meta name="twitter:card" content="summary">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#131316">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <style>
@@ -794,6 +798,39 @@ dialog.motion-library { box-sizing: border-box; width: min(980px, calc(100vw - 2
 /* 4 書き出し */
 #app.m-shelled .m-view[data-mview="out"] .easy-sec { border: 0; padding: 0; }
 
+/* ================= スマホ・タブレットの画面上部（16_touch_header.js）================= */
+.th-btns, .th-panel { display: none; }
+.upd-box { display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.upd-version { font-size: 11px; }
+#app.touch-ui #btnMenu, #app.touch-ui .upd-pc { display: none !important; }
+/* スマホ画面では「かんたん / 詳細」を出さない。タブレット画面では出す（「スマホ」は右のボタンで切り替える） */
+#app.touch-ui.is-mobile .modes, #app.touch-ui #modeMobile { display: none !important; }
+#app.touch-ui:not(.is-mobile) .modes button { min-height: 40px; padding: 6px 16px; }
+#app.touch-ui .th-btns { display: flex; gap: 8px; margin-left: auto; }
+#app.touch-ui .th-btn { min-height: 40px; padding: 6px 14px; font-weight: 700; }
+#app.touch-ui .th-tablet, #app.touch-ui .th-phone { border-color: var(--cyan); color: var(--cyan); background: transparent; }
+#app.touch-ui .th-settings[aria-expanded="true"] { background: var(--raised2); border-color: var(--amber); color: var(--amber); }
+#app.touch-ui.is-mobile .th-phone, #app.touch-ui:not(.is-mobile) .th-tablet, #app.phone-device .th-tablet { display: none; }
+#app.touch-ui.th-open .th-panel { display: flex; flex-direction: column; gap: 10px; flex: 1 1 100%; order: 10; padding: 12px; border: 1px solid var(--line2); border-radius: var(--r); background: var(--raised); }
+.th-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.th-label { font-size: 13px; color: var(--muted); min-width: 3em; }
+#app.touch-ui .th-panel .lang-switch { display: inline-flex !important; }
+#app.touch-ui .th-panel button { min-height: 40px; }
+#app.touch-ui .th-panel .upd-check { border-color: #9acd32; color: #9acd32; }
+
+/* 更新のお知らせ（16b_updater.js） */
+.upd-banner { position: fixed; left: 50%; top: 10px; transform: translateX(-50%); z-index: 1000; width: min(92vw, 560px); display: flex; flex-wrap: wrap; gap: 8px 10px; align-items: center;
+  padding: 12px 14px; background: var(--raised2); border: 1px solid #9acd32; border-radius: 6px; box-shadow: 0 10px 30px rgba(0,0,0,0.6); }
+.upd-banner[hidden] { display: none; }
+.upd-banner .upd-text { flex: 1 1 100%; font-size: 14px; }
+.upd-banner button { min-height: 40px; }
+.upd-banner .upd-now { background: #9acd32; color: #142000; border-color: #9acd32; font-weight: 700; }
+
+/* 「おまかせ」は歌詞と曲がそろうまで押せない（15_mobile_shell.js） */
+.m-nav-a .m-nav-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+.m-omk-note { margin: 0; font-size: 12px; color: var(--muted); text-align: center; }
+.m-omk-note[hidden] { display: none; }
+
 </style>
 </head>
 <body>
@@ -808,7 +845,7 @@ dialog.motion-library { box-sizing: border-box; width: min(980px, calc(100vw - 2
 </div>
 <div id="app">
   <header class="bar">
-    <div class="brand"><span class="mark" aria-hidden="true">字面</span><span class="word">JIZURA Layer Studio</span><span class="tag">Firefox Compatible</span><span class="ver">v1.5.2-fc.3</span></div>
+    <div class="brand"><span class="mark" aria-hidden="true">字面</span><span class="word">JIZURA Layer Studio</span><span class="tag">Firefox Compatible</span><span class="ver">v1.5.2-fc.4</span></div>
     <div class="proj">
       <input id="songTitle" type="text" placeholder="曲名（タイトルカード・HUDに表示）" aria-label="曲名">
       <input id="songArtist" type="text" placeholder="アーティスト" aria-label="アーティスト">
@@ -1091,7 +1128,7 @@ dialog.motion-library { box-sizing: border-box; width: min(980px, calc(100vw - 2
 <dialog id="termsDlg" class="terms publication-dialog" aria-labelledby="termsTitle">
   <form method="dialog">
     <h2 id="termsTitle" tabindex="-1">利用について</h2>
-    <div class="terms-main"><p class="terms-big">JIZURA Layer Studio</p><p>Firefox Compatible (Posn973) · cityedge fork · v1.5.2-fc.3</p></div>
+    <div class="terms-main"><p class="terms-big">JIZURA Layer Studio</p><p>Firefox Compatible (Posn973) · cityedge fork · v1.5.2-fc.4</p></div>
     <p>本アプリは、hakoniwa氏の「JIZURA」を基に、cityedgeが字幕レイヤー制作向けに改変した非公式派生版です。さらにPosn973が、Firefoxでの書き出し対応・AAC音声のそのままコピー・背景に合わせた画面比などを加えた版（Firefox Compatible）です。原版の作者・cityedgeが本版の開発・保守を担当するものではありません。</p>
     <p><a href="https://github.com/852wa/JIZURA" target="_blank" rel="noopener">原版 JIZURA — hakoniwa</a></p>
     <p>出力動画を利用するために、本アプリのMITライセンス表示を動画へ付ける必要はありません。歌詞・音楽・画像・動画・フォントなど、使用する素材の権利と利用条件は個別に確認してください。</p>
@@ -1575,7 +1612,7 @@ Exhibit B - &quot;Incompatible With Secondary Licenses&quot; Notice
   <form method="dialog">
     <h2 id="guideTitle" tabindex="-1">JIZURA Layer Studio 利用ガイド</h2>
     <p>字幕の演出を作り、背景・音源付きの動画、または編集ソフトで重ねるフロント／マット動画として保存できます。</p>
-    <p><a class="full-manual" href="user_guide.md" target="_blank" rel="noopener">v1.5.2-fc.3 詳細ユーザーマニュアル（Markdown）</a>には、各設定・合成手順・保存データを詳しく掲載しています。</p>
+    <p><a class="full-manual" href="user_guide.md" target="_blank" rel="noopener">v1.5.2-fc.4 詳細ユーザーマニュアル（Markdown）</a>には、各設定・合成手順・保存データを詳しく掲載しています。</p>
     <h3>まず1本作る</h3>
     <ol class="guide-steps">
       <li><strong>字幕と素材を読み込む</strong><p>「SRTを読み込む」でUTF-8のSRTを選び、音源と背景画像・背景動画を読み込みます。SRTなしで字幕を直接入力することもできます。保存済みプロジェクトを再開する場合はJSONを開き、素材だけを読み直してください。SRTを読み直すと、復元した字幕・フィラー・個別演出を置き換えます。</p></li>
@@ -1643,7 +1680,7 @@ Exhibit B - &quot;Incompatible With Secondary Licenses&quot; Notice
     <p><strong>「プロジェクト初期化」</strong>は現在の字幕・フィラー・区切り・演出・ロック・素材の読み込み・スペアナ・透明度・出力・タイトル設定・再生位置・履歴を初期状態へ戻します。出力の一時保存リンクも消え、自動保存は初期状態に置き換わります。確認後はUndoできません。</p>
     <p><strong>共通ライブラリは削除しません。</strong>ユーザーテーマなど曲をまたいで使うデータと、画面の言語・表示モード・プレビュー音量は保持します。PC上の素材、保存済みJSON、出力動画も削除しません。共通データの削除はそれぞれの管理画面で行います。</p>
     <p>「利用について」は右ペイン最下部にあります。権利・ライセンス・素材の取り扱いを確認できます。</p>
-    <div class="terms-foot"><span class="muted">cityedge fork · v1.5.2-fc.3</span><button value="close" class="primary" autofocus>閉じる</button></div>
+    <div class="terms-foot"><span class="muted">cityedge fork · v1.5.2-fc.4</span><button value="close" class="primary" autofocus>閉じる</button></div>
   </form>
 </dialog>
 
@@ -4687,7 +4724,7 @@ J.plan = (project, audio) => {
   const zoneOf = () => (zones ? Object.assign({}, zones[0]) : null);
   if (zones && en.bg) en.bg.bigChar = false;               // the one background that draws the lyric itself (big, centred)
   const plan = {
-    version: 1, generator: 'JIZURA', appVersion: '1.5.2-fc.3', title, artist, W, H, fps: project.fps || 30,
+    version: 1, generator: 'JIZURA', appVersion: '1.5.2-fc.4', title, artist, W, H, fps: project.fps || 30,
     duration: tm.duration, styleKey: project.style, style: st, fx, seed: project.seed,
     lines: [], cuts: [], events: [], beats: audio && audio.beats ? audio.beats.slice() : [],
     hud: fx.hud === 'on' ? true : fx.hud === 'off' ? false : !!st.hud,
@@ -41676,7 +41713,7 @@ function bind() {
   dlg.addEventListener('click', e => { if (e.target === dlg) dlg.close ? dlg.close() : dlg.removeAttribute('open'); });   // click on the backdrop
   // JIZURA改: PC の Chrome / Edge では「名前を付けて保存」画面（同名なら OS が上書きを確認）。ほかはこれまでどおりダウンロード
   $('btnSave').addEventListener('click', async () => {
-    const name = baseName() + '.jizura.json', data = JSON.stringify(Object.assign({}, S.project, { appVersion: '1.5.2-fc.3' }), null, 1);
+    const name = baseName() + '.jizura.json', data = JSON.stringify(Object.assign({}, S.project, { appVersion: '1.5.2-fc.4' }), null, 1);
     if (typeof window.showSaveFilePicker === 'function' && !(window.claude && typeof window.claude.use === 'function')) {
       try {
         const h = await window.showSaveFilePicker({ suggestedName: name, types: [{ description: 'JIZURA project', accept: { 'application/json': ['.json'] } }] });
@@ -41860,7 +41897,8 @@ function boot() {
   bind(); initVolume(); initPreviewSpeed(); initOmakaseThemes(); initMotionPitchInputs(); syncUI(); syncLoopBtn(); replan();
   warnLegacyFonts();
   // first visit on a phone: スマホ mode
-  let mode = window.matchMedia && window.matchMedia('(max-width: 760px)').matches ? 'mobile' : 'pro';
+  // JIZURA改: タブレットなどのタッチ操作の端末も、はじめはスマホ画面（「タブレット」を選べば次からはタブレット画面）
+  let mode = window.matchMedia && window.matchMedia('(max-width: 760px), (pointer: coarse)').matches ? 'mobile' : 'pro';
   try { mode = localStorage.getItem('jizura.mode') || mode; } catch (e) {}
   setMode(mode); commit();
   bindTour();
@@ -43562,8 +43600,7 @@ function ensureAlpha() {
   sel.value = 'alpha';
   sel.dispatchEvent(new Event('change', { bubbles: true }));   // 既存の処理で保存・表示を更新
 }
-try { view = localStorage.getItem('jizura.mview') || 'omakase'; } catch (e) {}
-if (!VIEWS.some(v => v[0] === view)) view = 'omakase';
+view = 'lyrics';   // 起動したときはいつも「1 歌詞」から
 
 function el(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
 // 移動した部品は、元の位置に目印を残して戻せるようにする
@@ -43589,7 +43626,8 @@ function build() {
     b.addEventListener('click', () => show(key, true));
     (key === 'omakase' || key === 'pro' ? rowA : rowB).append(b);
   }
-  nav.append(rowA, rowB);
+  const omkNote = el('p', 'm-omk-note', tr('歌詞と曲を入れると「おまかせ」が使えます', 'Add lyrics and a song to use "Auto"')); omkNote.id = 'mOmkNote';
+  nav.append(rowA, rowB, omkNote);
   const stage = el('div', 'm-stage');
   const views = {};
   for (const [key] of VIEWS) { views[key] = el('div', 'm-view'); views[key].dataset.mview = key; }
@@ -43785,7 +43823,8 @@ async function loadLyricFile(file) {
   let text = decodeText(await file.arrayBuffer()).replace(/^﻿/, '').replace(/\r\n?/g, '\n');
   if (/\.lrc$/i.test(file.name)) text = cleanLrc(text);
   text = text.replace(/\n+$/, '');
-  if (J.uiApi.loadLyrics(text)) toast(tr('「' + file.name + '」を読み込みました（「元に戻す」で戻せます）', 'Loaded "' + file.name + '" (Undo to revert)'));
+  if (J.uiApi.loadLyrics(text)) setTimeout(syncOmakase, 300);
+  if (J.ui && !J.ui.exporting) toast(tr('「' + file.name + '」を読み込みました（「元に戻す」で戻せます）', 'Loaded "' + file.name + '" (Undo to revert)'));
 }
 
 // 3 同期を開いたときの再生位置: 3 同期で最後に止めた位置から動いていなければそのまま、
@@ -43813,6 +43852,7 @@ function show(key, user) {
   if (mt && st && document.activeElement !== mt) mt.value = st.value;   // プロジェクトを開いた後などの最新の名前を出す
   shell.querySelector('.m-stage').hidden = !STAGE_VIEWS.has(key);
   syncNoSong();
+  syncOmakase();
   measure();
   if (user) { window.scrollTo({ top: 0 }); window.dispatchEvent(new Event('resize')); }
   updateRail();
@@ -43826,6 +43866,23 @@ function measure() {
   shell.style.setProperty('--m-stage', stage.hidden ? '0px' : stage.offsetHeight + 'px');
 }
 
+// 「おまかせ」は歌詞と曲がそろってから押せる。一度押せるようになったら、この作業中はそのまま
+// （プロジェクトを開いた・初期化したときは、もう一度そろうまで押せない）
+let omkUnlocked = false;
+function syncOmakase() {
+  if (!omkUnlocked && window.J && J.ui && J.ui.project) {
+    const p = J.ui.project;
+    const lyrics = Array.isArray(p.subtitleCues) ? p.subtitleCues.some(c => (c.text || '').trim()) : !!(p.lyrics || '').trim();
+    if (lyrics && J.ui.audio) omkUnlocked = true;
+  }
+  if (!shell) return;
+  const b = shell.querySelector('.m-nav-btn[data-mview="omakase"]');
+  if (b) b.disabled = !omkUnlocked;
+  const n = $('mOmkNote'); if (n) n.hidden = omkUnlocked;
+  if (!omkUnlocked && view === 'omakase') show('lyrics');
+  measure();
+}
+function lockOmakase() { omkUnlocked = false; setTimeout(syncOmakase, 300); }
 function syncNoSong() {
   const n = $('mNoSong'); if (!n) return;
   const name = $('audioName');
@@ -43895,12 +43952,325 @@ function boot() {
   sync();
   // 曲の読み込み状態は表示の文字が変わるので、それを見て注意書きを出し入れする
   // プロジェクトを開いたら、3 同期は頭から
-  const fp = $('fileProject'); if (fp) fp.addEventListener('change', () => { syncLeftT = null; });
+  const fp = $('fileProject'); if (fp) fp.addEventListener('change', () => { syncLeftT = null; lockOmakase(); });
+  // 初期化したら「おまかせ」はもう一度そろうまで押せない
+  const rd = $('resetDlg'); if (rd) rd.addEventListener('close', () => { if (rd.returnValue === 'reset') lockOmakase(); });
+  const ly = $('lyrics'); if (ly) ly.addEventListener('input', () => setTimeout(syncOmakase, 400));
   const name = $('audioName');
-  if (name) new MutationObserver(syncNoSong).observe(name, { childList: true, characterData: true, subtree: true });
+  if (name) new MutationObserver(() => { syncNoSong(); syncOmakase(); }).observe(name, { childList: true, characterData: true, subtree: true });
   window.addEventListener('load', () => { measure(); updateRail(); });
 }
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
+})();
+
+/* ============================================================
+   JIZURA改 — スマホ・タブレットの画面上部
+   スマホ画面:     [タブレット] [設定]
+   タブレット画面: [かんたん | 詳細] [スマホ] [設定]（PC と同じ3列の画面。はじめは「かんたん」）
+   設定: 言語 / プロジェクト初期化 / 利用ガイド / 更新の確認（版）
+   PC（マウス操作の大きい画面）は今のまま。更新の確認だけ利用ガイドの隣に置く。
+   ============================================================ */
+(() => {
+'use strict';
+const $ = id => document.getElementById(id);
+const tr = (ja, en) => (window.J && J.layerText ? J.layerText(ja, en) : ja);
+const touchQuery = window.matchMedia ? window.matchMedia('(pointer: coarse), (max-width: 900px)') : null;
+// スマホかタブレットかは画面の短い方の辺で見分ける（スマホは約 360〜430、タブレットは 600 以上）
+const isPhoneDevice = () => Math.min(screen.width || 9999, screen.height || 9999) < 600;
+function el(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+
+// 更新の確認ボタンと版の表示（16b_updater.js が中身を動かす）
+function updateControls() {
+  const box = el('span', 'upd-box');
+  const btn = el('button', 'ghost upd-check', tr('更新の確認', 'Check for updates')); btn.type = 'button';
+  const ver = el('span', 'upd-version muted mono');
+  box.append(btn, ver);
+  return box;
+}
+
+let built = false;
+const places = [];   // { node, mark（PC の場所）, target（設定の中） }
+function placeItems(touch) { for (const p of places) (touch ? p.target : p.mark.parentNode).insertBefore(p.node, touch ? null : p.mark); }
+function build() {
+  if (built) return; built = true;
+  const app = $('app'), bar = document.querySelector('.bar');
+  if (!app || !bar) return;
+  // スマホ / タブレットの切り替えと設定
+  const btns = el('div', 'th-btns');
+  const toTablet = el('button', 'th-btn th-tablet', tr('タブレット', 'Tablet')); toTablet.type = 'button';
+  const toPhone = el('button', 'th-btn th-phone', tr('スマホ', 'Phone')); toPhone.type = 'button';
+  const settings = el('button', 'th-btn th-settings', tr('設定', 'Settings')); settings.type = 'button';
+  settings.setAttribute('aria-expanded', 'false');
+  toTablet.addEventListener('click', () => { closePanel(); $('modeEasy') && $('modeEasy').click(); window.scrollTo({ top: 0 }); });   // タブレットは「かんたん」から
+  toPhone.addEventListener('click', () => { closePanel(); $('modeMobile') && $('modeMobile').click(); window.scrollTo({ top: 0 }); });
+  settings.addEventListener('click', () => {
+    const on = !app.classList.contains('th-open');
+    app.classList.toggle('th-open', on); settings.setAttribute('aria-expanded', String(on));
+  });
+  btns.append(toTablet, toPhone, settings);
+  bar.append(btns);
+  // 設定の中身（言語・初期化・利用ガイドは、PC 用の場所に目印を残して移す）
+  const panel = el('div', 'th-panel'); panel.id = 'thSettings';
+  const langRow = el('div', 'th-row th-lang'); langRow.append(el('span', 'th-label', tr('言語', 'Language')));
+  const row2 = el('div', 'th-row th-actions');
+  const row3 = el('div', 'th-row'); row3.append(updateControls());
+  panel.append(langRow, row2, row3);
+  bar.append(panel);
+  for (const [node, target] of [[bar.querySelector('.lang-switch'), langRow], [$('btnReset'), row2], [$('btnGuide'), row2]]) {
+    if (!node) continue;
+    const mark = document.createComment('th'); node.before(mark);
+    places.push({ node, mark, target });
+  }
+  // 設定の外を押したら閉じる
+  document.addEventListener('click', e => {
+    if (!app.classList.contains('th-open')) return;
+    if (e.target.closest('.th-panel, .th-settings')) return;
+    closePanel();
+  });
+}
+function closePanel() { const a = $('app'); if (a) a.classList.remove('th-open'); const s = document.querySelector('.th-settings'); if (s) s.setAttribute('aria-expanded', 'false'); }
+
+// PC: 更新の確認を利用ガイドの隣へ
+let pcBuilt = false;
+function buildPC() {
+  if (pcBuilt) return; pcBuilt = true;
+  const guide = $('btnGuide'), acts = document.querySelector('.bar .acts');
+  const box = updateControls(); box.classList.add('upd-pc');
+  if (guide && guide.parentNode === acts) guide.after(box); else if (acts) acts.append(box);
+}
+
+// タブレット画面: 端末の幅が 1280 より狭いときは、ページを幅 1280 として描いて画面に縮小して収める
+// （PC の3列の表示は幅 1181 以上が条件のため。横向きで使う前提）
+const VIEWPORT_DEFAULT = 'width=device-width, initial-scale=1, viewport-fit=cover';
+const TABLET_WIDTH = 1280;
+function fitTablet() {
+  const app = $('app'), meta = document.querySelector('meta[name="viewport"]');
+  if (!app || !meta) return;
+  const tablet = app.classList.contains('touch-ui') && !app.classList.contains('is-mobile');
+  const deviceW = Math.min(screen.width || 0, screen.height || 0) && Math.max(screen.width, screen.height) ? (window.matchMedia('(orientation: portrait)').matches ? Math.min(screen.width, screen.height) : Math.max(screen.width, screen.height)) : window.innerWidth;
+  const want = tablet && !isPhoneDevice() && deviceW < TABLET_WIDTH ? 'width=' + TABLET_WIDTH + ', viewport-fit=cover' : VIEWPORT_DEFAULT;
+  if (meta.getAttribute('content') !== want) meta.setAttribute('content', want);
+}
+function apply() {
+  const app = $('app'); if (!app) return;
+  const touch = !!(touchQuery && touchQuery.matches);
+  app.classList.toggle('touch-ui', touch);
+  const phone = touch && isPhoneDevice();
+  app.classList.toggle('phone-device', phone);   // スマホでは「タブレット」ボタンを出さない
+  if (touch) build();
+  // スマホがタブレット画面のまま保存されていたら、スマホ画面に戻す（小さすぎて戻れなくなるのを防ぐ）
+  if (phone && !app.classList.contains('is-mobile')) $('modeMobile') && $('modeMobile').click();
+  buildPC();
+  placeItems(touch);
+  if (!touch) closePanel();
+  if (window.JUpdater) JUpdater.refreshUI();
+}
+function boot() {
+  apply();
+  fitTablet();
+  new MutationObserver(fitTablet).observe($('app'), { attributes: true, attributeFilter: ['class'] });
+  window.addEventListener('orientationchange', () => setTimeout(fitTablet, 300));
+  if (touchQuery && touchQuery.addEventListener) touchQuery.addEventListener('change', apply);
+}
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
+})();
+
+/* ============================================================
+   JIZURA改 — この端末への保存と更新の確認（VideoEditing と同じ方式）
+   ・アプリのファイルは端末の中（Cache Storage）に保存し、開くときはそこから読む（sw.js）。
+     ネットがなくても起動できる。書体（Google Fonts）も一度使ったものは保存する。
+   ・更新の確認では version.json（ファイルごとの SHA-256 の一覧）だけを読む。
+       自動：アプリを開くたびに 1 回（起動を遅くしないよう 2〜5 秒たってから裏で）。ネットがなければ何も出さない。
+       手動：「更新の確認」。続けて押したときのために 1 分だけ間をあける。
+   ・新しい版があれば「今すぐ更新 / 後で更新」。今すぐ更新は、変わったファイルだけを読み、
+     ハッシュが合うことを確かめてから入れ替えて開き直す。1 つでも合わなければ何も入れ替えない。
+   ============================================================ */
+(() => {
+'use strict';
+const CACHE = 'jizura-fc-app';            // sw.js と同じ名前（同じサイトの VideoEditing と分ける）
+const MANIFEST_KEY = '__manifest__';
+const COOL_DOWN = 60 * 1000;
+const LS_LAST = 'jizura.update.lastCheck', LS_PENDING = 'jizura.update.pending', LS_RESULT = 'jizura.update.lastResult';
+const tr = (ja, en) => (window.J && J.layerText ? J.layerText(ja, en) : ja);
+// 英語版は en/ の中にあるので、アプリの一番上は 1 つ上
+const root = new URL(document.documentElement.lang === 'en' ? '../' : './', location.href).href;
+const supported = 'serviceWorker' in navigator && 'caches' in self && self.isSecureContext && location.protocol !== 'file:';
+let current = null, busy = false;
+
+const lsGet = k => { try { return localStorage.getItem(k); } catch (e) { return null; } };
+const lsSet = (k, v) => { try { v == null ? localStorage.removeItem(k) : localStorage.setItem(k, v); } catch (e) {} };
+const toast = m => (window.J && J.uiApi && J.uiApi.toast ? J.uiApi.toast(m) : alert(m));
+const fmtClock = ms => { const d = new Date(ms); return d.getHours() + ':' + String(d.getMinutes()).padStart(2, '0'); };
+
+async function sha256Hex(buf) {
+  const h = await crypto.subtle.digest('SHA-256', buf);
+  return [...new Uint8Array(h)].map(b => b.toString(16).padStart(2, '0')).join('');
+}
+async function readCurrent() {
+  try { const c = await caches.open(CACHE); const r = await c.match(root + MANIFEST_KEY); current = r ? JSON.parse(await r.text()) : null; }
+  catch (e) { current = null; }
+  return current;
+}
+async function fetchManifest() {
+  const r = await fetch(root + 'version.json');            // 印は付けない（配信の拠点の写しで答えてもらう）
+  if (!r.ok) throw new Error('HTTP ' + r.status);
+  const text = await r.text();
+  return { text, man: JSON.parse(text) };
+}
+const sameVersion = (a, b) => a && b && JSON.stringify(a.files) === JSON.stringify(b.files);
+
+function refreshUI() {
+  const v = current ? current.version : null;
+  document.querySelectorAll('.upd-version').forEach(n => {
+    n.textContent = !supported ? tr('（直接開いているため更新の仕組みは使いません）', '(opened directly: updates unavailable)')
+      : v ? tr('版 ', 'Build ') + v : tr('（この端末への保存の準備中）', '(saving to this device…)');
+  });
+  const last = +(lsGet(LS_LAST) || 0);
+  document.querySelectorAll('.upd-check').forEach(b => {
+    b.title = !supported ? tr('GitHub のページから開いたときに使えます', 'Available when opened from the GitHub page')
+      : tr('新しい版があるか確かめます', 'Check for a newer version') + (last ? tr('（前の確認：', ' (last: ') + fmtClock(last) + tr('）', ')') : '');
+  });
+}
+
+// ---- お知らせ（今すぐ更新 / 後で更新） ----
+let banner = null;
+function ensureBanner() {
+  if (banner) return banner;
+  banner = document.createElement('div'); banner.className = 'upd-banner'; banner.hidden = true; banner.setAttribute('role', 'status');
+  banner.innerHTML = '<span class="upd-text"></span><button type="button" class="upd-now"></button><button type="button" class="ghost upd-later"></button>';
+  banner.querySelector('.upd-now').textContent = tr('今すぐ更新', 'Update now');
+  banner.querySelector('.upd-later').textContent = tr('後で更新', 'Later');
+  banner.querySelector('.upd-now').addEventListener('click', updateNow);
+  banner.querySelector('.upd-later').addEventListener('click', () => { if (!busy) { banner.hidden = true; banner.querySelector('.upd-later').textContent = tr('後で更新', 'Later'); } });
+  document.body.append(banner);
+  return banner;
+}
+function showBanner(version) {
+  const b = ensureBanner();
+  b.querySelector('.upd-text').textContent = tr('新しい版があります（版 ', 'A new version is available (build ') + version + tr('）', ')');
+  b.querySelector('.upd-now').disabled = b.querySelector('.upd-later').disabled = false;
+  b.hidden = false;
+}
+function hideBanner() { if (banner) banner.hidden = true; }
+
+async function check(manual) {
+  if (!supported) { if (manual) toast(tr('GitHub のページから開いたときに使えます', 'Available when opened from the GitHub page')); return; }
+  if (busy) return;
+  const now = Date.now(), last = +(lsGet(LS_LAST) || 0);
+  if (manual && now - last < COOL_DOWN) {
+    const r = lsGet(LS_RESULT);
+    if (r && r !== 'latest' && current && r !== current.version) showBanner(r);
+    else toast(tr('最新版です', 'You have the latest version'));
+    return;
+  }
+  busy = true;
+  try {
+    if (!current) await readCurrent();
+    const { man } = await fetchManifest();
+    lsSet(LS_LAST, String(Date.now()));
+    if (!current) { if (manual) toast(tr('準備中です。少し待ってから開き直してください', 'Still saving. Reopen in a moment')); return; }
+    if (sameVersion(man, current)) {
+      lsSet(LS_PENDING, null); lsSet(LS_RESULT, 'latest'); hideBanner();
+      if (manual) toast(tr('最新版です', 'You have the latest version'));
+      return;
+    }
+    lsSet(LS_PENDING, man.version); lsSet(LS_RESULT, man.version);
+    showBanner(man.version);
+  } catch (e) {
+    if (manual) toast(tr('確認できませんでした（インターネットにつながっていません）', 'Could not check (offline)'));
+    else console.warn('更新の確認に失敗しました:', e);
+  } finally { busy = false; refreshUI(); }
+}
+
+async function downloadChanged(man, old, cache, onProgress) {
+  const todo = [];
+  for (const path of Object.keys(man.files)) {
+    if (old.files[path] === man.files[path] && await cache.match(root + path)) continue;   // 変わっていないファイルは読まない
+    todo.push(path);
+  }
+  const got = []; let done = 0, next = 0;
+  const worker = async () => {
+    while (next < todo.length) {
+      const path = todo[next++], hash = man.files[path];
+      const r = await fetch(root + path + '?h=' + hash.slice(0, 12), { cache: 'no-store' });
+      if (!r.ok) throw new Error(path + tr(' を読めませんでした（HTTP ', ' could not be read (HTTP ') + r.status + ')');
+      const buf = await r.arrayBuffer();
+      if (await sha256Hex(buf) !== hash) throw new Error(path + tr(' の中身が版の情報と合いません（配信の切り替わり中かもしれません）', ' does not match the version info (the site may still be updating)'));
+      got.push([path, buf, r.headers.get('Content-Type') || '']);
+      if (onProgress) onProgress(++done, todo.length);
+    }
+  };
+  await Promise.all([worker(), worker(), worker()]);
+  return got;
+}
+async function commit(cache, got, man, text, old) {
+  for (const [path, buf, type] of got) await cache.put(root + path, new Response(buf, { headers: { 'Content-Type': type } }));
+  for (const path of Object.keys(old.files)) if (!(path in man.files)) await cache.delete(root + path);
+  await cache.put(root + MANIFEST_KEY, new Response(text, { headers: { 'Content-Type': 'application/json' } }));   // 版の情報はいちばん最後
+}
+async function installMissing() {
+  if (busy || current) return;
+  busy = true;
+  try {
+    const { text, man } = await fetchManifest();
+    const cache = await caches.open(CACHE);
+    const got = await downloadChanged(man, { files: {} }, cache);
+    await commit(cache, got, man, text, { files: {} });
+    await readCurrent();
+    if (!lsGet(LS_LAST)) lsSet(LS_LAST, String(Date.now()));
+  } catch (e) { console.warn('この端末への保存に失敗しました（次に開いたときにもう一度試します）:', e); }
+  finally { busy = false; refreshUI(); }
+}
+
+async function updateNow() {
+  if (busy) return;
+  if (window.J && J.ui && (J.ui.exporting || J.ui.tap)) { alert(tr('書き出し中・タップ同期中は更新できません。終わってから「今すぐ更新」を押してください。', 'Cannot update while exporting or tap syncing. Press "Update now" afterwards.')); return; }
+  const b = ensureBanner(), txt = b.querySelector('.upd-text');
+  busy = true;
+  b.querySelector('.upd-now').disabled = b.querySelector('.upd-later').disabled = true;
+  try {
+    if (window.J && J.uiApi && J.uiApi.flushSave) J.uiApi.flushSave();       // 作業中のプロジェクトはブラウザに保存してから
+    txt.textContent = tr('新しい版を読み込んでいます…', 'Downloading the new version…');
+    const { text, man } = await fetchManifest();
+    const cache = await caches.open(CACHE);
+    const old = current || { files: {} };
+    const got = await downloadChanged(man, old, cache, (n, all) => { txt.textContent = tr('新しい版を読み込んでいます…（', 'Downloading the new version… (') + n + ' / ' + all + tr('）', ')'); });
+    await commit(cache, got, man, text, old);
+    lsSet(LS_PENDING, null); lsSet(LS_RESULT, 'latest'); lsSet(LS_LAST, String(Date.now()));
+    txt.textContent = tr('版 ', 'Updated to build ') + man.version + tr(' に更新しました。開き直します…', '. Reloading…');
+    setTimeout(() => location.reload(), 600);
+  } catch (e) {
+    txt.textContent = tr('更新できませんでした。今の版のまま使えます。時間をおいてもう一度お試しください。（', 'Update failed. You can keep using this version; try again later. (') + e.message + tr('）', ')');
+    b.querySelector('.upd-later').disabled = false;
+    b.querySelector('.upd-later').textContent = tr('閉じる', 'Close');
+    busy = false;
+  }
+}
+
+async function init() {
+  document.addEventListener('click', e => { const b = e.target.closest('.upd-check'); if (b) { e.preventDefault(); check(true); } });
+  refreshUI();
+  if (!supported) return;
+  try { await navigator.serviceWorker.register(root + 'sw.js', { scope: root, updateViaCache: 'all' }); }
+  catch (e) { console.warn('サービスワーカーを登録できませんでした:', e); }
+  await readCurrent();
+  if (!current) {
+    // はじめて開いたとき：sw.js が保存し終わるのを待つ。15 秒たっても終わらなければページの側で保存し直す
+    navigator.serviceWorker.ready.then(async () => {
+      for (let k = 0; k < 15 && !current; k++) { await new Promise(r => setTimeout(r, 1000)); await readCurrent(); }
+      if (!current && navigator.onLine !== false) await installMissing();
+      if (current && !lsGet(LS_LAST)) lsSet(LS_LAST, String(Date.now()));   // 保存したばかりなので、すぐには確認しない
+      refreshUI();
+    });
+  }
+  refreshUI();
+  const pending = lsGet(LS_PENDING);
+  if (pending && current && pending !== current.version) showBanner(pending);   // 「後で更新」にした版をもう一度お知らせ
+  else if (pending && current && pending === current.version) lsSet(LS_PENDING, null);
+  if (current && navigator.onLine !== false) setTimeout(() => check(false), 2000 + Math.random() * 3000);
+}
+window.JUpdater = { check, refreshUI, get supported() { return supported; }, get version() { return current && current.version; } };
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
 })();
 
 </script>

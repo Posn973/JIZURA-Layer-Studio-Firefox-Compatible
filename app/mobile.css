@@ -118,3 +118,36 @@
 
 /* 4 書き出し */
 #app.m-shelled .m-view[data-mview="out"] .easy-sec { border: 0; padding: 0; }
+
+/* ================= スマホ・タブレットの画面上部（16_touch_header.js）================= */
+.th-btns, .th-panel { display: none; }
+.upd-box { display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.upd-version { font-size: 11px; }
+#app.touch-ui #btnMenu, #app.touch-ui .upd-pc { display: none !important; }
+/* スマホ画面では「かんたん / 詳細」を出さない。タブレット画面では出す（「スマホ」は右のボタンで切り替える） */
+#app.touch-ui.is-mobile .modes, #app.touch-ui #modeMobile { display: none !important; }
+#app.touch-ui:not(.is-mobile) .modes button { min-height: 40px; padding: 6px 16px; }
+#app.touch-ui .th-btns { display: flex; gap: 8px; margin-left: auto; }
+#app.touch-ui .th-btn { min-height: 40px; padding: 6px 14px; font-weight: 700; }
+#app.touch-ui .th-tablet, #app.touch-ui .th-phone { border-color: var(--cyan); color: var(--cyan); background: transparent; }
+#app.touch-ui .th-settings[aria-expanded="true"] { background: var(--raised2); border-color: var(--amber); color: var(--amber); }
+#app.touch-ui.is-mobile .th-phone, #app.touch-ui:not(.is-mobile) .th-tablet, #app.phone-device .th-tablet { display: none; }
+#app.touch-ui.th-open .th-panel { display: flex; flex-direction: column; gap: 10px; flex: 1 1 100%; order: 10; padding: 12px; border: 1px solid var(--line2); border-radius: var(--r); background: var(--raised); }
+.th-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.th-label { font-size: 13px; color: var(--muted); min-width: 3em; }
+#app.touch-ui .th-panel .lang-switch { display: inline-flex !important; }
+#app.touch-ui .th-panel button { min-height: 40px; }
+#app.touch-ui .th-panel .upd-check { border-color: #9acd32; color: #9acd32; }
+
+/* 更新のお知らせ（16b_updater.js） */
+.upd-banner { position: fixed; left: 50%; top: 10px; transform: translateX(-50%); z-index: 1000; width: min(92vw, 560px); display: flex; flex-wrap: wrap; gap: 8px 10px; align-items: center;
+  padding: 12px 14px; background: var(--raised2); border: 1px solid #9acd32; border-radius: 6px; box-shadow: 0 10px 30px rgba(0,0,0,0.6); }
+.upd-banner[hidden] { display: none; }
+.upd-banner .upd-text { flex: 1 1 100%; font-size: 14px; }
+.upd-banner button { min-height: 40px; }
+.upd-banner .upd-now { background: #9acd32; color: #142000; border-color: #9acd32; font-weight: 700; }
+
+/* 「おまかせ」は歌詞と曲がそろうまで押せない（15_mobile_shell.js） */
+.m-nav-a .m-nav-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+.m-omk-note { margin: 0; font-size: 12px; color: var(--muted); text-align: center; }
+.m-omk-note[hidden] { display: none; }

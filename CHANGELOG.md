@@ -1,3 +1,12 @@
+## 1.5.2-fc.4 — 2026-11-21（Firefox Compatible）
+
+- この端末への保存と更新の確認（PWA）：はじめて開いたときにアプリ（日本語版・英語版）を端末に保存し、ネットがなくても起動できるように。一度表示した書体（Google Fonts）も保存。開くたびに 1 回、version.json（ファイルごとの SHA-256）だけで新しい版を確認し、「今すぐ更新 / 後で更新」を表示。手動の「更新の確認」は 1 分あければ再確認。ハッシュが合わないファイルは入れ替えない。ホーム画面に追加できるアイコンとマニフェストを追加。version.json は build.py が自動で作る。
+- スマホ画面の上部を「タブレット」「設定」に。設定には言語・プロジェクト初期化・利用ガイド・更新の確認（版）。
+- タブレット画面を追加：PC と同じ3列で、上部は「かんたん / 詳細」「スマホ」「設定」。幅が 1280 より狭いタブレットは全体を縮小して3列で表示。はじめは「かんたん」、一度選べば次からタブレット画面で開く。スマホ（画面の短い辺が 600 未満）では「タブレット」を出さない。
+- タッチ操作の端末は、はじめはスマホ画面で開く。PC は上部の利用ガイドの隣に「更新の確認」を追加。
+- スマホ：起動時は「1 歌詞」から。「おまかせ」は歌詞と曲がそろうまで押せない（一度押せるようになったら作業中はそのまま。プロジェクトを開いた・初期化したときは判定し直す）。
+- Add offline install and update check (service worker, hashed version.json, font caching, update banner), phone header with Tablet / Settings, a three-column tablet screen (Simple / Advanced) scaled to fit narrower tablets, phone/tablet detection by the screen's short side, start phones on the Lyrics tab, and enable Auto only after lyrics and a song are loaded.
+
 ## 1.5.2-fc.3 — 2026-11-21（Firefox Compatible）
 
 - スマホのタップ同期中は、TAP・終了する・回転・一覧のスクロール以外（タブ、メニュー、再生・一時停止、シークバー、リピート、各行のボタン）を押せないようにし、薄く表示。

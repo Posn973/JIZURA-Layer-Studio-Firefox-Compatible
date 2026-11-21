@@ -42,6 +42,7 @@ def build(lang):
         alternates = '\n'.join(f'<link rel="alternate" hreflang="{hl}" href="{escape(SITE_URL)}/{f + "/" if f else ""}">' for c, f, hl, _ in i18n.EDITIONS)
         site_meta = f'<link rel="canonical" href="{escape(canonical)}">\n<meta property="og:url" content="{escape(canonical)}">\n{alternates}'
     html_lang = dict((c, hl) for c, _, hl, _ in i18n.EDITIONS)[lang]
+    up = '../' if folder else ''   # JIZURA改: manifest / icons はアプリの一番上にある
     html = f'''<!doctype html>
 <html lang="{html_lang}">
 <head>
@@ -54,6 +55,10 @@ def build(lang):
 <meta property="og:title" content="{title}">
 <meta property="og:description" content="{description}">
 <meta name="twitter:card" content="summary">
+<link rel="manifest" href="{up}manifest.webmanifest">
+<meta name="theme-color" content="#131316">
+<link rel="icon" href="{up}icons/icon-192.png">
+<link rel="apple-touch-icon" href="{up}icons/icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <style>
@@ -74,10 +79,25 @@ def build(lang):
 '''
     target = (folder + '/' if folder else '') + 'index.html'
     os.makedirs(os.path.dirname(target) or '.', exist_ok=True)
-    open(target, 'w', encoding='utf-8').write(html)
+    open(target, 'w', encoding='utf-8', newline='\n').write(html)   # Windows で作っても改行は LF（version.json のハッシュを GitHub と合わせる）
     print(target, len(html), 'bytes')
 for code, _, _, _ in i18n.EDITIONS:
     build(code)
+
+# JIZURA改: この端末への保存と更新の確認に使う version.json（ファイルごとの SHA-256）
+import hashlib, json, datetime
+def write_version_json():
+    files = ['index.html'] + [f + '/index.html' for _, f, _, _ in i18n.EDITIONS if f] + ['manifest.webmanifest', 'icons/icon-192.png', 'icons/icon-512.png']
+    hashes = {f: hashlib.sha256(open(f, 'rb').read()).hexdigest() for f in files}
+    stamp = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9))).strftime('%Y.%m.%d-%H%M')
+    old = None
+    try: old = json.load(open('version.json', encoding='utf-8'))
+    except Exception: pass
+    if old and old.get('files') == hashes: return   # 中身が同じなら版も変えない
+    man = {'version': VERSION + ' (' + stamp + ')', 'files': hashes}
+    open('version.json', 'w', encoding='utf-8', newline='\n').write(json.dumps(man, ensure_ascii=False, indent=1) + '\n')
+    print('version.json', man['version'])
+write_version_json()
 if '--dev' in sys.argv:
     os.makedirs('dev/www', exist_ok=True)
     open('dev/www/jizura.js', 'w', encoding='utf-8').write(js)

@@ -2123,7 +2123,8 @@ function boot() {
   bind(); initVolume(); initPreviewSpeed(); initOmakaseThemes(); initMotionPitchInputs(); syncUI(); syncLoopBtn(); replan();
   warnLegacyFonts();
   // first visit on a phone: スマホ mode
-  let mode = window.matchMedia && window.matchMedia('(max-width: 760px)').matches ? 'mobile' : 'pro';
+  // JIZURA改: タブレットなどのタッチ操作の端末も、はじめはスマホ画面（「タブレット」を選べば次からはタブレット画面）
+  let mode = window.matchMedia && window.matchMedia('(max-width: 760px), (pointer: coarse)').matches ? 'mobile' : 'pro';
   try { mode = localStorage.getItem('jizura.mode') || mode; } catch (e) {}
   setMode(mode); commit();
   bindTour();
