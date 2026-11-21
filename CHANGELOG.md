@@ -1,3 +1,9 @@
+## 1.5.2-fc.3 — 2026-11-21（Firefox Compatible）
+
+- スマホのタップ同期中は、TAP・終了する・回転・一覧のスクロール以外（タブ、メニュー、再生・一時停止、シークバー、リピート、各行のボタン）を押せないようにし、薄く表示。
+- MP4を書き出せないブラウザ（Android版Firefoxなど、WebCodecs 非対応）では、開いたときに確認画面で知らせ、「4 書き出し」に注意書きを表示。MP4書き出し・マット＋フロントのボタンは押せないように。
+- Lock everything except TAP / Stop / rotate / list scrolling during tap sync on phones. In browsers without WebCodecs (e.g. Firefox for Android), show a notice on open and in the Export tab, and disable MP4 export buttons.
+
 ## 1.5.2-fc.2 — 2026-11-21（Firefox Compatible）
 
 - スマホ画面を作り直し：上段「おまかせ / 詳細」、下段「1 歌詞 / 2 素材 / 3 同期 / 4 書き出し」のタブ構成。プレビューと再生バーを上に固定。スマホモードのときだけ有効で、PC画面は変わりません。

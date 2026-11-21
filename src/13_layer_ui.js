@@ -85,7 +85,7 @@ function syncCueErrors() {
   J.layerCueEditsInvalid = !!error;
   if (error) status(error, true); else if (showingCueError) status('');
   showingCueError = !!error;
-  for (const id of ['layerExport', 'layerExportFront']) if ($(id)) $(id).disabled = session.busy || !!error || !!J.nativeSpectrumBlocked?.();
+  for (const id of ['layerExport', 'layerExportFront']) if ($(id)) $(id).disabled = session.busy || !!error || !!J.nativeSpectrumBlocked?.() || !J.canEncodeVideo();
   document.querySelectorAll('.cue-actions button[id^="cue-add-"]').forEach(b => { b.disabled = session.busy || !!error; });
   if ($('layerAddCue')) {
     const atZero = J.ui.project.subtitleCues?.some(c => c.start === 0);
@@ -95,6 +95,22 @@ function syncCueErrors() {
   for (const id of ['layerShiftBack', 'layerShiftForward']) if ($(id)) $(id).disabled = session.busy || !J.ui.project.subtitleCues?.length;
   J.syncFillerUI?.();
   syncSimpleExportUI();
+}
+// JIZURA改: 動画を作る機能（WebCodecs）がないブラウザ（Android版Firefoxなど）では書き出せない
+J.canEncodeVideo = () => typeof VideoEncoder !== 'undefined';
+function noEncoderText() {
+  return tr('このブラウザではMP4の書き出しができません。書き出すときは、AndroidならChrome、PCならChrome / Edge / Firefoxで開いてください。編集とプロジェクトファイルの保存は、このブラウザでもできます。',
+    'This browser cannot export MP4. To export, open the app in Chrome on Android, or Chrome / Edge / Firefox on a PC. Editing and saving the project file work here too.');
+}
+function noEncoderNotice() {
+  if (J.canEncodeVideo()) return;
+  const dlg = el('dialog', null, 'terms'); dlg.id = 'noEncoderNotice';
+  const form = el('form'); form.method = 'dialog';
+  const foot = el('div', null, 'terms-foot'); const ok = el('button', 'OK', 'primary'); ok.value = 'ok';
+  foot.append(el('span'), ok);
+  form.append(el('h2', tr('MP4の書き出しについて', 'About MP4 export')), el('p', noEncoderText()), foot);
+  dlg.append(form); document.body.append(dlg);
+  try { dlg.showModal(); } catch (e) { dlg.setAttribute('open', ''); }
 }
 function ratioLabel([w, h]) {
   const g = (a, b) => b ? g(b, a % b) : a, d = g(w, h), a = w / d, b = h / d;
@@ -335,6 +351,7 @@ function syncSimpleExportUI() {
   if (session.background?.simpleError) reason = session.background.simpleError;
   if (J.layerCueEditsInvalid) reason = tr('字幕の時刻エラーを修正してください。', 'Correct the subtitle timing error.');
   if (J.nativeSpectrumBlocked?.()) reason = tr('音源を読み込み、スペアナ解析の完了を待ってください。', 'Load audio and wait for spectrum analysis to finish.');
+  if (!J.canEncodeVideo()) reason = noEncoderText();
   $('simpleExport').disabled = !!reason;
   input.setAttribute('aria-invalid', String(simpleInvalidDraft));
   const help = $('simpleExportInfo'); help.classList.toggle('error', !!reason);
@@ -693,6 +710,7 @@ function boot() {
   const left = document.querySelector('.col-left');
   left.prepend(panel);
   swapSrtAndOpen();
+  setTimeout(noEncoderNotice, 800);   // 開いたときに1回だけ
   $('lineList').closest('.sec').classList.add('layer-cut-list');
   J.syncLayerUI(); dirty();
 }

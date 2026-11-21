@@ -747,6 +747,19 @@ dialog.motion-library { box-sizing: border-box; width: min(980px, calc(100vw - 2
 #app.m-shelled .m-view #syntax { display: block !important; margin-top: 4px; }
 #app.m-shelled .m-view #btnSyntax { color: var(--cyan); border-color: var(--cyan); }
 
+/* タップ同期中: TAP・終了する・回転・一覧のスクロール以外は押せない（薄く表示） */
+#app.m-shelled.m-tapping .bar,
+#app.m-shelled.m-tapping .m-nav,
+#app.m-shelled.m-tapping .m-stage .transport,
+#app.m-shelled.m-tapping .m-sync-top,
+#app.m-shelled.m-tapping #lineList { pointer-events: none; opacity: 0.4; }
+#app.m-shelled.m-tapping #lineList { opacity: 0.75; }
+
+/* 書き出せないブラウザの注意書き */
+.m-noenc { margin: 4px 0 0; padding: 10px 12px; border: 1px solid var(--danger); border-radius: var(--r); color: #ffb3bb; background: rgba(255,90,106,0.08); font-size: 13px; }
+
+.m-shell.m-noenc-on .right-mp4-info { display: none; }
+
 /* 4 書き出し: プロジェクトの保存 */
 .m-save-box { display: flex; flex-direction: column; gap: 8px; padding-bottom: 12px; border-bottom: 1px solid var(--line); }
 .m-title-lab { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: var(--muted); }
@@ -795,7 +808,7 @@ dialog.motion-library { box-sizing: border-box; width: min(980px, calc(100vw - 2
 </div>
 <div id="app">
   <header class="bar">
-    <div class="brand"><span class="mark" aria-hidden="true">字面</span><span class="word">JIZURA Layer Studio</span><span class="tag">Firefox Compatible</span><span class="ver">v1.5.2-fc.2</span></div>
+    <div class="brand"><span class="mark" aria-hidden="true">字面</span><span class="word">JIZURA Layer Studio</span><span class="tag">Firefox Compatible</span><span class="ver">v1.5.2-fc.3</span></div>
     <div class="proj">
       <input id="songTitle" type="text" placeholder="Song title (shown on title cards and HUD)" aria-label="Song title">
       <input id="songArtist" type="text" placeholder="Artist" aria-label="Artist">
@@ -1078,7 +1091,7 @@ dialog.motion-library { box-sizing: border-box; width: min(980px, calc(100vw - 2
 <dialog id="termsDlg" class="terms publication-dialog" aria-labelledby="termsTitle">
   <form method="dialog">
     <h2 id="termsTitle" tabindex="-1">About / rights</h2>
-    <div class="terms-main"><p class="terms-big">JIZURA Layer Studio</p><p>Firefox Compatible (Posn973) · cityedge fork · v1.5.2-fc.2</p></div>
+    <div class="terms-main"><p class="terms-big">JIZURA Layer Studio</p><p>Firefox Compatible (Posn973) · cityedge fork · v1.5.2-fc.3</p></div>
     <p>This is an unofficial derivative of JIZURA by hakoniwa, adapted by cityedge for subtitle layer production. Posn973 further modified it (Firefox Compatible: Firefox export, AAC audio copy, background-matched aspect ratio). Neither the original author nor cityedge maintains this edition.</p>
     <p><a href="https://github.com/852wa/JIZURA" target="_blank" rel="noopener">Original JIZURA — hakoniwa</a></p>
     <p>You do not need to place this app’s MIT license notice in exported videos. Check the rights and terms of the lyrics, music, images, videos, fonts and other material you use.</p>
@@ -1562,7 +1575,7 @@ Exhibit B - &quot;Incompatible With Secondary Licenses&quot; Notice
   <form method="dialog">
     <h2 id="guideTitle" tabindex="-1">JIZURA Layer Studio user guide</h2>
     <p>Create animated lyrics and export a finished video with background/audio, or front/matte layers for a video editor.</p>
-    <p><a class="full-manual" href="user_guide.en.md" target="_blank" rel="noopener">v1.5.2-fc.2 Full user manual (Markdown)</a> covers individual settings, compositing and saved data in detail.</p>
+    <p><a class="full-manual" href="user_guide.en.md" target="_blank" rel="noopener">v1.5.2-fc.3 Full user manual (Markdown)</a> covers individual settings, compositing and saved data in detail.</p>
     <h3>Make your first video</h3>
     <ol class="guide-steps">
       <li><strong>Load lyrics and media</strong><p>Import a UTF-8 SRT, audio and a preview background (image/video). You can also type lyrics without SRT. To resume a project, open its JSON and reload only the media. Reimporting SRT replaces restored cues, fillers and local effects.</p></li>
@@ -1630,7 +1643,7 @@ Exhibit B - &quot;Incompatible With Secondary Licenses&quot; Notice
     <p><strong>Reset project</strong> clears current lyrics, fillers, parts, effects, locks, loaded media, spectrum/opacity/export/title settings, playhead and histories. Temporary export links are removed and autosave becomes the blank project. This cannot be undone after confirmation.</p>
     <p><strong>Shared libraries are kept.</strong> User themes and other cross-project data, interface language, display mode and preview volume remain. Original media, saved JSON and exported files on your PC are not deleted. Delete shared items in their own management screens.</p>
     <p>About / rights is at the bottom of the right pane, with license and material-handling information.</p>
-    <div class="terms-foot"><span class="muted">cityedge fork · v1.5.2-fc.2</span><button value="close" class="primary" autofocus>Close</button></div>
+    <div class="terms-foot"><span class="muted">cityedge fork · v1.5.2-fc.3</span><button value="close" class="primary" autofocus>Close</button></div>
   </form>
 </dialog>
 
@@ -4674,7 +4687,7 @@ J.plan = (project, audio) => {
   const zoneOf = () => (zones ? Object.assign({}, zones[0]) : null);
   if (zones && en.bg) en.bg.bigChar = false;               // the one background that draws the lyric itself (big, centred)
   const plan = {
-    version: 1, generator: 'JIZURA', appVersion: '1.5.2-fc.2', title, artist, W, H, fps: project.fps || 30,
+    version: 1, generator: 'JIZURA', appVersion: '1.5.2-fc.3', title, artist, W, H, fps: project.fps || 30,
     duration: tm.duration, styleKey: project.style, style: st, fx, seed: project.seed,
     lines: [], cuts: [], events: [], beats: audio && audio.beats ? audio.beats.slice() : [],
     hud: fx.hud === 'on' ? true : fx.hud === 'off' ? false : !!st.hud,
@@ -41907,7 +41920,7 @@ function bind() {
   dlg.addEventListener('click', e => { if (e.target === dlg) dlg.close ? dlg.close() : dlg.removeAttribute('open'); });   // click on the backdrop
   // JIZURA改: PC の Chrome / Edge では「名前を付けて保存」画面（同名なら OS が上書きを確認). ほかはこれまでどおりダウンロード
   $('btnSave').addEventListener('click', async () => {
-    const name = baseName() + '.jizura.json', data = JSON.stringify(Object.assign({}, S.project, { appVersion: '1.5.2-fc.2' }), null, 1);
+    const name = baseName() + '.jizura.json', data = JSON.stringify(Object.assign({}, S.project, { appVersion: '1.5.2-fc.3' }), null, 1);
     if (typeof window.showSaveFilePicker === 'function' && !(window.claude && typeof window.claude.use === 'function')) {
       try {
         const h = await window.showSaveFilePicker({ suggestedName: name, types: [{ description: 'JIZURA project', accept: { 'application/json': ['.json'] } }] });
@@ -42207,7 +42220,7 @@ function syncCueErrors() {
   J.layerCueEditsInvalid = !!error;
   if (error) status(error, true); else if (showingCueError) status('');
   showingCueError = !!error;
-  for (const id of ['layerExport', 'layerExportFront']) if ($(id)) $(id).disabled = session.busy || !!error || !!J.nativeSpectrumBlocked?.();
+  for (const id of ['layerExport', 'layerExportFront']) if ($(id)) $(id).disabled = session.busy || !!error || !!J.nativeSpectrumBlocked?.() || !J.canEncodeVideo();
   document.querySelectorAll('.cue-actions button[id^="cue-add-"]').forEach(b => { b.disabled = session.busy || !!error; });
   if ($('layerAddCue')) {
     const atZero = J.ui.project.subtitleCues?.some(c => c.start === 0);
@@ -42217,6 +42230,22 @@ function syncCueErrors() {
   for (const id of ['layerShiftBack', 'layerShiftForward']) if ($(id)) $(id).disabled = session.busy || !J.ui.project.subtitleCues?.length;
   J.syncFillerUI?.();
   syncSimpleExportUI();
+}
+// JIZURA改: 動画を作る機能（WebCodecs）がないブラウザ（Android版Firefoxなど）では書き出せない
+J.canEncodeVideo = () => typeof VideoEncoder !== 'undefined';
+function noEncoderText() {
+  return tr('このブラウザではMP4の書き出しができません。書き出すときは、AndroidならChrome、PCならChrome / Edge / Firefoxで開いてください。編集とプロジェクトファイルの保存は、このブラウザでもできます。',
+    'This browser cannot export MP4. To export, open the app in Chrome on Android, or Chrome / Edge / Firefox on a PC. Editing and saving the project file work here too.');
+}
+function noEncoderNotice() {
+  if (J.canEncodeVideo()) return;
+  const dlg = el('dialog', null, 'terms'); dlg.id = 'noEncoderNotice';
+  const form = el('form'); form.method = 'dialog';
+  const foot = el('div', null, 'terms-foot'); const ok = el('button', 'OK', 'primary'); ok.value = 'ok';
+  foot.append(el('span'), ok);
+  form.append(el('h2', tr('MP4の書き出しについて', 'About MP4 export')), el('p', noEncoderText()), foot);
+  dlg.append(form); document.body.append(dlg);
+  try { dlg.showModal(); } catch (e) { dlg.setAttribute('open', ''); }
 }
 function ratioLabel([w, h]) {
   const g = (a, b) => b ? g(b, a % b) : a, d = g(w, h), a = w / d, b = h / d;
@@ -42457,6 +42486,7 @@ function syncSimpleExportUI() {
   if (session.background?.simpleError) reason = session.background.simpleError;
   if (J.layerCueEditsInvalid) reason = tr('字幕の時刻エラーを修正してください。', 'Correct the subtitle timing error.');
   if (J.nativeSpectrumBlocked?.()) reason = tr('音源を読み込み、スペアナ解析の完了を待ってください。', 'Load audio and wait for spectrum analysis to finish.');
+  if (!J.canEncodeVideo()) reason = noEncoderText();
   $('simpleExport').disabled = !!reason;
   input.setAttribute('aria-invalid', String(simpleInvalidDraft));
   const help = $('simpleExportInfo'); help.classList.toggle('error', !!reason);
@@ -42815,6 +42845,7 @@ function boot() {
   const left = document.querySelector('.col-left');
   left.prepend(panel);
   swapSrtAndOpen();
+  setTimeout(noEncoderNotice, 800);   // 開いたときに1回だけ
   $('lineList').closest('.sec').classList.add('layer-cut-list');
   J.syncLayerUI(); dirty();
 }
@@ -43735,7 +43766,7 @@ const VIEWS = [
 ];
 const STAGE_VIEWS = new Set(['omakase', 'pro', 'sync']);   // プレビューを上に出す画面
 let shell = null, moved = [], view = 'omakase', undoObs = null, alphaObs = null, labelRestore = [], created = [], repObs = null;
-let rotState = 0, rotObs = null;
+let rotState = 0, rotObs = null, tapObs = null;
 function portrait() { const p = window.J && J.ui && J.ui.plan; return !!(p && p.H > p.W); }
 // 回転中は、回したあとの見た目がプレビュー欄の幅いっぱいになるように canvas の大きさを決める
 function applyRotate() {
@@ -43931,6 +43962,11 @@ function build() {
 
   // 4 書き出し（最後にプロジェクトの保存。メニューの「保存」と同じ）
   move(easyOut, views.out);
+  if (window.J && J.canEncodeVideo && !J.canEncodeVideo()) {
+    const ne = el('p', 'm-noenc', tr('このブラウザではMP4の書き出しができません。書き出すときは、AndroidならChromeで開いてください。編集とプロジェクトファイルの保存は、このブラウザでもできます。', 'This browser cannot export MP4. Open the app in Chrome on Android to export. Editing and saving the project file work here too.'));
+    views.out.append(ne);
+    shell.classList.add('m-noenc-on');   // ボタンの下に出る同じ文面は隠す
+  }
   move(easyMp4, views.out);
   const saveBox = el('div', 'm-save-box');
   saveBox.append(el('h2', 'm-h', tr('プロジェクト', 'Project')));
@@ -43944,6 +43980,14 @@ function build() {
   save.addEventListener('click', () => $('btnSave') && $('btnSave').click());
   saveBox.append(titleLab, save, el('p', 'note m-note', tr('歌詞・タイミング・演出・書き出し設定を .jizura.json に保存します。曲と背景の画像・動画は含まれないので、開き直したら「2 素材」で読み込み直してください。', 'Saves lyrics, timing, look and export settings as .jizura.json. The song and background are not included; load them again in "2 Media" after reopening.')));
   views.out.prepend(saveBox);   // 書き出しの上に置く
+
+  // タップ同期中は TAP・終了する・回転・一覧のスクロール以外を押せなくする
+  const tapBtn = $('btnTap');
+  if (tapBtn) {
+    const syncLock = () => app.classList.toggle('m-tapping', tapBtn.getAttribute('aria-pressed') === 'true');
+    tapObs = new MutationObserver(syncLock); tapObs.observe(tapBtn, { attributes: true, attributeFilter: ['aria-pressed'] });
+    syncLock();
+  }
 
   // 上段の「おまかせ」ボタン（ヘッダー）はおまかせ画面の大きなボタンと重なるので隠す
   app.classList.add('m-shelled');
@@ -44076,6 +44120,8 @@ function teardown() {
   labelRestore.forEach(f => f()); labelRestore = [];
   if (repObs) { repObs.disconnect(); repObs = null; }
   if (rotObs) { rotObs.disconnect(); rotObs = null; }
+  if (tapObs) { tapObs.disconnect(); tapObs = null; }
+  $('app').classList.remove('m-tapping');
   if (rotState) { rotState = 0; const vp = $('viewport'), c = $('view'); if (vp) { vp.classList.remove('m-rotated'); vp.style.height = ''; } if (c) c.style.transform = ''; }
   created.forEach(n => n.remove()); created = [];
   shell.remove(); shell = null; railState = null;

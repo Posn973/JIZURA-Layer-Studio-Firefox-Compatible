@@ -13,7 +13,7 @@ const VIEWS = [
 ];
 const STAGE_VIEWS = new Set(['omakase', 'pro', 'sync']);   // プレビューを上に出す画面
 let shell = null, moved = [], view = 'omakase', undoObs = null, alphaObs = null, labelRestore = [], created = [], repObs = null;
-let rotState = 0, rotObs = null;
+let rotState = 0, rotObs = null, tapObs = null;
 function portrait() { const p = window.J && J.ui && J.ui.plan; return !!(p && p.H > p.W); }
 // 回転中は、回したあとの見た目がプレビュー欄の幅いっぱいになるように canvas の大きさを決める
 function applyRotate() {
@@ -209,6 +209,11 @@ function build() {
 
   // 4 書き出し（最後にプロジェクトの保存。メニューの「保存」と同じ）
   move(easyOut, views.out);
+  if (window.J && J.canEncodeVideo && !J.canEncodeVideo()) {
+    const ne = el('p', 'm-noenc', tr('このブラウザではMP4の書き出しができません。書き出すときは、AndroidならChromeで開いてください。編集とプロジェクトファイルの保存は、このブラウザでもできます。', 'This browser cannot export MP4. Open the app in Chrome on Android to export. Editing and saving the project file work here too.'));
+    views.out.append(ne);
+    shell.classList.add('m-noenc-on');   // ボタンの下に出る同じ文面は隠す
+  }
   move(easyMp4, views.out);
   const saveBox = el('div', 'm-save-box');
   saveBox.append(el('h2', 'm-h', tr('プロジェクト', 'Project')));
@@ -222,6 +227,14 @@ function build() {
   save.addEventListener('click', () => $('btnSave') && $('btnSave').click());
   saveBox.append(titleLab, save, el('p', 'note m-note', tr('歌詞・タイミング・演出・書き出し設定を .jizura.json に保存します。曲と背景の画像・動画は含まれないので、開き直したら「2 素材」で読み込み直してください。', 'Saves lyrics, timing, look and export settings as .jizura.json. The song and background are not included; load them again in "2 Media" after reopening.')));
   views.out.prepend(saveBox);   // 書き出しの上に置く
+
+  // タップ同期中は TAP・終了する・回転・一覧のスクロール以外を押せなくする
+  const tapBtn = $('btnTap');
+  if (tapBtn) {
+    const syncLock = () => app.classList.toggle('m-tapping', tapBtn.getAttribute('aria-pressed') === 'true');
+    tapObs = new MutationObserver(syncLock); tapObs.observe(tapBtn, { attributes: true, attributeFilter: ['aria-pressed'] });
+    syncLock();
+  }
 
   // 上段の「おまかせ」ボタン（ヘッダー）はおまかせ画面の大きなボタンと重なるので隠す
   app.classList.add('m-shelled');
@@ -354,6 +367,8 @@ function teardown() {
   labelRestore.forEach(f => f()); labelRestore = [];
   if (repObs) { repObs.disconnect(); repObs = null; }
   if (rotObs) { rotObs.disconnect(); rotObs = null; }
+  if (tapObs) { tapObs.disconnect(); tapObs = null; }
+  $('app').classList.remove('m-tapping');
   if (rotState) { rotState = 0; const vp = $('viewport'), c = $('view'); if (vp) { vp.classList.remove('m-rotated'); vp.style.height = ''; } if (c) c.style.transform = ''; }
   created.forEach(n => n.remove()); created = [];
   shell.remove(); shell = null; railState = null;

@@ -72,6 +72,19 @@
 #app.m-shelled .m-view #syntax { display: block !important; margin-top: 4px; }
 #app.m-shelled .m-view #btnSyntax { color: var(--cyan); border-color: var(--cyan); }
 
+/* タップ同期中: TAP・終了する・回転・一覧のスクロール以外は押せない（薄く表示） */
+#app.m-shelled.m-tapping .bar,
+#app.m-shelled.m-tapping .m-nav,
+#app.m-shelled.m-tapping .m-stage .transport,
+#app.m-shelled.m-tapping .m-sync-top,
+#app.m-shelled.m-tapping #lineList { pointer-events: none; opacity: 0.4; }
+#app.m-shelled.m-tapping #lineList { opacity: 0.75; }
+
+/* 書き出せないブラウザの注意書き */
+.m-noenc { margin: 4px 0 0; padding: 10px 12px; border: 1px solid var(--danger); border-radius: var(--r); color: #ffb3bb; background: rgba(255,90,106,0.08); font-size: 13px; }
+
+.m-shell.m-noenc-on .right-mp4-info { display: none; }
+
 /* 4 書き出し: プロジェクトの保存 */
 .m-save-box { display: flex; flex-direction: column; gap: 8px; padding-bottom: 12px; border-bottom: 1px solid var(--line); }
 .m-title-lab { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: var(--muted); }
