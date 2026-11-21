@@ -93,6 +93,18 @@ button.icon svg { width: 15px; height: 15px; }
 label.file { position: relative; display: inline-flex; align-items: center; gap: 6px; background: var(--raised); border: 1px dashed var(--line2); border-radius: var(--r); padding: 6px 12px; cursor: pointer; }
 label.file:hover { border-color: var(--amber); }
 label.file input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; }
+#btnSave { display: none !important; }   /* JIZURA改: 保存は「プロジェクトファイルの保存」ボタンへ */
+button.proj-save { background: #9acd32; color: #142000; border: 1px solid #9acd32; font-weight: 700; width: 100%; margin-bottom: 10px; }
+button.proj-save:hover { background: #b0e04a; border-color: #b0e04a; }
+label.file.file-bg { background: #2f7cf6; color: #fff; border: 1px solid #2f7cf6; font-weight: 700; }
+label.file.file-bg:hover { background: #4a90ff; border-color: #4a90ff; }
+/* JIZURA改: 曲を読み込む = 水色 / タップで同期 Start = オレンジ */
+label.file.file-audio { background: #5ccfff; color: #04202c; border: 1px solid #5ccfff; font-weight: 700; }
+label.file.file-audio:hover { background: #86dcff; border-color: #86dcff; }
+button.btn-tap { background: #ff8a1f; color: #1e0d00; border-color: #ff8a1f; font-weight: 700; }
+button.btn-tap:hover { background: #ffa04a; border-color: #ffa04a; }
+button.btn-tap[aria-pressed="true"] { background: #e06a00; border-color: #ffd0a0; }
+button.btn-tap:disabled:hover { background: #ff8a1f; border-color: #ff8a1f; }
 .muted { color: var(--muted); }
 .mono { font-family: var(--mono); }
 h2, h3 { margin: 0; font-weight: 600; }
@@ -661,6 +673,114 @@ dialog.motion-library { box-sizing: border-box; width: min(980px, calc(100vw - 2
 .right-mp4-links a { color:var(--amber); }
 .right-mp4-status:empty, .right-mp4-info:empty { display:none; }
 
+/* ================= JIZURA改: スマホ画面（タブ構成）=================
+   15_mobile_shell.js がスマホモードのときだけ #mShell を作り、#app に .m-shelled を付ける */
+#app.m-shelled main.work { display: none; }
+#app.m-shelled .bar { position: static; }
+#app.m-shelled .omk-top { display: none !important; }
+#app.m-shelled .modes { display: none; }
+#app.m-shelled.menu-open .modes { display: flex; }
+
+.m-shell { --m-nav: 84px; --m-stage: 0px; display: flex; flex-direction: column; }
+.m-nav { position: sticky; top: 0; z-index: 45; background: var(--panel); border-bottom: 1px solid var(--line); padding: 6px 8px; display: grid; gap: 6px; }
+.m-nav-a, .m-nav-b { display: grid; gap: 6px; }
+.m-nav-a { grid-template-columns: 1fr 1fr; }
+.m-nav-b { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.m-nav-btn { min-height: 36px !important; padding: 4px 2px; font-size: 13px; font-weight: 600; }
+.m-nav-a .m-nav-btn { border-color: var(--amber); color: var(--amber); background: transparent; }
+.m-nav-a .m-nav-btn[aria-pressed="true"] { background: var(--amber); color: #120c00; }
+.m-nav-b .m-nav-btn[aria-pressed="true"] { background: var(--cyan); border-color: var(--cyan); color: #00211c; }
+
+/* プレビュー（おまかせ・詳細・3 同期で表示） */
+.m-stage { position: sticky; top: var(--m-nav); z-index: 30; background: var(--ink); box-shadow: 0 8px 18px rgba(0,0,0,0.45); }
+.m-stage[hidden] { display: none; }
+/* 「前の案 / 次の案」は 詳細・3 同期 では隠す（おまかせ画面のボタンで同じ操作ができる） */
+#app.m-shelled .m-shell[data-mview="sync"] .m-stage .hist-btns,
+#app.m-shelled .m-shell[data-mview="pro"] .m-stage .hist-btns { display: none !important; }
+/* 縦長プレビューの回転ボタン（右上・半透明）と回転中の表示 */
+.m-rotate { position: absolute; top: 6px; right: 6px; z-index: 5; width: 40px; height: 40px; min-height: 40px !important; padding: 0;
+  border-radius: 50%; border: 1px solid rgba(255,255,255,0.35); background: rgba(0,0,0,0.45); color: #fff; font-size: 22px; line-height: 1; opacity: 0.75; }
+.m-rotate:hover { opacity: 1; background: rgba(0,0,0,0.6); }
+.m-rotate[hidden] { display: none; }
+#app.m-shelled .viewport.m-rotated { display: block; }
+#app.m-shelled .viewport.m-rotated canvas { position: absolute; left: 50%; top: 50%; max-height: none !important; max-width: none; }
+
+/* 倍速は隠して、その位置にリピート */
+#app.m-shelled .m-stage .preview-speed { display: none !important; }
+#app.m-shelled .m-stage .m-repeat { flex: 0 0 auto; min-width: 104px; min-height: 40px; padding: 4px 10px; font-weight: 700; }
+#app.m-shelled .m-stage .m-repeat[aria-pressed="true"] { background: var(--cyan); border-color: var(--cyan); color: #00211c; }
+#app.m-shelled .m-stage .m-repeat[aria-pressed="false"] { background: var(--raised); color: var(--muted); }
+#app.m-shelled .m-stage .col-stage { position: static; top: auto; box-shadow: none; padding: 6px 8px; }
+
+.m-view { padding: 10px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.m-view[hidden] { display: none !important; }
+.m-view > .sec, .m-view .layer-audio-section { border: 0; padding: 0; margin: 0; }
+.m-h { font-size: 14px; margin: 6px 0 0; color: var(--text); border-left: 3px solid var(--cyan); padding-left: 8px; }
+.m-note { margin: 0; }
+#app.m-shelled .m-view .sec-h h2::before { content: none; }
+
+/* おまかせ */
+#app.m-shelled .m-view .easy-hero .omakase { display: block; width: 100%; }
+#app.m-shelled .m-view #easyPanel { display: flex; flex-direction: column; gap: 10px; }
+
+/* 詳細: タブはプレビューの下に固定 */
+.m-pro-extras { display: flex; flex-direction: column; gap: 8px; }
+.m-pro-extras:empty { display: none; }
+.m-pro-extras #btnMotionLibrary { display: none !important; }
+.m-gacha { border: 1px solid var(--line2); border-radius: var(--r); background: var(--raised); }
+.m-gacha-sum { cursor: pointer; padding: 10px 12px; font-weight: 700; list-style: none; display: flex; align-items: center; gap: 8px; min-height: 44px; box-sizing: border-box; }
+.m-gacha-sum::-webkit-details-marker { display: none; }
+.m-gacha-sum::before { content: '▸'; color: var(--amber); }
+.m-gacha[open] > .m-gacha-sum::before { content: '▾'; }
+.m-gacha .cue-roll-bar { padding: 0 10px 10px; }
+#app.m-shelled .m-view[data-mview="pro"] .tabs { display: flex !important; position: sticky; top: calc(var(--m-nav) + var(--m-stage)); z-index: 20; background: var(--ink); margin: 0 -10px; padding: 6px 10px; }
+#app.m-shelled .m-view[data-mview="pro"] .tabs button { flex: 1 1 0; }
+#app.m-shelled .m-view .tabpane:not([hidden]) { display: block !important; }
+#app.m-shelled .m-view .style-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+/* 1 歌詞 */
+.m-lyric-bar { display: flex; gap: 8px; }
+#app.m-shelled .m-lyric-load { flex: 1 1 auto; justify-content: center; background: #5ccfff; color: #04202c; border: 1px solid #5ccfff; font-weight: 700; min-height: 44px; }
+#app.m-shelled .m-lyric-undo { flex: 0 0 auto; min-height: 44px; }
+#app.m-shelled .m-view #lyrics { min-height: 46vh; font-size: 15px; }
+
+#app.m-shelled .m-view #syntax { display: block !important; margin-top: 4px; }
+#app.m-shelled .m-view #btnSyntax { color: var(--cyan); border-color: var(--cyan); }
+
+/* 4 書き出し: プロジェクトの保存 */
+.m-save-box { display: flex; flex-direction: column; gap: 8px; padding-bottom: 12px; border-bottom: 1px solid var(--line); }
+.m-title-lab { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: var(--muted); }
+#app.m-shelled .m-title-lab input { min-height: 44px; font-size: 16px; color: var(--text); }
+#app.m-shelled .m-save { min-height: 48px; font-size: 15px; margin-bottom: 0; }
+/* スマホでは保存は「4 書き出し」の一番上の1つだけ。SRT はスマホでは使わない */
+#app.m-shelled .m-view .right-mp4 .proj-save, #app.m-shelled .srt-load { display: none !important; }
+
+/* 2 素材 */
+#app.m-shelled label.file.file-bg { min-height: 44px; }
+#app.m-shelled .m-view[data-mview="media"] .layer-audio-section > .sec-h { display: none; }
+#app.m-shelled .m-view .layer-media { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+#app.m-shelled .m-view .layer-background-opacity { display: grid; grid-template-columns: 1fr auto; gap: 4px 8px; }
+#app.m-shelled .m-view .layer-background-opacity input { grid-column: 1 / -1; width: 100%; }
+
+/* 3 同期 */
+.m-sync-top { display: flex; flex-direction: column; gap: 6px; }
+#app.m-shelled .m-sync-top #btnTap { width: 100%; min-height: 48px; font-size: 16px; }
+.m-nosong { margin: 0; color: var(--amber); }
+.m-nosong[hidden] { display: none; }
+#app.m-shelled .m-view #tapPanel:not([hidden]) { position: sticky; top: calc(var(--m-nav) + var(--m-stage)); z-index: 25;
+  background: linear-gradient(rgba(245,165,12,0.06), rgba(245,165,12,0.06)), var(--ink); box-shadow: 0 6px 14px rgba(0,0,0,0.5); }
+/* スマホでは「1つ戻る」は使わない（間違えたら「終了する」→ 行の「この行から」で再開） */
+#app.m-shelled .m-view #tapBack, #app.m-shelled .m-view #tapPanel .hint { display: none; }
+#app.m-shelled .m-view #tapStop { min-height: 44px; }
+#app.m-shelled .m-view[data-mview="sync"] { padding-right: 34px; }
+.m-rail { position: fixed; right: 3px; top: calc(var(--m-nav) + var(--m-stage) + 8px); bottom: 12px; width: 24px; border-radius: 12px; background: rgba(255,255,255,0.06); z-index: 35; touch-action: none; }
+.m-rail[hidden] { display: none; }
+.m-rail-thumb { position: absolute; left: 0; width: 24px; height: 56px; border-radius: 12px; background: var(--cyan); opacity: 0.75; }
+.m-rail.drag .m-rail-thumb { opacity: 1; }
+
+/* 4 書き出し */
+#app.m-shelled .m-view[data-mview="out"] .easy-sec { border: 0; padding: 0; }
+
 </style>
 </head>
 <body>
@@ -675,7 +795,7 @@ dialog.motion-library { box-sizing: border-box; width: min(980px, calc(100vw - 2
 </div>
 <div id="app">
   <header class="bar">
-    <div class="brand"><span class="mark" aria-hidden="true">字面</span><span class="word">JIZURA Layer Studio</span><span class="tag">Firefox Compatible</span><span class="ver">v1.5.2-fc.1</span></div>
+    <div class="brand"><span class="mark" aria-hidden="true">字面</span><span class="word">JIZURA Layer Studio</span><span class="tag">Firefox Compatible</span><span class="ver">v1.5.2-fc.2</span></div>
     <div class="proj">
       <input id="songTitle" type="text" placeholder="Song title (shown on title cards and HUD)" aria-label="Song title">
       <input id="songArtist" type="text" placeholder="Artist" aria-label="Artist">
@@ -729,8 +849,8 @@ dialog.motion-library { box-sizing: border-box; width: min(980px, calc(100vw - 2
         <div class="sec-h"><h2>Audio and timing</h2></div>
         <div id="audioName" class="muted audio-name">No audio. Import a song to detect beats and align cuts.</div>
         <div class="row">
-          <label class="file" title="MP3, WAV, M4A and more">Import audio<input id="audioFile" type="file" accept="audio/*,.mp3,.wav,.m4a,.aac,.ogg,.flac"></label>
-          <button id="btnTap" title="Tap at the start of each line while the song plays">Tap to sync</button>
+          <label class="file file-audio" title="MP3, WAV, M4A and more">Import audio<input id="audioFile" type="file" accept="audio/*,.mp3,.wav,.m4a,.aac,.ogg,.flac"></label>
+          <button id="btnTap" class="btn-tap" title="Tap at the start of each line while the song plays">Tap to sync Start</button>
         </div>
         <p id="tapUnavailable" class="note" hidden></p>
         <div class="fields pro-only">
@@ -832,6 +952,7 @@ dialog.motion-library { box-sizing: border-box; width: min(980px, calc(100vw - 2
             <label class="field">Aspect ratio<select id="eAspect"><option value="16:9">16:9</option><option value="9:16">9:16 portrait</option><option value="4:3">4:3</option><option value="3:4">3:4 portrait</option><option value="1:1">1:1</option><option value="4:5">4:5 portrait</option><option value="21:9">21:9</option><option value="bg">Match background</option></select></label>
             <label class="field">Resolution<select id="eRes"><option value="480">480p</option><option value="540">540p</option><option value="720">720p</option><option value="765">1360×766</option><option value="900">900p</option><option value="1080">1080p</option><option value="1440">1440p</option><option value="2160">4K</option></select></label>
             <label class="field">fps<select id="eFps"><option>30</option><option>24</option><option>60</option></select></label>
+            <label class="field">Quality<select id="eQuality" title="Lighter means a smaller file (Standard or Light recommended on phones)"><option value="high">High</option><option value="standard">Standard</option><option value="light">Light</option></select></label>
             <label class="field field-wide">Background<select id="eKey"><option value="off">Style background</option><option value="green">Green screen (compositing)</option><option value="black">Black background (compositing)</option></select></label>
           </div>
           <label class="check center-free"><input id="eCenter" class="center-toggle" type="checkbox"><span>Keep the centre free (for a character)<small>For a character or other footage in the middle: lyrics and their effects go to the left / right on wide frames and top / bottom on tall ones, alternating line by line. Backgrounds and screen effects still cover the whole frame (the preview outlines the free area with a dotted line)</small></span></label>
@@ -910,7 +1031,7 @@ dialog.motion-library { box-sizing: border-box; width: min(980px, calc(100vw - 2
           <label class="field">Aspect ratio<select id="outAspect"><option value="16:9">16:9</option><option value="9:16">9:16 portrait</option><option value="4:3">4:3</option><option value="3:4">3:4 portrait</option><option value="1:1">1:1</option><option value="4:5">4:5 portrait</option><option value="21:9">21:9</option><option value="bg">Match background</option></select></label>
           <label class="field">Resolution<select id="outRes"><option value="480">480p</option><option value="540">540p</option><option value="720">720p</option><option value="765">1360×766</option><option value="900">900p</option><option value="1080">1080p</option><option value="1440">1440p</option><option value="2160">4K</option></select></label>
           <label class="field">fps<select id="outFps"><option>30</option><option>24</option><option>60</option></select></label>
-          <label class="field">Quality<select id="outQuality"><option value="standard">Standard</option><option value="high">High</option><option value="max">Maximum</option></select></label>
+          <label class="field">Quality<select id="outQuality"><option value="high">High</option><option value="standard">Standard</option><option value="light">Light</option></select></label>
           <label class="field field-wide">Background<select id="outKey"><option value="off">Style background</option><option value="green">Green screen (compositing)</option><option value="black">Black background (compositing)</option></select></label>
         </div>
         <p class="note key-note">Green screen and black background render white text and effects over a solid color, without background patterns, paper texture, particles or vignette. The preview shows the export. Use a chroma key for green or Screen blending / a luma key for black to composite over footage.</p>
@@ -957,7 +1078,7 @@ dialog.motion-library { box-sizing: border-box; width: min(980px, calc(100vw - 2
 <dialog id="termsDlg" class="terms publication-dialog" aria-labelledby="termsTitle">
   <form method="dialog">
     <h2 id="termsTitle" tabindex="-1">About / rights</h2>
-    <div class="terms-main"><p class="terms-big">JIZURA Layer Studio</p><p>Firefox Compatible (Posn973) · cityedge fork · v1.5.2-fc.1</p></div>
+    <div class="terms-main"><p class="terms-big">JIZURA Layer Studio</p><p>Firefox Compatible (Posn973) · cityedge fork · v1.5.2-fc.2</p></div>
     <p>This is an unofficial derivative of JIZURA by hakoniwa, adapted by cityedge for subtitle layer production. Posn973 further modified it (Firefox Compatible: Firefox export, AAC audio copy, background-matched aspect ratio). Neither the original author nor cityedge maintains this edition.</p>
     <p><a href="https://github.com/852wa/JIZURA" target="_blank" rel="noopener">Original JIZURA — hakoniwa</a></p>
     <p>You do not need to place this app’s MIT license notice in exported videos. Check the rights and terms of the lyrics, music, images, videos, fonts and other material you use.</p>
@@ -1441,7 +1562,7 @@ Exhibit B - &quot;Incompatible With Secondary Licenses&quot; Notice
   <form method="dialog">
     <h2 id="guideTitle" tabindex="-1">JIZURA Layer Studio user guide</h2>
     <p>Create animated lyrics and export a finished video with background/audio, or front/matte layers for a video editor.</p>
-    <p><a class="full-manual" href="user_guide.en.md" target="_blank" rel="noopener">v1.5.2-fc.1 Full user manual (Markdown)</a> covers individual settings, compositing and saved data in detail.</p>
+    <p><a class="full-manual" href="user_guide.en.md" target="_blank" rel="noopener">v1.5.2-fc.2 Full user manual (Markdown)</a> covers individual settings, compositing and saved data in detail.</p>
     <h3>Make your first video</h3>
     <ol class="guide-steps">
       <li><strong>Load lyrics and media</strong><p>Import a UTF-8 SRT, audio and a preview background (image/video). You can also type lyrics without SRT. To resume a project, open its JSON and reload only the media. Reimporting SRT replaces restored cues, fillers and local effects.</p></li>
@@ -1509,7 +1630,7 @@ Exhibit B - &quot;Incompatible With Secondary Licenses&quot; Notice
     <p><strong>Reset project</strong> clears current lyrics, fillers, parts, effects, locks, loaded media, spectrum/opacity/export/title settings, playhead and histories. Temporary export links are removed and autosave becomes the blank project. This cannot be undone after confirmation.</p>
     <p><strong>Shared libraries are kept.</strong> User themes and other cross-project data, interface language, display mode and preview volume remain. Original media, saved JSON and exported files on your PC are not deleted. Delete shared items in their own management screens.</p>
     <p>About / rights is at the bottom of the right pane, with license and material-handling information.</p>
-    <div class="terms-foot"><span class="muted">cityedge fork · v1.5.2-fc.1</span><button value="close" class="primary" autofocus>Close</button></div>
+    <div class="terms-foot"><span class="muted">cityedge fork · v1.5.2-fc.2</span><button value="close" class="primary" autofocus>Close</button></div>
   </form>
 </dialog>
 
@@ -1785,6 +1906,37 @@ J.layerRenderStyle = (style, opt = {}) => {
   cache.set(style, { style: value, opacity, original: style.schemes.map(sc => ({ ...sc })) });
   return value;
 };
+})();
+
+/* ============================================================
+   JIZURA改 — 画面を消さない（Screen Wake Lock）
+   J.keepAwake() で保持を始め、返された関数を呼ぶと解除。複数の処理が同時に保持してもよい。
+   別のアプリから戻ったときなど、ブラウザが自動で外した保持はかけ直す。
+   ============================================================ */
+(() => {
+'use strict';
+const holds = new Set();
+let sentinel = null, pending = false;
+async function acquire() {
+  if (sentinel || pending || !holds.size || document.hidden || !(navigator.wakeLock && navigator.wakeLock.request)) return;
+  pending = true;
+  try {
+    const s = await navigator.wakeLock.request('screen');
+    s.addEventListener('release', () => { if (sentinel === s) sentinel = null; });
+    if (holds.size) sentinel = s; else s.release().catch(() => {});
+  } catch (e) { sentinel = null; }
+  finally { pending = false; }
+}
+function drop() {
+  const s = sentinel; sentinel = null;
+  if (s) s.release().catch(() => {});
+}
+J.keepAwake = () => {
+  const token = {};
+  holds.add(token); acquire();
+  return () => { if (holds.delete(token) && !holds.size) drop(); };
+};
+document.addEventListener('visibilitychange', () => { if (!document.hidden) acquire(); });
 })();
 
 /* ============================================================
@@ -4286,7 +4438,7 @@ J.defaultProject = () => ({
   centerDir: 'tb',                // 中央を空ける on tall frames: 'tb' = top / bottom, 'lr' = left / right
   centerFree: false,              // 中央を空ける: lay the cuts out in side bands (left / right or top / bottom) around a character
   seed: 20260922,
-  aspect: '16:9', res: 1080, fps: 30,
+  aspect: 'bg', res: 1080, fps: 30,     // JIZURA改: 初期値は「背景に合わせる」（背景がなければ 16:9）
   fx: { motion: 0.7, glitch: 0.55, chroma: 0.7, decor: 0.5, density: 0.55, texture: 0.6, flash: true, onTwos: true, koma: 15, hud: 'auto', bgSwitch: 0.35 },
   enabled: Object.fromEntries(J.GROUP_KEYS.map(g => [g, Object.fromEntries(J.order(g).map(k => [k, true]))])),
   timing: { bpm: 0, offset: 0.4, snap: true, tail: 0.9, lineTimes: {}, lineScale: 1 },
@@ -4522,7 +4674,7 @@ J.plan = (project, audio) => {
   const zoneOf = () => (zones ? Object.assign({}, zones[0]) : null);
   if (zones && en.bg) en.bg.bigChar = false;               // the one background that draws the lyric itself (big, centred)
   const plan = {
-    version: 1, generator: 'JIZURA', appVersion: '1.5.2-fc.1', title, artist, W, H, fps: project.fps || 30,
+    version: 1, generator: 'JIZURA', appVersion: '1.5.2-fc.2', title, artist, W, H, fps: project.fps || 30,
     duration: tm.duration, styleKey: project.style, style: st, fx, seed: project.seed,
     lines: [], cuts: [], events: [], beats: audio && audio.beats ? audio.beats.slice() : [],
     hud: fx.hud === 'on' ? true : fx.hud === 'off' ? false : !!st.hud,
@@ -6692,8 +6844,11 @@ const VIDEO_CANDS = [
   { codec: 'av01.0.12M.08', mux: 'av1', label: 'AV1' },
 ];
 // hardware encoders often refuse very high bitrates (52 Mbps+ for 1080p60 at 最高) — keep them in a range they accept
+// JIZURA改: 画質は 高 / 標準 / 軽量 の3段階。初期値は標準。旧プロジェクトの「最高」は「高」として扱う
+J.normalizeQuality = q => (q === 'high' || q === 'max') ? 'high' : q === 'light' ? 'light' : 'standard';
 J.videoBitrate = (w, h, fps, quality) => {
-  const want = w * h * fps * (quality === 'max' ? 0.42 : quality === 'high' ? 0.28 : 0.16);
+  const q = J.normalizeQuality(quality);
+  const want = w * h * fps * (q === 'high' ? 0.28 : q === 'light' ? 0.08 : 0.16);
   const px = w * h, cap = px <= 2.2e6 ? 40e6 : px <= 3.8e6 ? 60e6 : 90e6;
   return Math.round(Math.min(want, cap));
 };
@@ -6775,7 +6930,7 @@ class BlockStore {                    // positioned writes into a list of blocks
   blob(type) { return new Blob(this.blocks.map(b => b.u), { type }); }
 }
 J.exportMP4 = async (o) => {
-  const { plan, project, audio, quality = 'high', onProgress, signal, range, file = null } = o;
+  const { plan, project, audio, quality = 'standard', onProgress, signal, range, file = null } = o;
   const [w, h] = J.outputSize(project);
   const fps = plan.fps, bitrate = J.videoBitrate(w, h, fps, quality);
   const attempts = await J.videoAttempts(w, h, fps, bitrate);
@@ -37647,7 +37802,7 @@ J.exportLayerPair = async ({ plan, project, spectrum = null, range = null, signa
   const fullDuration = Math.max(plan.duration, J.spectrumSourceDuration(spectrum));
   const t0 = range ? range.t0 : 0, end = range ? Math.min(fullDuration, range.t1) : fullDuration;
   const total = Math.max(1, Math.ceil((end - t0) * fps - 1e-7));
-  const attempts = await J.videoAttempts(w, h, fps, J.videoBitrate(w, h, fps, project.quality || 'high'));
+  const attempts = await J.videoAttempts(w, h, fps, J.videoBitrate(w, h, fps, J.normalizeQuality(project.quality)));
   if (!attempts.length) throw new Error(msg('MP4出力にはWebCodecs対応のChrome / Edgeが必要です。', 'MP4 export requires Chrome / Edge with WebCodecs.'));
   const errors = [];
   for (const codec of attempts) {
@@ -38212,7 +38367,7 @@ J.exportSimpleVideo = async ({ plan, project, background = null, spectrum = null
     else throw new Error(tr('この環境では音声を出力できません。「音源を含めない」を選ぶか、AAC（.m4a）の音源を読み込んでください。', 'Audio encoding is unavailable. Select “Exclude audio” or load an AAC (.m4a) music file.'));
   }
   abort(signal);
-  const attempts = (await J.videoAttempts(w, h, fps, J.videoBitrate(w, h, fps, project.quality || 'high'))).filter(c => c.mux === 'avc');
+  const attempts = (await J.videoAttempts(w, h, fps, J.videoBitrate(w, h, fps, J.normalizeQuality(project.quality)))).filter(c => c.mux === 'avc');
   if (!attempts.length) throw new Error(tr('H.264 MP4出力に対応していません。', 'H.264 MP4 encoding is unavailable.'));
   const errors = [];
   for (const codec of attempts) {
@@ -40226,6 +40381,8 @@ function updateTimeUI() {
   if (!S.scrubbing) $('scrub').value = String(Math.round(S.t / Math.max(0.001, previewDuration()) * 10000));
 }
 function play() {
+  // JIZURA改: 最後までPlayして止まった位置（終端の1ms手前）でPlayを押したら、頭からPlayする（以前はすぐ止まってPlayされなかった）
+  if (!S.tap && S.t >= previewDuration() - 0.05) seek(0);
   refreshLoopHold();
   if (S.audio) AP.play(S.t, S.previewRate, S.previewEngine);
   else S.t0 = performance.now() - S.t * 1000 / S.previewRate;
@@ -40782,6 +40939,17 @@ function clearLyrics() {
   replan(); flushSave(); updateEditBtns(); seek(0);
   toast('Lyrics cleared (Undo or Ctrl+Z brings them back)');
 }
+// JIZURA改: 読み込んだテキスト（.txt / .lrc）で歌詞を置き換える。clearLyrics と同じく前のタイミング · 指定 · 範囲も消し、「元に戻す」で戻せる
+function loadLyrics(text) {
+  if (S.tap || S.exporting) return false;
+  const P = S.project;
+  const snap = JSON.parse(edSnap()); snap.ov = P.overrides || {}; snap.range = P.exportRange || null;
+  ED.undo.push(JSON.stringify(snap)); if (ED.undo.length > 60) ED.undo.shift(); ED.redo = [];
+  pause();
+  P.lyrics = String(text || ''); delete P.subtitleCues; P.timing.lineTimes = {}; P.overrides = {}; P.localLooks = null; P.exportRange = null; $('lyrics').value = P.lyrics;
+  replan(); flushSave(); updateEditBtns(); seek(0);
+  return true;
+}
 // Reset only the current project/session. Shared libraries and app preferences
 // are never cleared; flushSave replaces only LS_KEY with the new blank project.
 J.projectSessionEpoch = 0;
@@ -40800,7 +40968,7 @@ async function resetAll() {
   TL.z = 1; TL.off = 0; TL.drag = -1; TL.dragView = null;
   S.loopHold = null; cueRerollHold = null; syncLoopBtn();
   if ($('fileProject')) $('fileProject').value = '';
-  $('lyrics').value = ''; fontKey = '';
+  $('lyrics').value = ''; fontKey = ''; J.projectFromFile = false;
   syncUI(); replan(); commit(); updateEditBtns(); flushSave(); seek(0);
   toast(J.layerText('プロジェクトを初期化しました。共通ライブラリはHoldしています。', 'Project reset. Shared libraries have been kept.'));
 }
@@ -41380,7 +41548,7 @@ function syncOut() {
   for (const id of ['outRes', 'eRes']) $(id).querySelector('option[value="765"]').textContent = intermediateSize;
   $('outAspect').value = S.project.aspect; $('outRes').value = String(S.project.res); $('outFps').value = String(S.project.fps);
   $('eAspect').value = S.project.aspect; $('eRes').value = String(S.project.res); $('eFps').value = String(S.project.fps);
-  $('outQuality').value = S.project.quality || 'high'; $('outAudio').checked = S.project.includeAudio !== false;
+  $('outQuality').value = $('eQuality').value = J.normalizeQuality(S.project.quality); $('outAudio').checked = S.project.includeAudio !== false;
   const k = J.keyMode(S.project) || 'off';
   $('outKey').value = k; $('eKey').value = k;
   $('outCenter').checked = $('eCenter').checked = !!S.project.centerFree;
@@ -41439,7 +41607,7 @@ async function runExport(kind) {
     if (lost.length) throw new Error(J.layerText('旧フォントファイルの指定を、PCにインストール済みの書体または標準書体に変更してください: ', 'Replace legacy file-font selections with installed PC fonts or built-in fonts: ') + lost.join(', '));
     if (kind === 'mp4' || kind === 'mp4file') {
       const plan = S.plan, range = exportRange(), span = J.exportSpan(plan, range);
-      const r = await J.exportMP4({ plan, project: proj, audio: S.project.includeAudio !== false ? S.audio : null, quality: S.project.quality || 'high', onProgress, signal: ac.signal, range, file });
+      const r = await J.exportMP4({ plan, project: proj, audio: S.project.includeAudio !== false ? S.audio : null, quality: J.normalizeQuality(S.project.quality), onProgress, signal: ac.signal, range, file });
       file = null;
       txt.textContent = `Done: ${r.blob ? (r.blob.size / 1048576).toFixed(1) + 'MB · ' : ''}${r.codec}${r.audio ? ' + ' + r.audio.toUpperCase() : ''} · ${((performance.now() - t0) / 1000).toFixed(0)}s`;
       if (r.blob) {
@@ -41483,7 +41651,9 @@ function offerShare(boxes, blob, name) {
 }
 
 /* ---------------- tap sync ---------------- */
+let tapWake = null;
 function resetTapSession() {
+  if (tapWake) { tapWake(); tapWake = null; }
   S.tap = null; $('tapPanel').hidden = true; $('btnTap').setAttribute('aria-pressed', 'false');
   if ($('previewRate')) $('previewRate').disabled = false;
 }
@@ -41506,6 +41676,7 @@ function startTap(from = 0) {
   from = J.clamp(from | 0, 0, S.plan.lines.length - 1);
   pushEdit();
   S.tap = { i: from, from, done: [] };
+  if (tapWake) tapWake(); tapWake = J.keepAwake ? J.keepAwake() : null;   // JIZURA改: タップ同期中は画面を消さない
   if (!S.project.timing.lineTimes) S.project.timing.lineTimes = {};
   $('tapPanel').hidden = false; $('btnTap').setAttribute('aria-pressed', 'true');
   $('tapPanel').classList.remove('compact');
@@ -41683,7 +41854,7 @@ function bind() {
   ['outAspect', 'eAspect'].forEach(id => $(id).addEventListener('change', e => { S.project.aspect = e.target.value; syncOut(); replan(); codecNote(); }));
   ['outRes', 'eRes'].forEach(id => $(id).addEventListener('change', e => { S.project.res = +e.target.value; syncOut(); autosave(); codecNote(); }));
   ['outFps', 'eFps'].forEach(id => $(id).addEventListener('change', e => { S.project.fps = +e.target.value; syncOut(); replan(); codecNote(); }));
-  $('outQuality').addEventListener('change', e => { S.project.quality = e.target.value; autosave(); });
+  ['outQuality', 'eQuality'].forEach(id => $(id).addEventListener('change', e => { S.project.quality = e.target.value; syncOut(); autosave(); }));
   ['outKey', 'eKey'].forEach(id => $(id).addEventListener('change', e => {
     S.project.keyBg = e.target.value; syncOut(); replan(); flushSave();
     const k = J.keyMode(S.project);
@@ -41734,7 +41905,19 @@ function bind() {
   };
   document.querySelectorAll('.terms-open').forEach(b => b.addEventListener('click', openTerms));
   dlg.addEventListener('click', e => { if (e.target === dlg) dlg.close ? dlg.close() : dlg.removeAttribute('open'); });   // click on the backdrop
-  $('btnSave').addEventListener('click', () => J.saveFile(baseName() + '.jizura.json', JSON.stringify(Object.assign({}, S.project, { appVersion: '1.5.2-fc.1' }), null, 1)));
+  // JIZURA改: PC の Chrome / Edge では「名前を付けて保存」画面（同名なら OS が上書きを確認). ほかはこれまでどおりダウンロード
+  $('btnSave').addEventListener('click', async () => {
+    const name = baseName() + '.jizura.json', data = JSON.stringify(Object.assign({}, S.project, { appVersion: '1.5.2-fc.2' }), null, 1);
+    if (typeof window.showSaveFilePicker === 'function' && !(window.claude && typeof window.claude.use === 'function')) {
+      try {
+        const h = await window.showSaveFilePicker({ suggestedName: name, types: [{ description: 'JIZURA project', accept: { 'application/json': ['.json'] } }] });
+        const w = await h.createWritable(); await w.write(data); await w.close();
+        toast(J.layerText('プロジェクトを保存しました: ', 'Project saved: ') + h.name);
+        return;
+      } catch (e) { if (e && e.name === 'AbortError') return; }   // 取り消しなら何もしない。それ以外の失敗はダウンロードへ
+    }
+    J.saveFile(name, data);
+  });
   audioNameDefault = $('audioName').textContent;
   $('btnClearLyrics').addEventListener('click', clearLyrics);
   $('btnReset').addEventListener('click', () => {
@@ -41758,6 +41941,7 @@ function bind() {
       ED.undo = []; ED.redo = []; H.list = []; H.i = -1;
       fontKey = '';
       syncUI(); replan(); commit(); updateEditBtns(); flushSave();
+      J.projectFromFile = true;   // JIZURA改: Backgroundで画面比が変わったときの保存のお願いに使う
       warnLegacyFonts(); showProjectLoadNotice();
     }
     catch (err) { if (epoch !== J.projectSessionEpoch) return; showMsg('Could not open the project'); setTimeout(() => showMsg(null), 2500); }
@@ -41921,7 +42105,7 @@ function boot() {
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
 J.ui = S;
 // Shared editor hooks used by the layer interface
-J.uiApi = { toast, replan, syncUI, syncOut, syncOmakaseThemes, pause, seek, flushSave, loadAudioFile, restartPreview, exportRange, exportRangeLines, pushEdit, edGo,
+J.uiApi = { toast, loadLyrics, replan, syncUI, syncOut, syncOmakaseThemes, pause, seek, flushSave, loadAudioFile, restartPreview, exportRange, exportRangeLines, pushEdit, edGo,
   audioLike, cueRerollTarget,
   applyMotionProject(project, index, resume) {
     if (S.exporting) return;
@@ -42034,6 +42218,24 @@ function syncCueErrors() {
   J.syncFillerUI?.();
   syncSimpleExportUI();
 }
+function ratioLabel([w, h]) {
+  const g = (a, b) => b ? g(b, a % b) : a, d = g(w, h), a = w / d, b = h / d;
+  return a <= 32 && b <= 32 ? a + ':' + b : (w / h).toFixed(2) + ':1';
+}
+function aspectNotice(before, after) {
+  let dlg = $('aspectNotice');
+  if (!dlg) {
+    dlg = el('dialog', null, 'terms'); dlg.id = 'aspectNotice';
+    const form = el('form'); form.method = 'dialog';
+    const msg = el('p'); msg.id = 'aspectNoticeText';
+    const foot = el('div', null, 'terms-foot'); const ok = el('button', 'OK', 'primary'); ok.value = 'ok';
+    foot.append(el('span'), ok); form.append(el('h2', tr('アスペクト比が変わりました', 'Aspect ratio changed')), msg, foot);
+    dlg.append(form); document.body.append(dlg);
+  }
+  $('aspectNoticeText').textContent = tr(`アスペクト比が変わりました（${ratioLabel(before)} → ${ratioLabel(after)}）。再度プロジェクトファイルを保存してください。`,
+    `The aspect ratio changed (${ratioLabel(before)} → ${ratioLabel(after)}). Please save the project file again.`);
+  try { dlg.showModal(); } catch (e) { dlg.setAttribute('open', ''); }
+}
 function changed() { const a = J.uiApi; a.pause(); a.syncUI(); a.replan(); a.flushSave(); }
 async function loadMedia(key, file, videoOnly) {
   const n = session.generation[key] = (session.generation[key] || 0) + 1;
@@ -42053,8 +42255,15 @@ async function loadMedia(key, file, videoOnly) {
   if (key === 'front') J.ui.project.spectrumMode = 'external';
   if (m.video) { m.el.addEventListener('seeked', dirty); m.el.addEventListener('loadeddata', dirty); }
   $('layerName-' + key).textContent = file.name;
-  if (key === 'background') setBackgroundAspect(m);
-  if (key !== 'background' || J.ui.project.aspect === 'bg') J.uiApi.replan();
+  if (key === 'background') {
+    // JIZURA改: 背景を選んだら画面比は「背景に合わせる」。ファイルから開いた作品で大きさが変わったら保存を促す
+    const before = J.designSize(J.ui.project.aspect || '16:9');
+    setBackgroundAspect(m);
+    J.ui.project.aspect = 'bg'; J.uiApi.syncOut?.(); J.uiApi.flushSave();
+    const after = J.designSize('bg');
+    if (J.projectFromFile && (before[0] !== after[0] || before[1] !== after[1])) aspectNotice(before, after);
+  }
+  J.uiApi.replan();
   status(tr('読み込みました。素材はこの作業中だけ保持します。', 'Loaded. Media is kept for this editing session only.'));
   J.syncLayerUI(); dirty();
 }
@@ -42198,6 +42407,7 @@ async function exportVideo(simple, frontOnly = false) {
     document.querySelectorAll('.right-mp4-progress').forEach(p => { p.value = 0; p.hidden = !simple; });
     clearDownloads();
     status(tr('フォントを準備中…', 'Preparing fonts…'));
+    const awake = J.keepAwake ? J.keepAwake() : () => {};   // JIZURA改: 書き出し中は画面を消さない（スリープでエンコードが止まるため）
     try {
       const project = structuredClone(J.ui.project), plan = J.ui.plan, range = J.uiApi.exportRange();
       await J.ensureFonts(project.lyrics, J.fontsOfPlan(plan));
@@ -42210,6 +42420,7 @@ async function exportVideo(simple, frontOnly = false) {
       offerDownloads(pair.files, project.title);
       status(simple ? tr('簡易動画MP4を生成しました。保存されない場合はリンクから保存してください。', 'Simple video MP4 is ready. Use the save link if needed.') : frontOnly ? tr('フロントMP4を生成しました。保存されない場合はリンクから保存してください。', 'Front MP4 is ready. Use the save link if needed.') : tr('2本のMP4を生成し、ダウンロードを開始しました。保存されない場合は下のリンクから個別に保存してください。', 'Two MP4s are ready and downloads have started. If either is missing, save it using the links below.'));
     } finally {
+      awake();
       controls.forEach((e, i) => { e.disabled = disabled[i]; });
       J.ui.exporting = null; session.busy = false; $('layerCancel').hidden = true; dirty(); J.syncLayerUI();
       document.querySelectorAll('.right-mp4-cancel').forEach(b => { b.hidden = true; });
@@ -42266,6 +42477,10 @@ function mountRightExport() {
   for (const place of places) {
     if (!place) continue;
     const box = el('div', null, place.id === 'easyPanel' ? 'right-mp4 easy-sec' : 'right-mp4');
+    // JIZURA改: MP4書き出しの上に「プロジェクトファイルの保存」（黄緑）。中身はメニューにあった保存と同じ
+    const psave = el('button', tr('プロジェクトファイルの保存', 'Save project file'), 'proj-save'); psave.type = 'button';
+    psave.addEventListener('click', () => $('btnSave')?.click());
+    box.append(psave);
     box.append(el('h3', tr('MP4書き出し', 'MP4 export'), 'right-mp4-head'));
     const go = el('button', tr('MP4書き出し', 'Export MP4'), 'primary right-mp4-go'); go.type = 'button';
     go.addEventListener('click', () => exportVideo(true));
@@ -42282,6 +42497,17 @@ function mountRightExport() {
     box.append(go, settings, info, progress, cancel, statusLine, links, about);
     place.append(box);
   }
+}
+// JIZURA改: 「SRTを読み込む」はメニュー（元の「開く」の位置）へ、「開く」は「プロジェクトファイルを開く」として左上（元のSRTの位置）へ
+function swapSrtAndOpen() {
+  const srt = $('layerSrt')?.closest('label'), open = $('fileProject')?.closest('label');
+  if (!srt || !open) return;
+  const mark = document.createComment('');
+  srt.before(mark); open.before(srt); mark.replaceWith(open);
+  srt.classList.add('srt-load');
+  const text = [...open.childNodes].find(n => n.nodeType === 3 && n.textContent.trim());
+  if (text) text.textContent = tr('プロジェクトファイルを開く', 'Open project file');
+  open.classList.add('proj-open');
 }
 function simpleExportControls(panel) {
   panel.append(button('simpleExport', tr('簡易動画MP4を出力', 'Export simple video MP4'), () => exportVideo(true)));
@@ -42524,7 +42750,7 @@ function boot() {
   const mergeHelp = el('p', tr('スペアナ等の動画をアルファ合成できます。マット動画は任意で、未指定ならRGB 000000を透明化します。マットを指定する場合はフロントとサイズ・長さを揃えてください。', 'Composite spectrum or other videos using alpha. The matte is optional; without it, RGB 000000 is transparent. If supplied, match the front size and duration.'), 'note');
   mergeHelp.classList.add('spectrum-external');
   for (const [key, ja, en, accept, only] of [
-    ['background', '作業用背景（画像・動画）', 'Preview background (image/video)', 'image/*,video/*', false],
+    ['background', '背景画像・背景動画', 'Background image / video', 'image/*,video/*', false],
     ['front', 'スペアナのフロント動画', 'Spectrum front video', 'video/*', true],
     ['matte', 'スペアナのマット動画（任意）', 'Spectrum matte video (optional)', 'video/*', true],
   ]) {
@@ -42532,6 +42758,7 @@ function boot() {
     if (key !== 'background') row.classList.add('spectrum-external');
     row.append(fileInput('layerFile-' + key, tr(ja, en), accept, (f, files) => key === 'front' ? selectSpectrumFront(f, files) : loadMedia(key, f, only)));
     if (key === 'front') row.querySelector('input').multiple = true;
+    if (key === 'background') row.querySelector('label')?.classList.add('file-bg');   // JIZURA改: 青いボタン
     const name = el('span', tr('未選択', 'None'), 'muted'); name.id = 'layerName-' + key;
     row.append(name, button('layerClear-' + key, tr('解除', 'Clear'), () => clearMedia(key)));
     if (key === 'background') panel.append(el('hr', null, 'layer-divider'));
@@ -42587,6 +42814,7 @@ function boot() {
   mountRightExport();
   const left = document.querySelector('.col-left');
   left.prepend(panel);
+  swapSrtAndOpen();
   $('lineList').closest('.sec').classList.add('layer-cut-list');
   J.syncLayerUI(); dirty();
 }
@@ -43488,6 +43716,387 @@ function boot() {
     if (e.detail > 0 && e.target instanceof Element && (e.target === preview || e.target.matches('#view,#timeline')) && !blocked(preview))
       preview.focus({ preventScroll: true });
   });
+}
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
+})();
+
+/* ============================================================
+   JIZURA改 — スマホ画面（スマホモードのときだけ）
+   既存の部品をそのまま（イベントごと）タブへ移し、スマホモードを抜けたら元の位置へ戻す。
+   上段: おまかせ / 詳細　下段: 1 歌詞 / 2 素材 / 3 同期 / 4 書き出し
+   ============================================================ */
+(() => {
+'use strict';
+const $ = id => document.getElementById(id);
+const tr = (ja, en) => (window.J && J.layerText ? J.layerText(ja, en) : ja);
+const VIEWS = [
+  ['omakase', 'おまかせ', 'Auto'], ['pro', '詳細', 'Detail'],
+  ['lyrics', '1 歌詞', '1 Lyrics'], ['media', '2 素材', '2 Media'], ['sync', '3 同期', '3 Sync'], ['out', '4 書き出し', '4 Export'],
+];
+const STAGE_VIEWS = new Set(['omakase', 'pro', 'sync']);   // プレビューを上に出す画面
+let shell = null, moved = [], view = 'omakase', undoObs = null, alphaObs = null, labelRestore = [], created = [], repObs = null;
+let rotState = 0, rotObs = null;
+function portrait() { const p = window.J && J.ui && J.ui.plan; return !!(p && p.H > p.W); }
+// 回転中は、回したあとの見た目がプレビュー欄の幅いっぱいになるように canvas の大きさを決める
+function applyRotate() {
+  const vp = $('viewport'), c = $('view'), btn = $('mRotate');
+  if (!vp || !c || !btn) return;
+  if (!portrait()) rotState = 0;                       // 横長になったら元に戻す
+  btn.hidden = !portrait();
+  btn.textContent = rotState === 0 ? '⟲' : rotState === -90 ? '⟳' : '↺';
+  btn.title = rotState === 0 ? tr('左に回して表示', 'Rotate left') : rotState === -90 ? tr('右に回して表示', 'Rotate right') : tr('元の向きに戻す', 'Back to upright');
+  btn.setAttribute('aria-label', btn.title);
+  // 同じ値なら書き換えない（canvas の変化を見て呼び直すので、何度呼ばれても止まるようにする）
+  if (!rotState) {
+    if (vp.classList.contains('m-rotated')) {
+      vp.classList.remove('m-rotated'); vp.style.height = ''; c.style.transform = '';
+      window.dispatchEvent(new Event('resize'));         // 元の大きさに計算し直してもらう
+    }
+    return;
+  }
+  const p = J.ui.plan, ar = p.W / p.H;                   // 縦長なので 1 未満
+  const boxW = vp.clientWidth || 360;
+  const cssH = boxW, cssW = boxW * ar;                   // 回すと 幅 boxW × 高さ boxW*ar に見える
+  const dpr = Math.min(2, window.devicePixelRatio || 1);
+  const pw = Math.round(Math.min(p.W, cssW * dpr)), ph = Math.round(pw / ar);
+  const w = cssW.toFixed(2) + 'px', h = cssH.toFixed(2) + 'px', vh = Math.round(cssW) + 'px';
+  const tf = 'translate(-50%, -50%) rotate(' + rotState + 'deg)';
+  if (c.width !== pw || c.height !== ph) { c.width = pw; c.height = ph; }
+  vp.classList.add('m-rotated');
+  if (vp.style.height !== vh) vp.style.height = vh;
+  if (c.style.width !== w) c.style.width = w;
+  if (c.style.height !== h) c.style.height = h;
+  if (c.style.transform !== tf) c.style.transform = tf;
+  J.ui.need = true;
+}
+function ensureAlpha() {
+  const sel = $('layerMode');
+  if (!sel || !(window.J && J.ui && J.ui.project) || J.ui.project.layerMode === 'alpha') return;
+  sel.value = 'alpha';
+  sel.dispatchEvent(new Event('change', { bubbles: true }));   // 既存の処理で保存・表示を更新
+}
+try { view = localStorage.getItem('jizura.mview') || 'omakase'; } catch (e) {}
+if (!VIEWS.some(v => v[0] === view)) view = 'omakase';
+
+function el(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+// 移動した部品は、元の位置に目印を残して戻せるようにする
+function move(node, target) {
+  if (!node || !target) return;
+  const mark = document.createComment('m-shell');
+  node.parentNode.insertBefore(mark, node);
+  moved.push([node, mark]);
+  target.append(node);
+}
+function restore() {
+  for (let i = moved.length - 1; i >= 0; i--) { const [node, mark] = moved[i]; if (mark.parentNode) { mark.parentNode.insertBefore(node, mark); mark.remove(); } }
+  moved = [];
+}
+
+function build() {
+  const app = $('app'), work = document.querySelector('main.work');
+  shell = el('div', 'm-shell'); shell.id = 'mShell';
+  const nav = el('nav', 'm-nav'); nav.setAttribute('aria-label', tr('スマホの画面切り替え', 'Phone screens'));
+  const rowA = el('div', 'm-nav-a'), rowB = el('div', 'm-nav-b');
+  for (const [key, ja, en] of VIEWS) {
+    const b = el('button', 'm-nav-btn', tr(ja, en)); b.type = 'button'; b.dataset.mview = key;
+    b.addEventListener('click', () => show(key, true));
+    (key === 'omakase' || key === 'pro' ? rowA : rowB).append(b);
+  }
+  nav.append(rowA, rowB);
+  const stage = el('div', 'm-stage');
+  const views = {};
+  for (const [key] of VIEWS) { views[key] = el('div', 'm-view'); views[key].dataset.mview = key; }
+  shell.append(nav, stage, ...VIEWS.map(v => views[v[0]]));
+  work.before(shell);
+  // タブの中では見出しタップでの折りたたみをしない
+  shell.addEventListener('click', e => { if (e.target.closest('.sec > .sec-h h2')) e.stopPropagation(); }, true);
+
+  // プレビュー（再生バー・字幕ガチャ込み）
+  move(document.querySelector('.col-stage'), stage);
+
+  // 縦長のプレビューを横に回して大きく見る（表示だけ。書き出しは変わらない）
+  const vp = $('viewport');
+  if (vp) {
+    const rot = el('button', 'm-rotate'); rot.type = 'button'; rot.id = 'mRotate';
+    rot.addEventListener('click', () => { rotState = rotState === 0 ? -90 : rotState === -90 ? 90 : 0; applyRotate(); setTimeout(() => { measure(); updateRail(); }, 50); });
+    vp.append(rot); created.push(rot);
+    rotObs = new MutationObserver(() => applyRotate());
+    rotObs.observe($('view'), { attributes: true, attributeFilter: ['style', 'width', 'height'] });
+    applyRotate();
+  }
+
+  // 倍速の代わりにリピート（押すたびに ON / OFF。ON は曲全体の繰り返し）
+  const speedSel = document.querySelector('.col-stage .preview-speed select');
+  if (speedSel && speedSel.value !== '1') { speedSel.value = '1'; speedSel.dispatchEvent(new Event('change', { bubbles: true })); }
+  const loopBtn = $('btnLoop');
+  if (loopBtn) {
+    const rep = el('button', 'm-repeat', tr('リピート', 'Repeat')); rep.type = 'button'; rep.id = 'mRepeat';
+    const syncRep = () => { const on = !!(J.ui && J.ui.loop); rep.setAttribute('aria-pressed', String(on)); rep.textContent = on ? tr('リピート ON', 'Repeat ON') : tr('リピート OFF', 'Repeat OFF'); };
+    rep.addEventListener('click', () => {
+      if (J.ui && J.ui.loop) { for (let i = 0; i < 4 && J.ui.loop; i++) loopBtn.click(); }   // 行・カットループ中でも OFF へ
+      else loopBtn.click();                                                                 // OFF → 曲全体のループ
+      syncRep();
+    });
+    const sp = document.querySelector('.col-stage .preview-speed');
+    (sp || loopBtn).after(rep); created.push(rep);
+    repObs = new MutationObserver(syncRep); repObs.observe(loopBtn, { attributes: true, attributeFilter: ['aria-pressed', 'data-mode'] });
+    syncRep();
+  }
+
+  // おまかせ: かんたんパネル（書き出し部分は 4 へ）
+  const easy = $('easyPanel');
+  const easyOut = $('eMP4') && $('eMP4').closest('.easy-sec');
+  const easyMp4 = easy && easy.querySelector('.right-mp4');
+  move(easy, views.omakase);
+
+  // 詳細: 字幕ガチャ・モーションライブラリ（プレビューの下を狭くしないためここへ）、スタイル / 演出 / 手法 / 書き出し
+  const extras = el('div', 'm-pro-extras'); views.pro.append(extras);
+  move($('btnMotionLibrary'), extras);
+  // 字幕ガチャはアコーディオンにまとめる（最初は閉じておく）。モーションライブラリは CSS で隠す
+  const gacha = el('details', 'm-gacha');
+  gacha.append(el('summary', 'm-gacha-sum', tr('字幕ガチャ', 'Cue gacha')));
+  extras.append(gacha);
+  move($('cueRollBar'), gacha);
+  move(document.querySelector('.col-right .tabs'), views.pro);
+  document.querySelectorAll('.col-right .tabpane').forEach(p => move(p, views.pro));
+
+  // 1 歌詞: テキスト（.txt / .lrc）の読み込みと「元に戻す」
+  const lyricBar = el('div', 'm-lyric-bar');
+  const pick = el('label', 'file m-lyric-load', tr('歌詞・プロジェクトを開く', 'Open lyrics / project'));
+  const pickInput = el('input'); pickInput.type = 'file'; pickInput.id = 'mLyricFile';
+  pickInput.accept = '.txt,.lrc,.json,text/plain,application/json';
+  pickInput.addEventListener('change', () => {
+    const f = pickInput.files && pickInput.files[0]; if (!f) return;
+    if (/\.json$/i.test(f.name)) openProjectFile(f);   // プロジェクト（.jizura.json）はメニューの「開く」と同じ処理へ
+    else loadLyricFile(f);
+    pickInput.value = '';
+  });
+  pick.append(pickInput);
+  const undo = el('button', 'ghost m-lyric-undo', tr('元に戻す', 'Undo')); undo.type = 'button';
+  undo.addEventListener('click', () => { if (J.uiApi && J.uiApi.edGo) J.uiApi.edGo(-1); });
+  lyricBar.append(pick, undo);
+  views.lyrics.append(lyricBar);
+  const undoSrc = $('btnUndoEdit');
+  const syncUndo = () => { undo.disabled = !!(undoSrc && undoSrc.disabled); };
+  if (undoSrc) { undoObs = new MutationObserver(syncUndo); undoObs.observe(undoSrc, { attributes: true, attributeFilter: ['disabled'] }); }
+  syncUndo();
+  const lyricSec = $('lyrics') && $('lyrics').closest('.sec');
+  move(lyricSec, views.lyrics);
+  if (lyricSec) lyricSec.classList.remove('fold');
+  // 「記法」→「編集終了」（入力を終えてキーボードを閉じる）。記法の説明は歌詞の下に常に表示
+  const syn = $('btnSyntax');
+  if (syn) {
+    const old = syn.textContent; syn.textContent = tr('編集終了', 'Done');
+    const stop = e => { e.stopImmediatePropagation(); e.preventDefault(); const a = document.activeElement; if (a && a.blur) a.blur(); $('lyrics') && $('lyrics').blur(); };
+    syn.addEventListener('click', stop, true);
+    labelRestore.push(() => { syn.textContent = old; syn.removeEventListener('click', stop, true); });
+  }
+  if ($('layerAudioSection')) $('layerAudioSection').classList.remove('fold');
+
+  // 2 素材: 曲・作業用背景・不透明度・飾りの数字/時刻
+  const audioSec = $('layerAudioSection');
+  const bgRow = $('layerFile-background') && $('layerFile-background').closest('.layer-media');
+  views.media.append(el('h2', 'm-h', tr('曲', 'Song')));
+  move(audioSec, views.media);
+  views.media.append(el('h2', 'm-h', tr('背景（画像・動画）', 'Background (image/video)')));
+  move(bgRow, views.media);
+  views.media.append(el('p', 'note m-note', tr('読み込んだ背景は、プレビューと書き出したMP4の両方に入ります。', 'The background appears in the preview and in the exported MP4.')));
+  views.media.append(el('h2', 'm-h', tr('字幕の見え方', 'Subtitle look')));
+  // スマホでは透明度モードを「半透明（グレーマット）」に固定（二値は使わない）。プロジェクトを開き直したときも戻す
+  ensureAlpha();
+  const opInput = $('layerBackgroundOpacity');
+  if (opInput) { alphaObs = new MutationObserver(ensureAlpha); alphaObs.observe(opInput, { attributes: true, attributeFilter: ['disabled'] }); }
+  const opacity = document.querySelector('.layer-background-opacity');
+  move(opacity, views.media);
+  move($('layerBackgroundOpacityHelp'), views.media);
+  const hide = document.querySelector('.layer-hide-decorative');
+  const hideNote = hide && hide.nextElementSibling;
+  move(hide, views.media);
+  if (hideNote && hideNote.tagName === 'P') move(hideNote, views.media);
+
+  // 3 同期: タップで同期 Start・タップ中のボックス・行とカット
+  const syncTop = el('div', 'm-sync-top');
+  views.sync.append(syncTop);
+  move($('btnTap'), syncTop);
+  const noSong = el('p', 'note m-nosong', tr('曲が読み込まれていません（「2 素材」で読み込めます）', 'No song loaded (load one in "2 Media")'));
+  noSong.id = 'mNoSong'; syncTop.append(noSong);
+  move($('tapUnavailable'), syncTop);
+  move($('tapPanel'), views.sync);
+  const lines = $('lineList') && $('lineList').closest('.sec');
+  move(lines, views.sync);
+  if (lines) lines.classList.remove('fold');
+  const rail = el('div', 'm-rail'); rail.id = 'mRail'; rail.setAttribute('aria-hidden', 'true');
+  const thumb = el('div', 'm-rail-thumb'); rail.append(thumb); views.sync.append(rail);
+  bindRail(rail, thumb, lines);
+
+  // 4 書き出し（最後にプロジェクトの保存。メニューの「保存」と同じ）
+  move(easyOut, views.out);
+  move(easyMp4, views.out);
+  const saveBox = el('div', 'm-save-box');
+  saveBox.append(el('h2', 'm-h', tr('プロジェクト', 'Project')));
+  // タイトル名（メニューの「プロジェクト名」と同じ値。保存名・書き出したMP4の名前に使う）
+  const titleLab = el('label', 'm-title-lab', tr('タイトル名', 'Title'));
+  const titleIn = el('input'); titleIn.type = 'text'; titleIn.id = 'mTitle';
+  titleIn.placeholder = tr('例：冬の始まり', 'e.g. Winter begins');
+  titleIn.addEventListener('input', () => { const src = $('songTitle'); if (src) { src.value = titleIn.value; src.dispatchEvent(new Event('input', { bubbles: true })); } });
+  titleLab.append(titleIn);
+  const save = el('button', 'proj-save m-save', tr('プロジェクトファイルの保存', 'Save project file')); save.type = 'button';
+  save.addEventListener('click', () => $('btnSave') && $('btnSave').click());
+  saveBox.append(titleLab, save, el('p', 'note m-note', tr('歌詞・タイミング・演出・書き出し設定を .jizura.json に保存します。曲と背景の画像・動画は含まれないので、開き直したら「2 素材」で読み込み直してください。', 'Saves lyrics, timing, look and export settings as .jizura.json. The song and background are not included; load them again in "2 Media" after reopening.')));
+  views.out.prepend(saveBox);   // 書き出しの上に置く
+
+  // 上段の「おまかせ」ボタン（ヘッダー）はおまかせ画面の大きなボタンと重なるので隠す
+  app.classList.add('m-shelled');
+  show(view, false);
+}
+
+// 文字コード: BOM → UTF-8（厳密）→ だめなら Shift_JIS
+function decodeText(buf) {
+  const u8 = new Uint8Array(buf);
+  if (u8[0] === 0xFF && u8[1] === 0xFE) return new TextDecoder('utf-16le').decode(u8);
+  if (u8[0] === 0xFE && u8[1] === 0xFF) return new TextDecoder('utf-16be').decode(u8);
+  try { return new TextDecoder('utf-8', { fatal: true }).decode(u8); }
+  catch (e) {
+    try { return new TextDecoder('shift_jis').decode(u8); } catch (e2) { return new TextDecoder('utf-8').decode(u8); }
+  }
+}
+// .lrc: アプリが使わない情報（[length:] などのタグ、単語ごとの <00:12.34>）を外す。[ti:][ar:][al:][by:][offset:] と行の時間はそのまま
+function cleanLrc(text) {
+  return text.split('\n').map(line => {
+    const t = line.trim();
+    if (/^\[[a-z#]+:.*\]$/i.test(t) && !/^\[(ti|ar|al|by|offset):/i.test(t)) return null;
+    return line.replace(/<\d+:\d+(?:[.:]\d+)?>/g, '').replace(/[ \t]+$/, '');
+  }).filter(l => l !== null).join('\n');
+}
+function openProjectFile(file) {
+  const target = $('fileProject');
+  if (!target) return;
+  if (J.ui && J.ui.exporting) { J.uiApi.toast(tr('書き出し中は開けません', 'Not available while exporting')); return; }
+  try {
+    const dt = new DataTransfer(); dt.items.add(file);
+    target.files = dt.files;
+    target.dispatchEvent(new Event('change', { bubbles: true }));
+  } catch (e) { J.uiApi.toast(tr('このブラウザではここから開けません。メニューの「開く」を使ってください', 'Use "Open" in the menu in this browser')); }
+}
+async function loadLyricFile(file) {
+  const toast = m => J.uiApi && J.uiApi.toast && J.uiApi.toast(m);
+  if (J.ui && (J.ui.tap || J.ui.exporting)) { toast(tr('同期中・書き出し中は読み込めません', 'Not available while syncing or exporting')); return; }
+  if (file.size > 2 * 1024 * 1024) { toast(tr('ファイルが大きすぎます（2MBまで）', 'File too large (2 MB max)')); return; }
+  let text = decodeText(await file.arrayBuffer()).replace(/^﻿/, '').replace(/\r\n?/g, '\n');
+  if (/\.lrc$/i.test(file.name)) text = cleanLrc(text);
+  text = text.replace(/\n+$/, '');
+  if (J.uiApi.loadLyrics(text)) toast(tr('「' + file.name + '」を読み込みました（「元に戻す」で戻せます）', 'Loaded "' + file.name + '" (Undo to revert)'));
+}
+
+// 3 同期を開いたときの再生位置: 3 同期で最後に止めた位置から動いていなければそのまま、
+// それ以外（起動直後・プロジェクトを開いた後・おまかせで位置が動いた後など）は 0 秒へ
+let syncLeftT = null;
+function syncEnter(prev) {
+  if (!(window.J && J.ui && J.uiApi)) return;
+  if (prev === 'sync') return;
+  const keep = syncLeftT != null && Math.abs(J.ui.t - syncLeftT) < 0.002;
+  if (keep || J.ui.tap) return;
+  if (J.ui.playing) J.uiApi.pause();
+  J.uiApi.seek(0);
+}
+function show(key, user) {
+  const prev = shell && shell.dataset.mview;
+  if (prev === 'sync' && key !== 'sync' && window.J && J.ui) syncLeftT = J.ui.playing ? null : J.ui.t;
+  if (key === 'sync') syncEnter(prev);
+  view = key;
+  try { localStorage.setItem('jizura.mview', key); } catch (e) {}
+  if (!shell) return;
+  shell.dataset.mview = key;
+  shell.querySelectorAll('.m-nav-btn').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.mview === key)));
+  shell.querySelectorAll('.m-view').forEach(v => { v.hidden = v.dataset.mview !== key; });
+  const mt = $('mTitle'), st = $('songTitle');
+  if (mt && st && document.activeElement !== mt) mt.value = st.value;   // プロジェクトを開いた後などの最新の名前を出す
+  shell.querySelector('.m-stage').hidden = !STAGE_VIEWS.has(key);
+  syncNoSong();
+  measure();
+  if (user) { window.scrollTo({ top: 0 }); window.dispatchEvent(new Event('resize')); }
+  updateRail();
+}
+
+// ナビとプレビューを上に固定するための高さ
+function measure() {
+  if (!shell) return;
+  const nav = shell.querySelector('.m-nav'), stage = shell.querySelector('.m-stage');
+  shell.style.setProperty('--m-nav', nav.offsetHeight + 'px');
+  shell.style.setProperty('--m-stage', stage.hidden ? '0px' : stage.offsetHeight + 'px');
+}
+
+function syncNoSong() {
+  const n = $('mNoSong'); if (!n) return;
+  const name = $('audioName');
+  n.hidden = !!(window.J && J.ui && J.ui.audio) || !!(name && name.dataset && name.dataset.loaded);
+}
+
+// 右端のバー: 行の一覧を一気に上下へ移動する
+let railState = null;
+function bindRail(rail, thumb, list) {
+  railState = { rail, thumb, list };
+  const toScroll = clientY => {
+    const r = rail.getBoundingClientRect(), { top, span } = listRange();
+    if (span <= 0) return;
+    const f = Math.min(1, Math.max(0, (clientY - r.top - thumb.offsetHeight / 2) / Math.max(1, r.height - thumb.offsetHeight)));
+    window.scrollTo({ top: top + f * span });
+  };
+  rail.addEventListener('pointerdown', e => { e.preventDefault(); rail.setPointerCapture(e.pointerId); rail.classList.add('drag'); toScroll(e.clientY); });
+  rail.addEventListener('pointermove', e => { if (rail.hasPointerCapture(e.pointerId)) toScroll(e.clientY); });
+  const end = e => { rail.classList.remove('drag'); try { rail.releasePointerCapture(e.pointerId); } catch (err) {} };
+  rail.addEventListener('pointerup', end); rail.addEventListener('pointercancel', end);
+  window.addEventListener('scroll', updateRail, { passive: true });
+  window.addEventListener('resize', () => { measure(); updateRail(); });
+}
+// 行の一覧がページのどこからどこまでスクロールするか
+function listRange() {
+  const { list } = railState; if (!list) return { top: 0, span: 0 };
+  const fixedH = (parseFloat(getComputedStyle(shell).getPropertyValue('--m-nav')) || 0) + (parseFloat(getComputedStyle(shell).getPropertyValue('--m-stage')) || 0);
+  const r = list.getBoundingClientRect(), top = r.top + window.scrollY - fixedH;
+  const span = Math.max(0, r.height - (window.innerHeight - fixedH));
+  return { top, span };
+}
+function updateRail() {
+  if (!railState || !shell) return;
+  const { rail, thumb } = railState;
+  const on = view === 'sync';
+  const { top, span } = on ? listRange() : { top: 0, span: 0 };
+  rail.hidden = !on || span < 80;
+  if (rail.hidden) return;
+  const f = Math.min(1, Math.max(0, (window.scrollY - top) / span));
+  thumb.style.top = (f * Math.max(0, rail.clientHeight - thumb.offsetHeight)) + 'px';
+}
+
+function teardown() {
+  if (!shell) return;
+  restore();
+  if (undoObs) { undoObs.disconnect(); undoObs = null; }
+  if (alphaObs) { alphaObs.disconnect(); alphaObs = null; }
+  labelRestore.forEach(f => f()); labelRestore = [];
+  if (repObs) { repObs.disconnect(); repObs = null; }
+  if (rotObs) { rotObs.disconnect(); rotObs = null; }
+  if (rotState) { rotState = 0; const vp = $('viewport'), c = $('view'); if (vp) { vp.classList.remove('m-rotated'); vp.style.height = ''; } if (c) c.style.transform = ''; }
+  created.forEach(n => n.remove()); created = [];
+  shell.remove(); shell = null; railState = null;
+  $('app').classList.remove('m-shelled');
+}
+
+function sync() {
+  const mobile = $('app').classList.contains('is-mobile');
+  if (mobile && !shell) build();
+  else if (!mobile && shell) teardown();
+}
+function boot() {
+  const app = $('app'); if (!app) return;
+  new MutationObserver(sync).observe(app, { attributes: true, attributeFilter: ['class'] });
+  sync();
+  // 曲の読み込み状態は表示の文字が変わるので、それを見て注意書きを出し入れする
+  // プロジェクトを開いたら、3 同期は頭から
+  const fp = $('fileProject'); if (fp) fp.addEventListener('change', () => { syncLeftT = null; });
+  const name = $('audioName');
+  if (name) new MutationObserver(syncNoSong).observe(name, { childList: true, characterData: true, subtree: true });
+  window.addEventListener('load', () => { measure(); updateRail(); });
 }
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
 })();

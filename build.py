@@ -58,6 +58,7 @@ def build(lang):
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <style>
 {read('app/style.css')}
+{read('app/mobile.css')}
 </style>
 </head>
 <body>

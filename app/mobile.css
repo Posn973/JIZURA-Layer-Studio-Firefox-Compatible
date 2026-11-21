@@ -1,0 +1,107 @@
+/* ================= JIZURA改: スマホ画面（タブ構成）=================
+   15_mobile_shell.js がスマホモードのときだけ #mShell を作り、#app に .m-shelled を付ける */
+#app.m-shelled main.work { display: none; }
+#app.m-shelled .bar { position: static; }
+#app.m-shelled .omk-top { display: none !important; }
+#app.m-shelled .modes { display: none; }
+#app.m-shelled.menu-open .modes { display: flex; }
+
+.m-shell { --m-nav: 84px; --m-stage: 0px; display: flex; flex-direction: column; }
+.m-nav { position: sticky; top: 0; z-index: 45; background: var(--panel); border-bottom: 1px solid var(--line); padding: 6px 8px; display: grid; gap: 6px; }
+.m-nav-a, .m-nav-b { display: grid; gap: 6px; }
+.m-nav-a { grid-template-columns: 1fr 1fr; }
+.m-nav-b { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.m-nav-btn { min-height: 36px !important; padding: 4px 2px; font-size: 13px; font-weight: 600; }
+.m-nav-a .m-nav-btn { border-color: var(--amber); color: var(--amber); background: transparent; }
+.m-nav-a .m-nav-btn[aria-pressed="true"] { background: var(--amber); color: #120c00; }
+.m-nav-b .m-nav-btn[aria-pressed="true"] { background: var(--cyan); border-color: var(--cyan); color: #00211c; }
+
+/* プレビュー（おまかせ・詳細・3 同期で表示） */
+.m-stage { position: sticky; top: var(--m-nav); z-index: 30; background: var(--ink); box-shadow: 0 8px 18px rgba(0,0,0,0.45); }
+.m-stage[hidden] { display: none; }
+/* 「前の案 / 次の案」は 詳細・3 同期 では隠す（おまかせ画面のボタンで同じ操作ができる） */
+#app.m-shelled .m-shell[data-mview="sync"] .m-stage .hist-btns,
+#app.m-shelled .m-shell[data-mview="pro"] .m-stage .hist-btns { display: none !important; }
+/* 縦長プレビューの回転ボタン（右上・半透明）と回転中の表示 */
+.m-rotate { position: absolute; top: 6px; right: 6px; z-index: 5; width: 40px; height: 40px; min-height: 40px !important; padding: 0;
+  border-radius: 50%; border: 1px solid rgba(255,255,255,0.35); background: rgba(0,0,0,0.45); color: #fff; font-size: 22px; line-height: 1; opacity: 0.75; }
+.m-rotate:hover { opacity: 1; background: rgba(0,0,0,0.6); }
+.m-rotate[hidden] { display: none; }
+#app.m-shelled .viewport.m-rotated { display: block; }
+#app.m-shelled .viewport.m-rotated canvas { position: absolute; left: 50%; top: 50%; max-height: none !important; max-width: none; }
+
+/* 倍速は隠して、その位置にリピート */
+#app.m-shelled .m-stage .preview-speed { display: none !important; }
+#app.m-shelled .m-stage .m-repeat { flex: 0 0 auto; min-width: 104px; min-height: 40px; padding: 4px 10px; font-weight: 700; }
+#app.m-shelled .m-stage .m-repeat[aria-pressed="true"] { background: var(--cyan); border-color: var(--cyan); color: #00211c; }
+#app.m-shelled .m-stage .m-repeat[aria-pressed="false"] { background: var(--raised); color: var(--muted); }
+#app.m-shelled .m-stage .col-stage { position: static; top: auto; box-shadow: none; padding: 6px 8px; }
+
+.m-view { padding: 10px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.m-view[hidden] { display: none !important; }
+.m-view > .sec, .m-view .layer-audio-section { border: 0; padding: 0; margin: 0; }
+.m-h { font-size: 14px; margin: 6px 0 0; color: var(--text); border-left: 3px solid var(--cyan); padding-left: 8px; }
+.m-note { margin: 0; }
+#app.m-shelled .m-view .sec-h h2::before { content: none; }
+
+/* おまかせ */
+#app.m-shelled .m-view .easy-hero .omakase { display: block; width: 100%; }
+#app.m-shelled .m-view #easyPanel { display: flex; flex-direction: column; gap: 10px; }
+
+/* 詳細: タブはプレビューの下に固定 */
+.m-pro-extras { display: flex; flex-direction: column; gap: 8px; }
+.m-pro-extras:empty { display: none; }
+.m-pro-extras #btnMotionLibrary { display: none !important; }
+.m-gacha { border: 1px solid var(--line2); border-radius: var(--r); background: var(--raised); }
+.m-gacha-sum { cursor: pointer; padding: 10px 12px; font-weight: 700; list-style: none; display: flex; align-items: center; gap: 8px; min-height: 44px; box-sizing: border-box; }
+.m-gacha-sum::-webkit-details-marker { display: none; }
+.m-gacha-sum::before { content: '▸'; color: var(--amber); }
+.m-gacha[open] > .m-gacha-sum::before { content: '▾'; }
+.m-gacha .cue-roll-bar { padding: 0 10px 10px; }
+#app.m-shelled .m-view[data-mview="pro"] .tabs { display: flex !important; position: sticky; top: calc(var(--m-nav) + var(--m-stage)); z-index: 20; background: var(--ink); margin: 0 -10px; padding: 6px 10px; }
+#app.m-shelled .m-view[data-mview="pro"] .tabs button { flex: 1 1 0; }
+#app.m-shelled .m-view .tabpane:not([hidden]) { display: block !important; }
+#app.m-shelled .m-view .style-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+/* 1 歌詞 */
+.m-lyric-bar { display: flex; gap: 8px; }
+#app.m-shelled .m-lyric-load { flex: 1 1 auto; justify-content: center; background: #5ccfff; color: #04202c; border: 1px solid #5ccfff; font-weight: 700; min-height: 44px; }
+#app.m-shelled .m-lyric-undo { flex: 0 0 auto; min-height: 44px; }
+#app.m-shelled .m-view #lyrics { min-height: 46vh; font-size: 15px; }
+
+#app.m-shelled .m-view #syntax { display: block !important; margin-top: 4px; }
+#app.m-shelled .m-view #btnSyntax { color: var(--cyan); border-color: var(--cyan); }
+
+/* 4 書き出し: プロジェクトの保存 */
+.m-save-box { display: flex; flex-direction: column; gap: 8px; padding-bottom: 12px; border-bottom: 1px solid var(--line); }
+.m-title-lab { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: var(--muted); }
+#app.m-shelled .m-title-lab input { min-height: 44px; font-size: 16px; color: var(--text); }
+#app.m-shelled .m-save { min-height: 48px; font-size: 15px; margin-bottom: 0; }
+/* スマホでは保存は「4 書き出し」の一番上の1つだけ。SRT はスマホでは使わない */
+#app.m-shelled .m-view .right-mp4 .proj-save, #app.m-shelled .srt-load { display: none !important; }
+
+/* 2 素材 */
+#app.m-shelled label.file.file-bg { min-height: 44px; }
+#app.m-shelled .m-view[data-mview="media"] .layer-audio-section > .sec-h { display: none; }
+#app.m-shelled .m-view .layer-media { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+#app.m-shelled .m-view .layer-background-opacity { display: grid; grid-template-columns: 1fr auto; gap: 4px 8px; }
+#app.m-shelled .m-view .layer-background-opacity input { grid-column: 1 / -1; width: 100%; }
+
+/* 3 同期 */
+.m-sync-top { display: flex; flex-direction: column; gap: 6px; }
+#app.m-shelled .m-sync-top #btnTap { width: 100%; min-height: 48px; font-size: 16px; }
+.m-nosong { margin: 0; color: var(--amber); }
+.m-nosong[hidden] { display: none; }
+#app.m-shelled .m-view #tapPanel:not([hidden]) { position: sticky; top: calc(var(--m-nav) + var(--m-stage)); z-index: 25;
+  background: linear-gradient(rgba(245,165,12,0.06), rgba(245,165,12,0.06)), var(--ink); box-shadow: 0 6px 14px rgba(0,0,0,0.5); }
+/* スマホでは「1つ戻る」は使わない（間違えたら「終了する」→ 行の「この行から」で再開） */
+#app.m-shelled .m-view #tapBack, #app.m-shelled .m-view #tapPanel .hint { display: none; }
+#app.m-shelled .m-view #tapStop { min-height: 44px; }
+#app.m-shelled .m-view[data-mview="sync"] { padding-right: 34px; }
+.m-rail { position: fixed; right: 3px; top: calc(var(--m-nav) + var(--m-stage) + 8px); bottom: 12px; width: 24px; border-radius: 12px; background: rgba(255,255,255,0.06); z-index: 35; touch-action: none; }
+.m-rail[hidden] { display: none; }
+.m-rail-thumb { position: absolute; left: 0; width: 24px; height: 56px; border-radius: 12px; background: var(--cyan); opacity: 0.75; }
+.m-rail.drag .m-rail-thumb { opacity: 1; }
+
+/* 4 書き出し */
+#app.m-shelled .m-view[data-mview="out"] .easy-sec { border: 0; padding: 0; }

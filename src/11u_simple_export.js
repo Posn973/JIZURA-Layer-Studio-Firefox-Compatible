@@ -192,7 +192,7 @@ J.exportSimpleVideo = async ({ plan, project, background = null, spectrum = null
     else throw new Error(tr('この環境では音声を出力できません。「音源を含めない」を選ぶか、AAC（.m4a）の音源を読み込んでください。', 'Audio encoding is unavailable. Select “Exclude audio” or load an AAC (.m4a) music file.'));
   }
   abort(signal);
-  const attempts = (await J.videoAttempts(w, h, fps, J.videoBitrate(w, h, fps, project.quality || 'high'))).filter(c => c.mux === 'avc');
+  const attempts = (await J.videoAttempts(w, h, fps, J.videoBitrate(w, h, fps, J.normalizeQuality(project.quality)))).filter(c => c.mux === 'avc');
   if (!attempts.length) throw new Error(tr('H.264 MP4出力に対応していません。', 'H.264 MP4 encoding is unavailable.'));
   const errors = [];
   for (const codec of attempts) {

@@ -1,3 +1,18 @@
+## 1.5.2-fc.2 — 2026-11-21（Firefox Compatible）
+
+- スマホ画面を作り直し：上段「おまかせ / 詳細」、下段「1 歌詞 / 2 素材 / 3 同期 / 4 書き出し」のタブ構成。プレビューと再生バーを上に固定。スマホモードのときだけ有効で、PC画面は変わりません。
+- 1 歌詞：「歌詞・プロジェクトを開く」（.txt / .lrc は歌詞を置き換え、文字コードは UTF-8 → Shift_JIS を自動判定。.jizura.json はプロジェクトとして開く）、「元に戻す」、「編集終了」（記法の説明は常に表示）。
+- 2 素材：曲・背景画像/背景動画・背景色の不透明度・飾りの数字/時刻を隠す。スマホでは透明度モードを「半透明（グレーマット）」に固定。
+- 3 同期：「タップで同期 Start」、行の一覧と右端のスクロールバー。タップ枠は不透明にし「1つ戻る」を省略。開いたときは頭から（3 同期で止めた位置から動いていなければそのまま）。
+- 4 書き出し：タイトル名とプロジェクトファイルの保存を一番上に。
+- スマホ：倍速の代わりにリピート（ON / OFF）、縦長プレビューを左右に回して表示する回転ボタン、詳細の字幕ガチャをアコーディオン化、前の案 / 次の案とモーションライブラリを非表示。
+- 書き出し中とタップ同期中は画面を消さない（Screen Wake Lock）。
+- 画質を「高 / 標準 / 軽量」に（初期値は標準、「最高」は「高」として扱う）。おまかせ側の書き出し設定にも画質を追加。
+- 画面比の初期値を「背景に合わせる」に。背景画像・背景動画を選ぶと「背景に合わせる」に切り替え、プロジェクトファイルから開いた作品で比率が変わったら保存を促すメッセージを表示。
+- ボタン：「曲を読み込む」は水色、「タップで同期 Start」はオレンジ、「背景画像・背景動画」は青。「開く」は「プロジェクトファイルを開く」として左上へ、「SRTを読み込む」は上部へ。保存は黄緑の「プロジェクトファイルの保存」（MP4書き出しの上）に変更し、上部の「保存」は非表示。PC の Chrome / Edge では名前を付けて保存の画面を使う。
+- 最後まで再生して止まったあと、再生ボタンで頭から再生されなかった問題を修正。
+- Rebuilt phone layout with tabs (Auto / Detail, 1 Lyrics / 2 Media / 3 Sync / 4 Export), text/LRC/project opening with Shift_JIS fallback, repeat toggle, preview rotation for tall frames, screen wake lock during export and tap sync, quality presets High / Standard / Light (default Standard), aspect follows the chosen background, project-file save/open buttons moved, and replay-from-end fix.
+
 ## 1.5.2-fc.1 — 2026-11-19（Firefox Compatible として公開）
 
 - 名称を「JIZURA Layer Studio Firefox Compatible」に。改変者 Posn973 の表記を追加し、公開URLを posn973.github.io に変更。

@@ -34,8 +34,11 @@ const VIDEO_CANDS = [
   { codec: 'av01.0.12M.08', mux: 'av1', label: 'AV1' },
 ];
 // hardware encoders often refuse very high bitrates (52 Mbps+ for 1080p60 at 最高) — keep them in a range they accept
+// JIZURA改: 画質は 高 / 標準 / 軽量 の3段階。初期値は標準。旧プロジェクトの「最高」は「高」として扱う
+J.normalizeQuality = q => (q === 'high' || q === 'max') ? 'high' : q === 'light' ? 'light' : 'standard';
 J.videoBitrate = (w, h, fps, quality) => {
-  const want = w * h * fps * (quality === 'max' ? 0.42 : quality === 'high' ? 0.28 : 0.16);
+  const q = J.normalizeQuality(quality);
+  const want = w * h * fps * (q === 'high' ? 0.28 : q === 'light' ? 0.08 : 0.16);
   const px = w * h, cap = px <= 2.2e6 ? 40e6 : px <= 3.8e6 ? 60e6 : 90e6;
   return Math.round(Math.min(want, cap));
 };
@@ -117,7 +120,7 @@ class BlockStore {                    // positioned writes into a list of blocks
   blob(type) { return new Blob(this.blocks.map(b => b.u), { type }); }
 }
 J.exportMP4 = async (o) => {
-  const { plan, project, audio, quality = 'high', onProgress, signal, range, file = null } = o;
+  const { plan, project, audio, quality = 'standard', onProgress, signal, range, file = null } = o;
   const [w, h] = J.outputSize(project);
   const fps = plan.fps, bitrate = J.videoBitrate(w, h, fps, quality);
   const attempts = await J.videoAttempts(w, h, fps, bitrate);

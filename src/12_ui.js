@@ -413,6 +413,8 @@ function updateTimeUI() {
   if (!S.scrubbing) $('scrub').value = String(Math.round(S.t / Math.max(0.001, previewDuration()) * 10000));
 }
 function play() {
+  // JIZURA改: 最後まで再生して止まった位置（終端の1ms手前）で再生を押したら、頭から再生する（以前はすぐ止まって再生されなかった）
+  if (!S.tap && S.t >= previewDuration() - 0.05) seek(0);
   refreshLoopHold();
   if (S.audio) AP.play(S.t, S.previewRate, S.previewEngine);
   else S.t0 = performance.now() - S.t * 1000 / S.previewRate;
@@ -969,6 +971,17 @@ function clearLyrics() {
   replan(); flushSave(); updateEditBtns(); seek(0);
   toast('歌詞を消しました（「元に戻す」か Ctrl+Z で戻せます）');
 }
+// JIZURA改: 読み込んだテキスト（.txt / .lrc）で歌詞を置き換える。clearLyrics と同じく前のタイミング・指定・範囲も消し、「元に戻す」で戻せる
+function loadLyrics(text) {
+  if (S.tap || S.exporting) return false;
+  const P = S.project;
+  const snap = JSON.parse(edSnap()); snap.ov = P.overrides || {}; snap.range = P.exportRange || null;
+  ED.undo.push(JSON.stringify(snap)); if (ED.undo.length > 60) ED.undo.shift(); ED.redo = [];
+  pause();
+  P.lyrics = String(text || ''); delete P.subtitleCues; P.timing.lineTimes = {}; P.overrides = {}; P.localLooks = null; P.exportRange = null; $('lyrics').value = P.lyrics;
+  replan(); flushSave(); updateEditBtns(); seek(0);
+  return true;
+}
 // Reset only the current project/session. Shared libraries and app preferences
 // are never cleared; flushSave replaces only LS_KEY with the new blank project.
 J.projectSessionEpoch = 0;
@@ -987,7 +1000,7 @@ async function resetAll() {
   TL.z = 1; TL.off = 0; TL.drag = -1; TL.dragView = null;
   S.loopHold = null; cueRerollHold = null; syncLoopBtn();
   if ($('fileProject')) $('fileProject').value = '';
-  $('lyrics').value = ''; fontKey = '';
+  $('lyrics').value = ''; fontKey = ''; J.projectFromFile = false;
   syncUI(); replan(); commit(); updateEditBtns(); flushSave(); seek(0);
   toast(J.layerText('プロジェクトを初期化しました。共通ライブラリは保持しています。', 'Project reset. Shared libraries have been kept.'));
 }
@@ -1567,7 +1580,7 @@ function syncOut() {
   for (const id of ['outRes', 'eRes']) $(id).querySelector('option[value="765"]').textContent = intermediateSize;
   $('outAspect').value = S.project.aspect; $('outRes').value = String(S.project.res); $('outFps').value = String(S.project.fps);
   $('eAspect').value = S.project.aspect; $('eRes').value = String(S.project.res); $('eFps').value = String(S.project.fps);
-  $('outQuality').value = S.project.quality || 'high'; $('outAudio').checked = S.project.includeAudio !== false;
+  $('outQuality').value = $('eQuality').value = J.normalizeQuality(S.project.quality); $('outAudio').checked = S.project.includeAudio !== false;
   const k = J.keyMode(S.project) || 'off';
   $('outKey').value = k; $('eKey').value = k;
   $('outCenter').checked = $('eCenter').checked = !!S.project.centerFree;
@@ -1626,7 +1639,7 @@ async function runExport(kind) {
     if (lost.length) throw new Error(J.layerText('旧フォントファイルの指定を、PCにインストール済みの書体または標準書体に変更してください: ', 'Replace legacy file-font selections with installed PC fonts or built-in fonts: ') + lost.join(', '));
     if (kind === 'mp4' || kind === 'mp4file') {
       const plan = S.plan, range = exportRange(), span = J.exportSpan(plan, range);
-      const r = await J.exportMP4({ plan, project: proj, audio: S.project.includeAudio !== false ? S.audio : null, quality: S.project.quality || 'high', onProgress, signal: ac.signal, range, file });
+      const r = await J.exportMP4({ plan, project: proj, audio: S.project.includeAudio !== false ? S.audio : null, quality: J.normalizeQuality(S.project.quality), onProgress, signal: ac.signal, range, file });
       file = null;
       txt.textContent = `完成 ${r.blob ? (r.blob.size / 1048576).toFixed(1) + 'MB・' : ''}${r.codec}${r.audio ? ' + ' + r.audio.toUpperCase() : ''}・${((performance.now() - t0) / 1000).toFixed(0)}秒`;
       if (r.blob) {
@@ -1670,7 +1683,9 @@ function offerShare(boxes, blob, name) {
 }
 
 /* ---------------- tap sync ---------------- */
+let tapWake = null;
 function resetTapSession() {
+  if (tapWake) { tapWake(); tapWake = null; }
   S.tap = null; $('tapPanel').hidden = true; $('btnTap').setAttribute('aria-pressed', 'false');
   if ($('previewRate')) $('previewRate').disabled = false;
 }
@@ -1693,6 +1708,7 @@ function startTap(from = 0) {
   from = J.clamp(from | 0, 0, S.plan.lines.length - 1);
   pushEdit();
   S.tap = { i: from, from, done: [] };
+  if (tapWake) tapWake(); tapWake = J.keepAwake ? J.keepAwake() : null;   // JIZURA改: タップ同期中は画面を消さない
   if (!S.project.timing.lineTimes) S.project.timing.lineTimes = {};
   $('tapPanel').hidden = false; $('btnTap').setAttribute('aria-pressed', 'true');
   $('tapPanel').classList.remove('compact');
@@ -1870,7 +1886,7 @@ function bind() {
   ['outAspect', 'eAspect'].forEach(id => $(id).addEventListener('change', e => { S.project.aspect = e.target.value; syncOut(); replan(); codecNote(); }));
   ['outRes', 'eRes'].forEach(id => $(id).addEventListener('change', e => { S.project.res = +e.target.value; syncOut(); autosave(); codecNote(); }));
   ['outFps', 'eFps'].forEach(id => $(id).addEventListener('change', e => { S.project.fps = +e.target.value; syncOut(); replan(); codecNote(); }));
-  $('outQuality').addEventListener('change', e => { S.project.quality = e.target.value; autosave(); });
+  ['outQuality', 'eQuality'].forEach(id => $(id).addEventListener('change', e => { S.project.quality = e.target.value; syncOut(); autosave(); }));
   ['outKey', 'eKey'].forEach(id => $(id).addEventListener('change', e => {
     S.project.keyBg = e.target.value; syncOut(); replan(); flushSave();
     const k = J.keyMode(S.project);
@@ -1921,7 +1937,19 @@ function bind() {
   };
   document.querySelectorAll('.terms-open').forEach(b => b.addEventListener('click', openTerms));
   dlg.addEventListener('click', e => { if (e.target === dlg) dlg.close ? dlg.close() : dlg.removeAttribute('open'); });   // click on the backdrop
-  $('btnSave').addEventListener('click', () => J.saveFile(baseName() + '.jizura.json', JSON.stringify(Object.assign({}, S.project, { appVersion: '@VERSION@' }), null, 1)));
+  // JIZURA改: PC の Chrome / Edge では「名前を付けて保存」画面（同名なら OS が上書きを確認）。ほかはこれまでどおりダウンロード
+  $('btnSave').addEventListener('click', async () => {
+    const name = baseName() + '.jizura.json', data = JSON.stringify(Object.assign({}, S.project, { appVersion: '@VERSION@' }), null, 1);
+    if (typeof window.showSaveFilePicker === 'function' && !(window.claude && typeof window.claude.use === 'function')) {
+      try {
+        const h = await window.showSaveFilePicker({ suggestedName: name, types: [{ description: 'JIZURA project', accept: { 'application/json': ['.json'] } }] });
+        const w = await h.createWritable(); await w.write(data); await w.close();
+        toast(J.layerText('プロジェクトを保存しました: ', 'Project saved: ') + h.name);
+        return;
+      } catch (e) { if (e && e.name === 'AbortError') return; }   // 取り消しなら何もしない。それ以外の失敗はダウンロードへ
+    }
+    J.saveFile(name, data);
+  });
   audioNameDefault = $('audioName').textContent;
   $('btnClearLyrics').addEventListener('click', clearLyrics);
   $('btnReset').addEventListener('click', () => {
@@ -1945,6 +1973,7 @@ function bind() {
       ED.undo = []; ED.redo = []; H.list = []; H.i = -1;
       fontKey = '';
       syncUI(); replan(); commit(); updateEditBtns(); flushSave();
+      J.projectFromFile = true;   // JIZURA改: 背景で画面比が変わったときの保存のお願いに使う
       warnLegacyFonts(); showProjectLoadNotice();
     }
     catch (err) { if (epoch !== J.projectSessionEpoch) return; showMsg('プロジェクトを読み込めませんでした'); setTimeout(() => showMsg(null), 2500); }
@@ -2108,7 +2137,7 @@ function boot() {
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
 J.ui = S;
 // Shared editor hooks used by the layer interface
-J.uiApi = { toast, replan, syncUI, syncOut, syncOmakaseThemes, pause, seek, flushSave, loadAudioFile, restartPreview, exportRange, exportRangeLines, pushEdit, edGo,
+J.uiApi = { toast, loadLyrics, replan, syncUI, syncOut, syncOmakaseThemes, pause, seek, flushSave, loadAudioFile, restartPreview, exportRange, exportRangeLines, pushEdit, edGo,
   audioLike, cueRerollTarget,
   applyMotionProject(project, index, resume) {
     if (S.exporting) return;

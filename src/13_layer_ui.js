@@ -96,6 +96,24 @@ function syncCueErrors() {
   J.syncFillerUI?.();
   syncSimpleExportUI();
 }
+function ratioLabel([w, h]) {
+  const g = (a, b) => b ? g(b, a % b) : a, d = g(w, h), a = w / d, b = h / d;
+  return a <= 32 && b <= 32 ? a + ':' + b : (w / h).toFixed(2) + ':1';
+}
+function aspectNotice(before, after) {
+  let dlg = $('aspectNotice');
+  if (!dlg) {
+    dlg = el('dialog', null, 'terms'); dlg.id = 'aspectNotice';
+    const form = el('form'); form.method = 'dialog';
+    const msg = el('p'); msg.id = 'aspectNoticeText';
+    const foot = el('div', null, 'terms-foot'); const ok = el('button', 'OK', 'primary'); ok.value = 'ok';
+    foot.append(el('span'), ok); form.append(el('h2', tr('アスペクト比が変わりました', 'Aspect ratio changed')), msg, foot);
+    dlg.append(form); document.body.append(dlg);
+  }
+  $('aspectNoticeText').textContent = tr(`アスペクト比が変わりました（${ratioLabel(before)} → ${ratioLabel(after)}）。再度プロジェクトファイルを保存してください。`,
+    `The aspect ratio changed (${ratioLabel(before)} → ${ratioLabel(after)}). Please save the project file again.`);
+  try { dlg.showModal(); } catch (e) { dlg.setAttribute('open', ''); }
+}
 function changed() { const a = J.uiApi; a.pause(); a.syncUI(); a.replan(); a.flushSave(); }
 async function loadMedia(key, file, videoOnly) {
   const n = session.generation[key] = (session.generation[key] || 0) + 1;
@@ -115,8 +133,15 @@ async function loadMedia(key, file, videoOnly) {
   if (key === 'front') J.ui.project.spectrumMode = 'external';
   if (m.video) { m.el.addEventListener('seeked', dirty); m.el.addEventListener('loadeddata', dirty); }
   $('layerName-' + key).textContent = file.name;
-  if (key === 'background') setBackgroundAspect(m);
-  if (key !== 'background' || J.ui.project.aspect === 'bg') J.uiApi.replan();
+  if (key === 'background') {
+    // JIZURA改: 背景を選んだら画面比は「背景に合わせる」。ファイルから開いた作品で大きさが変わったら保存を促す
+    const before = J.designSize(J.ui.project.aspect || '16:9');
+    setBackgroundAspect(m);
+    J.ui.project.aspect = 'bg'; J.uiApi.syncOut?.(); J.uiApi.flushSave();
+    const after = J.designSize('bg');
+    if (J.projectFromFile && (before[0] !== after[0] || before[1] !== after[1])) aspectNotice(before, after);
+  }
+  J.uiApi.replan();
   status(tr('読み込みました。素材はこの作業中だけ保持します。', 'Loaded. Media is kept for this editing session only.'));
   J.syncLayerUI(); dirty();
 }
@@ -260,6 +285,7 @@ async function exportVideo(simple, frontOnly = false) {
     document.querySelectorAll('.right-mp4-progress').forEach(p => { p.value = 0; p.hidden = !simple; });
     clearDownloads();
     status(tr('フォントを準備中…', 'Preparing fonts…'));
+    const awake = J.keepAwake ? J.keepAwake() : () => {};   // JIZURA改: 書き出し中は画面を消さない（スリープでエンコードが止まるため）
     try {
       const project = structuredClone(J.ui.project), plan = J.ui.plan, range = J.uiApi.exportRange();
       await J.ensureFonts(project.lyrics, J.fontsOfPlan(plan));
@@ -272,6 +298,7 @@ async function exportVideo(simple, frontOnly = false) {
       offerDownloads(pair.files, project.title);
       status(simple ? tr('簡易動画MP4を生成しました。保存されない場合はリンクから保存してください。', 'Simple video MP4 is ready. Use the save link if needed.') : frontOnly ? tr('フロントMP4を生成しました。保存されない場合はリンクから保存してください。', 'Front MP4 is ready. Use the save link if needed.') : tr('2本のMP4を生成し、ダウンロードを開始しました。保存されない場合は下のリンクから個別に保存してください。', 'Two MP4s are ready and downloads have started. If either is missing, save it using the links below.'));
     } finally {
+      awake();
       controls.forEach((e, i) => { e.disabled = disabled[i]; });
       J.ui.exporting = null; session.busy = false; $('layerCancel').hidden = true; dirty(); J.syncLayerUI();
       document.querySelectorAll('.right-mp4-cancel').forEach(b => { b.hidden = true; });
@@ -328,6 +355,10 @@ function mountRightExport() {
   for (const place of places) {
     if (!place) continue;
     const box = el('div', null, place.id === 'easyPanel' ? 'right-mp4 easy-sec' : 'right-mp4');
+    // JIZURA改: MP4書き出しの上に「プロジェクトファイルの保存」（黄緑）。中身はメニューにあった保存と同じ
+    const psave = el('button', tr('プロジェクトファイルの保存', 'Save project file'), 'proj-save'); psave.type = 'button';
+    psave.addEventListener('click', () => $('btnSave')?.click());
+    box.append(psave);
     box.append(el('h3', tr('MP4書き出し', 'MP4 export'), 'right-mp4-head'));
     const go = el('button', tr('MP4書き出し', 'Export MP4'), 'primary right-mp4-go'); go.type = 'button';
     go.addEventListener('click', () => exportVideo(true));
@@ -344,6 +375,17 @@ function mountRightExport() {
     box.append(go, settings, info, progress, cancel, statusLine, links, about);
     place.append(box);
   }
+}
+// JIZURA改: 「SRTを読み込む」はメニュー（元の「開く」の位置）へ、「開く」は「プロジェクトファイルを開く」として左上（元のSRTの位置）へ
+function swapSrtAndOpen() {
+  const srt = $('layerSrt')?.closest('label'), open = $('fileProject')?.closest('label');
+  if (!srt || !open) return;
+  const mark = document.createComment('');
+  srt.before(mark); open.before(srt); mark.replaceWith(open);
+  srt.classList.add('srt-load');
+  const text = [...open.childNodes].find(n => n.nodeType === 3 && n.textContent.trim());
+  if (text) text.textContent = tr('プロジェクトファイルを開く', 'Open project file');
+  open.classList.add('proj-open');
 }
 function simpleExportControls(panel) {
   panel.append(button('simpleExport', tr('簡易動画MP4を出力', 'Export simple video MP4'), () => exportVideo(true)));
@@ -586,7 +628,7 @@ function boot() {
   const mergeHelp = el('p', tr('スペアナ等の動画をアルファ合成できます。マット動画は任意で、未指定ならRGB 000000を透明化します。マットを指定する場合はフロントとサイズ・長さを揃えてください。', 'Composite spectrum or other videos using alpha. The matte is optional; without it, RGB 000000 is transparent. If supplied, match the front size and duration.'), 'note');
   mergeHelp.classList.add('spectrum-external');
   for (const [key, ja, en, accept, only] of [
-    ['background', '作業用背景（画像・動画）', 'Preview background (image/video)', 'image/*,video/*', false],
+    ['background', '背景画像・背景動画', 'Background image / video', 'image/*,video/*', false],
     ['front', 'スペアナのフロント動画', 'Spectrum front video', 'video/*', true],
     ['matte', 'スペアナのマット動画（任意）', 'Spectrum matte video (optional)', 'video/*', true],
   ]) {
@@ -594,6 +636,7 @@ function boot() {
     if (key !== 'background') row.classList.add('spectrum-external');
     row.append(fileInput('layerFile-' + key, tr(ja, en), accept, (f, files) => key === 'front' ? selectSpectrumFront(f, files) : loadMedia(key, f, only)));
     if (key === 'front') row.querySelector('input').multiple = true;
+    if (key === 'background') row.querySelector('label')?.classList.add('file-bg');   // JIZURA改: 青いボタン
     const name = el('span', tr('未選択', 'None'), 'muted'); name.id = 'layerName-' + key;
     row.append(name, button('layerClear-' + key, tr('解除', 'Clear'), () => clearMedia(key)));
     if (key === 'background') panel.append(el('hr', null, 'layer-divider'));
@@ -649,6 +692,7 @@ function boot() {
   mountRightExport();
   const left = document.querySelector('.col-left');
   left.prepend(panel);
+  swapSrtAndOpen();
   $('lineList').closest('.sec').classList.add('layer-cut-list');
   J.syncLayerUI(); dirty();
 }

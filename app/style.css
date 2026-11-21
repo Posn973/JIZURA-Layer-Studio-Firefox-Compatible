@@ -75,6 +75,18 @@ button.icon svg { width: 15px; height: 15px; }
 label.file { position: relative; display: inline-flex; align-items: center; gap: 6px; background: var(--raised); border: 1px dashed var(--line2); border-radius: var(--r); padding: 6px 12px; cursor: pointer; }
 label.file:hover { border-color: var(--amber); }
 label.file input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; }
+#btnSave { display: none !important; }   /* JIZURA改: 保存は「プロジェクトファイルの保存」ボタンへ */
+button.proj-save { background: #9acd32; color: #142000; border: 1px solid #9acd32; font-weight: 700; width: 100%; margin-bottom: 10px; }
+button.proj-save:hover { background: #b0e04a; border-color: #b0e04a; }
+label.file.file-bg { background: #2f7cf6; color: #fff; border: 1px solid #2f7cf6; font-weight: 700; }
+label.file.file-bg:hover { background: #4a90ff; border-color: #4a90ff; }
+/* JIZURA改: 曲を読み込む = 水色 / タップで同期 Start = オレンジ */
+label.file.file-audio { background: #5ccfff; color: #04202c; border: 1px solid #5ccfff; font-weight: 700; }
+label.file.file-audio:hover { background: #86dcff; border-color: #86dcff; }
+button.btn-tap { background: #ff8a1f; color: #1e0d00; border-color: #ff8a1f; font-weight: 700; }
+button.btn-tap:hover { background: #ffa04a; border-color: #ffa04a; }
+button.btn-tap[aria-pressed="true"] { background: #e06a00; border-color: #ffd0a0; }
+button.btn-tap:disabled:hover { background: #ff8a1f; border-color: #ff8a1f; }
 .muted { color: var(--muted); }
 .mono { font-family: var(--mono); }
 h2, h3 { margin: 0; font-weight: 600; }

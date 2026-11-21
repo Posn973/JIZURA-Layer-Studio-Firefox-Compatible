@@ -413,7 +413,7 @@ J.exportLayerPair = async ({ plan, project, spectrum = null, range = null, signa
   const fullDuration = Math.max(plan.duration, J.spectrumSourceDuration(spectrum));
   const t0 = range ? range.t0 : 0, end = range ? Math.min(fullDuration, range.t1) : fullDuration;
   const total = Math.max(1, Math.ceil((end - t0) * fps - 1e-7));
-  const attempts = await J.videoAttempts(w, h, fps, J.videoBitrate(w, h, fps, project.quality || 'high'));
+  const attempts = await J.videoAttempts(w, h, fps, J.videoBitrate(w, h, fps, J.normalizeQuality(project.quality)));
   if (!attempts.length) throw new Error(msg('MP4出力にはWebCodecs対応のChrome / Edgeが必要です。', 'MP4 export requires Chrome / Edge with WebCodecs.'));
   const errors = [];
   for (const codec of attempts) {
