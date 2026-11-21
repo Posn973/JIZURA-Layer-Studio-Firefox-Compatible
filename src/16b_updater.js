@@ -192,6 +192,21 @@ async function init() {
   else if (pending && current && pending === current.version) lsSet(LS_PENDING, null);
   if (current && navigator.onLine !== false) setTimeout(() => check(false), 2000 + Math.random() * 3000);
 }
-window.JUpdater = { check, refreshUI, get supported() { return supported; }, get version() { return current && current.version; } };
+// ---- アプリとしてインストール（任意）----
+// Chrome が自動で出すインストールの案内は止める（押し売りにしない）。
+// インストールは「︙」メニューか、「設定」の「アプリとしてインストール」を押したときだけ。
+let installEvt = null;
+function refreshInstall() { document.querySelectorAll('.upd-install').forEach(b => { b.hidden = !installEvt; }); }
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); installEvt = e; refreshInstall(); });
+window.addEventListener('appinstalled', () => { installEvt = null; refreshInstall(); toast(tr('アプリとしてインストールしました', 'Installed as an app')); });
+document.addEventListener('click', async e => {
+  const b = e.target.closest('.upd-install'); if (!b || !installEvt) return;
+  e.preventDefault();
+  const ev = installEvt;
+  try { await ev.prompt(); const r = await ev.userChoice; if (r && r.outcome === 'accepted') installEvt = null; }
+  catch (err) { console.warn('インストールの画面を出せませんでした:', err); }
+  refreshInstall();
+});
+window.JUpdater = { check, refreshUI, refreshInstall, get supported() { return supported; }, get version() { return current && current.version; } };
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
 })();

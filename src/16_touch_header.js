@@ -19,7 +19,8 @@ function updateControls() {
   const box = el('span', 'upd-box');
   const btn = el('button', 'ghost upd-check', tr('更新の確認', 'Check for updates')); btn.type = 'button';
   const ver = el('span', 'upd-version muted mono');
-  box.append(btn, ver);
+  const inst = el('button', 'ghost upd-install', tr('アプリとしてインストール', 'Install as app')); inst.type = 'button'; inst.hidden = true;
+  box.append(btn, ver, inst);
   return box;
 }
 
@@ -98,7 +99,7 @@ function apply() {
   buildPC();
   placeItems(touch);
   if (!touch) closePanel();
-  if (window.JUpdater) JUpdater.refreshUI();
+  if (window.JUpdater) { JUpdater.refreshUI(); JUpdater.refreshInstall && JUpdater.refreshInstall(); }
 }
 function boot() {
   apply();

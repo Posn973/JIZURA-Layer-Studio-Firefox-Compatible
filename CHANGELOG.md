@@ -1,3 +1,8 @@
+## 1.5.2-fc.5 — 2026-11-22（Firefox Compatible）
+
+- Chrome が自動で出すインストールの案内は止め、インストールは「︙」メニューか「設定」の「アプリとしてインストール」（インストールできるときだけ表示）から任意で。
+- Stop Chrome's automatic install prompt; install only from the browser menu or the optional "Install as app" button in Settings (shown only when installable).
+
 ## 1.5.2-fc.4 — 2026-11-21（Firefox Compatible）
 
 - この端末への保存と更新の確認（PWA）：はじめて開いたときにアプリ（日本語版・英語版）を端末に保存し、ネットがなくても起動できるように。一度表示した書体（Google Fonts）も保存。開くたびに 1 回、version.json（ファイルごとの SHA-256）だけで新しい版を確認し、「今すぐ更新 / 後で更新」を表示。手動の「更新の確認」は 1 分あければ再確認。ハッシュが合わないファイルは入れ替えない。ホーム画面に追加できるアイコンとマニフェストを追加。version.json は build.py が自動で作る。

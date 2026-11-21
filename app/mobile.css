@@ -138,6 +138,8 @@
 #app.touch-ui .th-panel .lang-switch { display: inline-flex !important; }
 #app.touch-ui .th-panel button { min-height: 40px; }
 #app.touch-ui .th-panel .upd-check { border-color: #9acd32; color: #9acd32; }
+.upd-install[hidden] { display: none !important; }
+.upd-install { border-color: var(--cyan); color: var(--cyan); }
 
 /* 更新のお知らせ（16b_updater.js） */
 .upd-banner { position: fixed; left: 50%; top: 10px; transform: translateX(-50%); z-index: 1000; width: min(92vw, 560px); display: flex; flex-wrap: wrap; gap: 8px 10px; align-items: center;

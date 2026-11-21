@@ -817,6 +817,8 @@ dialog.motion-library { box-sizing: border-box; width: min(980px, calc(100vw - 2
 #app.touch-ui .th-panel .lang-switch { display: inline-flex !important; }
 #app.touch-ui .th-panel button { min-height: 40px; }
 #app.touch-ui .th-panel .upd-check { border-color: #9acd32; color: #9acd32; }
+.upd-install[hidden] { display: none !important; }
+.upd-install { border-color: var(--cyan); color: var(--cyan); }
 
 /* 更新のお知らせ（16b_updater.js） */
 .upd-banner { position: fixed; left: 50%; top: 10px; transform: translateX(-50%); z-index: 1000; width: min(92vw, 560px); display: flex; flex-wrap: wrap; gap: 8px 10px; align-items: center;
@@ -845,7 +847,7 @@ dialog.motion-library { box-sizing: border-box; width: min(980px, calc(100vw - 2
 </div>
 <div id="app">
   <header class="bar">
-    <div class="brand"><span class="mark" aria-hidden="true">字面</span><span class="word">JIZURA Layer Studio</span><span class="tag">Firefox Compatible</span><span class="ver">v1.5.2-fc.4</span></div>
+    <div class="brand"><span class="mark" aria-hidden="true">字面</span><span class="word">JIZURA Layer Studio</span><span class="tag">Firefox Compatible</span><span class="ver">v1.5.2-fc.5</span></div>
     <div class="proj">
       <input id="songTitle" type="text" placeholder="Song title (shown on title cards and HUD)" aria-label="Song title">
       <input id="songArtist" type="text" placeholder="Artist" aria-label="Artist">
@@ -1128,7 +1130,7 @@ dialog.motion-library { box-sizing: border-box; width: min(980px, calc(100vw - 2
 <dialog id="termsDlg" class="terms publication-dialog" aria-labelledby="termsTitle">
   <form method="dialog">
     <h2 id="termsTitle" tabindex="-1">About / rights</h2>
-    <div class="terms-main"><p class="terms-big">JIZURA Layer Studio</p><p>Firefox Compatible (Posn973) · cityedge fork · v1.5.2-fc.4</p></div>
+    <div class="terms-main"><p class="terms-big">JIZURA Layer Studio</p><p>Firefox Compatible (Posn973) · cityedge fork · v1.5.2-fc.5</p></div>
     <p>This is an unofficial derivative of JIZURA by hakoniwa, adapted by cityedge for subtitle layer production. Posn973 further modified it (Firefox Compatible: Firefox export, AAC audio copy, background-matched aspect ratio). Neither the original author nor cityedge maintains this edition.</p>
     <p><a href="https://github.com/852wa/JIZURA" target="_blank" rel="noopener">Original JIZURA — hakoniwa</a></p>
     <p>You do not need to place this app’s MIT license notice in exported videos. Check the rights and terms of the lyrics, music, images, videos, fonts and other material you use.</p>
@@ -1612,7 +1614,7 @@ Exhibit B - &quot;Incompatible With Secondary Licenses&quot; Notice
   <form method="dialog">
     <h2 id="guideTitle" tabindex="-1">JIZURA Layer Studio user guide</h2>
     <p>Create animated lyrics and export a finished video with background/audio, or front/matte layers for a video editor.</p>
-    <p><a class="full-manual" href="user_guide.en.md" target="_blank" rel="noopener">v1.5.2-fc.4 Full user manual (Markdown)</a> covers individual settings, compositing and saved data in detail.</p>
+    <p><a class="full-manual" href="user_guide.en.md" target="_blank" rel="noopener">v1.5.2-fc.5 Full user manual (Markdown)</a> covers individual settings, compositing and saved data in detail.</p>
     <h3>Make your first video</h3>
     <ol class="guide-steps">
       <li><strong>Load lyrics and media</strong><p>Import a UTF-8 SRT, audio and a preview background (image/video). You can also type lyrics without SRT. To resume a project, open its JSON and reload only the media. Reimporting SRT replaces restored cues, fillers and local effects.</p></li>
@@ -1680,7 +1682,7 @@ Exhibit B - &quot;Incompatible With Secondary Licenses&quot; Notice
     <p><strong>Reset project</strong> clears current lyrics, fillers, parts, effects, locks, loaded media, spectrum/opacity/export/title settings, playhead and histories. Temporary export links are removed and autosave becomes the blank project. This cannot be undone after confirmation.</p>
     <p><strong>Shared libraries are kept.</strong> User themes and other cross-project data, interface language, display mode and preview volume remain. Original media, saved JSON and exported files on your PC are not deleted. Delete shared items in their own management screens.</p>
     <p>About / rights is at the bottom of the right pane, with license and material-handling information.</p>
-    <div class="terms-foot"><span class="muted">cityedge fork · v1.5.2-fc.4</span><button value="close" class="primary" autofocus>Close</button></div>
+    <div class="terms-foot"><span class="muted">cityedge fork · v1.5.2-fc.5</span><button value="close" class="primary" autofocus>Close</button></div>
   </form>
 </dialog>
 
@@ -4724,7 +4726,7 @@ J.plan = (project, audio) => {
   const zoneOf = () => (zones ? Object.assign({}, zones[0]) : null);
   if (zones && en.bg) en.bg.bigChar = false;               // the one background that draws the lyric itself (big, centred)
   const plan = {
-    version: 1, generator: 'JIZURA', appVersion: '1.5.2-fc.4', title, artist, W, H, fps: project.fps || 30,
+    version: 1, generator: 'JIZURA', appVersion: '1.5.2-fc.5', title, artist, W, H, fps: project.fps || 30,
     duration: tm.duration, styleKey: project.style, style: st, fx, seed: project.seed,
     lines: [], cuts: [], events: [], beats: audio && audio.beats ? audio.beats.slice() : [],
     hud: fx.hud === 'on' ? true : fx.hud === 'off' ? false : !!st.hud,
@@ -41957,7 +41959,7 @@ function bind() {
   dlg.addEventListener('click', e => { if (e.target === dlg) dlg.close ? dlg.close() : dlg.removeAttribute('open'); });   // click on the backdrop
   // JIZURA改: PC の Chrome / Edge では「名前を付けて保存」画面（同名なら OS が上書きを確認). ほかはこれまでどおりダウンロード
   $('btnSave').addEventListener('click', async () => {
-    const name = baseName() + '.jizura.json', data = JSON.stringify(Object.assign({}, S.project, { appVersion: '1.5.2-fc.4' }), null, 1);
+    const name = baseName() + '.jizura.json', data = JSON.stringify(Object.assign({}, S.project, { appVersion: '1.5.2-fc.5' }), null, 1);
     if (typeof window.showSaveFilePicker === 'function' && !(window.claude && typeof window.claude.use === 'function')) {
       try {
         const h = await window.showSaveFilePicker({ suggestedName: name, types: [{ description: 'JIZURA project', accept: { 'application/json': ['.json'] } }] });
@@ -44228,7 +44230,8 @@ function updateControls() {
   const box = el('span', 'upd-box');
   const btn = el('button', 'ghost upd-check', tr('更新の確認', 'Check for updates')); btn.type = 'button';
   const ver = el('span', 'upd-version muted mono');
-  box.append(btn, ver);
+  const inst = el('button', 'ghost upd-install', tr('アプリとしてインストール', 'Install as app')); inst.type = 'button'; inst.hidden = true;
+  box.append(btn, ver, inst);
   return box;
 }
 
@@ -44307,7 +44310,7 @@ function apply() {
   buildPC();
   placeItems(touch);
   if (!touch) closePanel();
-  if (window.JUpdater) JUpdater.refreshUI();
+  if (window.JUpdater) { JUpdater.refreshUI(); JUpdater.refreshInstall && JUpdater.refreshInstall(); }
 }
 function boot() {
   apply();
@@ -44513,7 +44516,22 @@ async function init() {
   else if (pending && current && pending === current.version) lsSet(LS_PENDING, null);
   if (current && navigator.onLine !== false) setTimeout(() => check(false), 2000 + Math.random() * 3000);
 }
-window.JUpdater = { check, refreshUI, get supported() { return supported; }, get version() { return current && current.version; } };
+// ---- アプリとしてインストール（任意）----
+// Chrome が自動で出すインストールの案内は止める（押し売りにしない）。
+// インストールは「︙」メニューか、「設定」の「アプリとしてインストール」を押したときだけ。
+let installEvt = null;
+function refreshInstall() { document.querySelectorAll('.upd-install').forEach(b => { b.hidden = !installEvt; }); }
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); installEvt = e; refreshInstall(); });
+window.addEventListener('appinstalled', () => { installEvt = null; refreshInstall(); toast(tr('アプリとしてインストールしました', 'Installed as an app')); });
+document.addEventListener('click', async e => {
+  const b = e.target.closest('.upd-install'); if (!b || !installEvt) return;
+  e.preventDefault();
+  const ev = installEvt;
+  try { await ev.prompt(); const r = await ev.userChoice; if (r && r.outcome === 'accepted') installEvt = null; }
+  catch (err) { console.warn('インストールの画面を出せませんでした:', err); }
+  refreshInstall();
+});
+window.JUpdater = { check, refreshUI, refreshInstall, get supported() { return supported; }, get version() { return current && current.version; } };
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
 })();
 
