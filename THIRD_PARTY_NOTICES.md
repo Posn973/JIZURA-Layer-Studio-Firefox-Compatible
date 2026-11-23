@@ -1,11 +1,21 @@
 # Third-party notices
 
+## x264 (bundled as WebAssembly, GPL-2.0-or-later)
+
+x264 — H.264/AVC encoder. Copyright (C) 2003-2024 x264 project; see the AUTHORS file in the source.
+Built for WebAssembly (`vendor/x264/x264.wasm`, `vendor/x264/x264-mt.wasm`) and embedded in each HTML edition;
+used for MP4 export in Firefox. Licensed under the GNU General Public License version 2 or later (`COPYING`).
+Because of x264 this application as a whole is distributed under GPL-2.0-or-later.
+Source of the exact version (commit c24e06c2e184), the WebAssembly patch, the wrapper and the build script are in
+`vendor/x264/`. Upstream: https://code.videolan.org/videolan/x264
+
+
 ## Mediabunny 1.60.0 (bundled, MPL-2.0)
 
 Copyright (c) 2026-present, Vanilagy and contributors.
 The unchanged browser bundle `vendor/mediabunny.min.js` is embedded in each HTML edition
 to decode spectrum frames by presentation timestamp. This library is licensed under
-the Mozilla Public License 2.0, separately from this application's MIT-licensed code.
+the Mozilla Public License 2.0, separately from this application's GPL-licensed code (MPL-2.0 is compatible with the GPL).
 Full license: `vendor/mediabunny.LICENSE.txt` (also embedded in the About dialog).
 The complete upstream source distribution is included as `vendor/mediabunny-1.60.0.tgz`.
 Source distribution: https://registry.npmjs.org/mediabunny/-/mediabunny-1.60.0.tgz

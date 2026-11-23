@@ -57,6 +57,16 @@ async function fontResponse(req) {
   return res;
 }
 
+// JIZURA改: ページを「クロスオリジン分離」にして、MP4 書き出しの x264 を複数のスレッドで動かせるようにする
+// （SharedArrayBuffer に必要。GitHub Pages ではヘッダーを付けられないので、ここで付ける）
+function isolate(res) {
+  if (!res || res.type === 'opaque' || res.type === 'opaqueredirect' || !res.ok) return res;
+  const headers = new Headers(res.headers);
+  headers.set('Cross-Origin-Opener-Policy', 'same-origin');
+  headers.set('Cross-Origin-Embedder-Policy', 'credentialless');
+  return new Response(res.body, { status: res.status, statusText: res.statusText, headers });
+}
+
 self.addEventListener('fetch', e => {
   const req = e.request;
   if (req.method !== 'GET') return;
@@ -67,10 +77,11 @@ self.addEventListener('fetch', e => {
   if (path === 'version.json' || path === 'sw.js') return;      // 更新の確認はいつもネットへ
   if (req.cache === 'no-store' || url.searchParams.has('h')) return;   // 新しい版の読み込み（?h=ハッシュ付き）もネットへ
   if (path === '' || path.endsWith('/')) path += 'index.html';
+  const page = req.mode === 'navigate' || path.endsWith('.html');
   e.respondWith((async () => {
     const cache = await caches.open(CACHE);
     const hit = await cache.match(base + path);
-    if (hit) return hit;
-    return fetch(req);                                          // まだ保存していないとき
+    const res = hit || await fetch(req);                         // まだ保存していないときはネットから
+    return page ? isolate(res) : res;
   })());
 });

@@ -1,8 +1,8 @@
 {
- "version": "1.5.2-fc.5 (2026.11.22-0018)",
+ "version": "1.5.2-fc.7 (2026.11.24-0237)",
  "files": {
-  "index.html": "c43090168c02ab0acc53ec899a4070c8dbc1da45ffd56db2da5a5d907d699c81",
-  "en/index.html": "e6a910fc36b53b7b8bee285302ffd18a9080270d17815e2cd2fb5bb7e2393d94",
+  "index.html": "a9c56ac8aa5181c67869bdbff890f3896d0edb6cd977f4f4d5f49976bb2534b6",
+  "en/index.html": "c5c4251a94f5dd948150df938e0ba9bdb60800ceab951cce65bf7920a5fad7c1",
   "manifest.webmanifest": "47ea1bc0f2c51669362ab681cd52cbd8272a46b70d5b5188d07ad69af0b0829e",
   "icons/icon-192.png": "7c90511aeefb2803b63931d313a0cb00bb37447c179028d3e20c04a0187a7376",
   "icons/icon-512.png": "2de4eeae06a77da6b0db8d58dac6d8af3a39c52ebde46310601a1f7a441c45f0"

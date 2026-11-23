@@ -2,7 +2,7 @@
 
 **[Open the app](https://posn973.github.io/JIZURA-Layer-Studio-Firefox-Compatible/en/)** · [日本語](https://posn973.github.io/JIZURA-Layer-Studio-Firefox-Compatible/)
 
-A modified version of [JIZURA Layer Studio (cityedge fork)](https://github.com/cityedge/jizura_layer_studio) by Posn973: MP4 export works in Firefox (Mediabunny muxer with B-frame support and avcC repair), AAC audio from the music file is copied without re-encoding, a "Match background" aspect ratio, and an orange "MP4 export" button on the right panel. See [CHANGELOG.md](CHANGELOG.md). MIT License.
+A modified version of [JIZURA Layer Studio (cityedge fork)](https://github.com/cityedge/jizura_layer_studio) by Posn973: MP4 export works in Firefox (Mediabunny muxer with B-frame support and avcC repair), AAC audio from the music file is copied without re-encoding, a "Match background" aspect ratio, an orange "MP4 export" button on the right panel, and H.264 encoding with x264 (WebAssembly, constant quality) in Firefox, whose built-in encoder blurs once a second. See [CHANGELOG.md](CHANGELOG.md). Because it includes x264, the app is licensed under the GNU GPL v2 or later.
 
 ---
 
@@ -124,8 +124,8 @@ Source lives in `src/`; UI, translations and notices in `app/`; the MP4 library 
 
 ## Rights
 
-The original and derivative are [MIT licensed](LICENSE). Preserve original copyright and license text when redistributing. See [third-party notices](THIRD_PARTY_NOTICES.md).
+Because it includes x264 (GPL-2.0-or-later), this derivative as a whole is distributed under the [GNU GPL v2 or later](COPYING) (see [LICENSE](LICENSE)). The original, the cityedge fork and modifications up to fc.6 are MIT licensed and remain usable under MIT without x264. x264's source, changes and build steps are in `vendor/x264/`. Preserve original copyright and license text when redistributing. See [third-party notices](THIRD_PARTY_NOTICES.md).
 
-Exported videos do not require an application MIT credit. Check the rights and terms of your lyrics, music, images, videos, fonts and other material separately. The software is provided without warranty.
+Exported videos are not covered by the app's license (GPL) and need no license credit. Check the rights and terms of your lyrics, music, images, videos, fonts and other material separately. The software is provided without warranty.
 
 Bundled Mediabunny 1.60.0 is separately licensed under MPL-2.0. Its unmodified source distribution and license are included in `vendor/`.

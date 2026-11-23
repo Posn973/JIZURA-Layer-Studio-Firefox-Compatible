@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>JIZURA改 — 書き出し画質テスト（Firefox の 1 秒ごとのぼやけ調査）</title>
+<style>
+  body { font: 14px/1.6 system-ui, sans-serif; background: #131316; color: #e8e8ec; margin: 24px; }
+  h1 { font-size: 18px; margin: 0 0 8px; }
+  p { margin: 6px 0; color: #b8b8c0; }
+  button { font: inherit; padding: 6px 14px; border-radius: 6px; border: 1px solid #555; background: #2a2a31; color: #fff; cursor: pointer; }
+  button.primary { background: #3d5afe; border-color: #3d5afe; }
+  button:disabled { opacity: .45; cursor: default; }
+  table { border-collapse: collapse; margin: 14px 0; }
+  th, td { border: 1px solid #3a3a44; padding: 4px 10px; text-align: right; white-space: nowrap; }
+  th { background: #1f1f25; }
+  td:first-child, th:first-child { text-align: left; }
+  .bad { color: #ff8a80; } .good { color: #9be59b; } .muted { color: #888; }
+  #status { margin: 10px 0; min-height: 1.6em; }
+  textarea { width: 100%; max-width: 1100px; height: 220px; background: #0d0d10; color: #ddd; border: 1px solid #3a3a44; font: 12px/1.5 monospace; }
+  canvas#preview { width: 216px; height: 384px; border: 1px solid #3a3a44; float: right; margin-left: 16px; }
+</style>
+</head>
+<body>
+<canvas id="preview" width="1080" height="1920"></canvas>
+<h1>書き出し画質テスト</h1>
+<p>細かい光の粒と模様が動く 8 秒の映像（1080×1920・30fps）を、いくつかの設定で書き出して比べます。</p>
+<p>各設定で書き出した映像をその場で読み戻し、元の映像とのずれ（PSNR）をフレームごとに測ります。
+  「ぼやけの差」が大きいほど、キーフレームの直前でぼやけています。全部で数分かかります。終わるまでこのタブを表示したままにしてください。</p>
+<p>
+  <button id="run" class="primary">テスト開始</button>
+  <button id="copy" disabled>結果をコピー</button>
+  <button id="saveAll" disabled>MP4 をすべて保存</button>
+</p>
+<div id="status"></div>
+<table id="table">
+  <thead><tr><th>設定</th><th>結果</th><th>実ビットレート</th><th>キーフレーム間隔</th><th>平均PSNR</th><th>最低PSNR</th><th>ぼやけの差</th><th>MP4</th></tr></thead>
+  <tbody></tbody>
+</table>
+<textarea id="report" readonly placeholder="テストが終わると、ここに結果が出ます。"></textarea>
+
+<script>window.J = window.J || {};</script>
+<script src="../vendor/mediabunny.min.js"></script>
+<script src="../src/10b_mp4_writer.js"></script>
+<script>
+'use strict';
+const W = 1080, H = 1920, FPS = 30, SECONDS = 8, FRAMES = FPS * SECONDS;
+const CROP = { x: 220, y: 560, w: 640, h: 640 };   // 光の粒・模様・文字がそろう中央付近を等倍で比べる
+const MBPS = 1e6;
+const AVC = 'avc1.640034', VP9 = 'vp09.00.51.08', AV1 = 'av01.0.12M.08';
+const VARIANTS = [
+  { id: 'avc10',      label: 'H.264 10Mbps（今と同じ・標準相当）', codec: AVC, mux: 'avc', bitrate: 10 * MBPS },
+  { id: 'avc20',      label: 'H.264 20Mbps',                      codec: AVC, mux: 'avc', bitrate: 20 * MBPS },
+  { id: 'avc40',      label: 'H.264 40Mbps',                      codec: AVC, mux: 'avc', bitrate: 40 * MBPS },
+  { id: 'avc10cbr',   label: 'H.264 10Mbps 固定ビットレート',      codec: AVC, mux: 'avc', bitrate: 10 * MBPS, extra: { bitrateMode: 'constant' } },
+  { id: 'avc10sw',    label: 'H.264 10Mbps ソフトウェア優先',      codec: AVC, mux: 'avc', bitrate: 10 * MBPS, extra: { hardwareAcceleration: 'prefer-software' } },
+  { id: 'avc10hw',    label: 'H.264 10Mbps ハードウェア優先',      codec: AVC, mux: 'avc', bitrate: 10 * MBPS, extra: { hardwareAcceleration: 'prefer-hardware' } },
+  { id: 'avc10rt',    label: 'H.264 10Mbps リアルタイム',          codec: AVC, mux: 'avc', bitrate: 10 * MBPS, latency: 'realtime' },
+  { id: 'avcintra',   label: 'H.264 全フレームをキーフレーム 60Mbps', codec: AVC, mux: 'avc', bitrate: 60 * MBPS, keyEvery: 1 },
+  { id: 'vp9',        label: 'VP9 10Mbps',                        codec: VP9, mux: 'vp9', bitrate: 10 * MBPS },
+  { id: 'av1',        label: 'AV1 10Mbps',                        codec: AV1, mux: 'av1', bitrate: 10 * MBPS },
+];
+
+/* ---------- テスト映像（毎回まったく同じ絵になる） ---------- */
+function rng(seed) { let s = seed >>> 0; return () => { s = (s + 0x6D2B79F5) >>> 0; let t = s; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
+const TEX = document.createElement('canvas'); TEX.width = 1300; TEX.height = 2300;
+(() => {
+  const g = TEX.getContext('2d'), r = rng(7);
+  const grd = g.createLinearGradient(0, 0, 0, TEX.height); grd.addColorStop(0, '#1a1030'); grd.addColorStop(1, '#3a2410');
+  g.fillStyle = grd; g.fillRect(0, 0, TEX.width, TEX.height);
+  for (let k = 0; k < 9000; k++) {   // 木の皮のような細い線
+    g.strokeStyle = `hsla(${25 + r() * 20},${50 + r() * 40}%,${20 + r() * 45}%,${0.25 + r() * 0.5})`;
+    g.lineWidth = 0.6 + r() * 1.6; g.beginPath();
+    const x = r() * TEX.width, y = r() * TEX.height, a = -1.2 + r() * 0.5, l = 20 + r() * 90;
+    g.moveTo(x, y); g.lineTo(x + Math.cos(a) * l, y + Math.sin(a) * l); g.stroke();
+  }
+  for (let k = 0; k < 14000; k++) {  // 動かない小さな電球
+    g.fillStyle = `hsla(${38 + r() * 18},100%,${60 + r() * 35}%,${0.5 + r() * 0.5})`;
+    g.beginPath(); g.arc(r() * TEX.width, r() * TEX.height, 0.7 + r() * 1.5, 0, Math.PI * 2); g.fill();
+  }
+})();
+const SPARKS = (() => { const r = rng(11), a = []; for (let k = 0; k < 2600; k++) a.push({ x: r() * W, y: r() * H, rad: 0.8 + r() * 2.2, ph: r() * 6.283, sp: 1.5 + r() * 4, hue: 35 + r() * 25 }); return a; })();
+function drawFrame(ctx, i) {
+  const t = i / FPS, s = 1.0 + 0.035 * t, ox = -60 - 9 * t, oy = -90 - 14 * t;   // ゆっくりズーム＋パン
+  ctx.setTransform(s, 0, 0, s, ox, oy); ctx.drawImage(TEX, 0, 0); ctx.setTransform(1, 0, 0, 1, 0, 0);
+  for (const p of SPARKS) {   // またたく光の粒
+    const b = 0.5 + 0.5 * Math.sin(p.ph + t * p.sp);
+    ctx.fillStyle = `hsla(${p.hue},100%,${55 + 40 * b}%,${0.25 + 0.75 * b})`;
+    ctx.beginPath(); ctx.arc(p.x, p.y, p.rad * (0.6 + 0.6 * b), 0, Math.PI * 2); ctx.fill();
+  }
+  ctx.font = '900 150px system-ui, sans-serif'; ctx.textAlign = 'center'; ctx.lineJoin = 'round';
+  const tx = W / 2 + 40 * Math.sin(t * 0.9), ty = 900;
+  ctx.lineWidth = 16; ctx.strokeStyle = '#e0455a'; ctx.strokeText('光の木の下で', tx, ty);
+  ctx.fillStyle = '#fff'; ctx.fillText('光の木の下で', tx, ty);
+  ctx.font = '700 46px system-ui, sans-serif'; ctx.fillStyle = 'rgba(255,255,255,.85)';
+  ctx.fillText(`frame ${i}`, W / 2, 1060);
+}
+const luma = (rgba, out) => { for (let k = 0, j = 0; j < out.length; k += 4, j++) out[j] = (77 * rgba[k] + 150 * rgba[k + 1] + 29 * rgba[k + 2]) >> 8; return out; };
+
+/* ---------- 画面 ---------- */
+const $ = id => document.getElementById(id);
+const status = m => { $('status').textContent = m; };
+const tick = () => new Promise(r => setTimeout(r, 0));
+const results = [];
+const files = {};
+function row(v) {
+  let tr = document.getElementById('row-' + v.id);
+  if (!tr) { tr = document.createElement('tr'); tr.id = 'row-' + v.id; $('table').tBodies[0].appendChild(tr); }
+  return tr;
+}
+function show(v, r) {
+  const c = r.ok
+    ? [v.label, '<span class="good">OK</span>', (r.mbps).toFixed(1) + ' Mbps', r.gop, r.psnr.toFixed(2) + ' dB', r.minPsnr.toFixed(2) + ' dB',
+       `<span class="${r.pump > 1 ? 'bad' : 'good'}">${r.pump.toFixed(2)} dB</span>`, `<button data-id="${v.id}">保存</button>`]
+    : [v.label, `<span class="bad">${r.error}</span>`, '', '', '', '', '', ''];
+  row(v).innerHTML = c.map(x => `<td>${x}</td>`).join('');
+}
+$('table').addEventListener('click', e => { const id = e.target?.dataset?.id; if (id && files[id]) save(id); });
+function save(id) {
+  const a = document.createElement('a'); a.href = URL.createObjectURL(files[id]); a.download = `jizura_test_${id}.mp4`;
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 60000);
+}
+
+/* ---------- 1 つの設定を書き出して読み戻す ---------- */
+async function runVariant(v, refs) {
+  const cfg = Object.assign({ codec: v.codec, width: W, height: H, bitrate: v.bitrate, framerate: FPS, latencyMode: v.latency || 'quality' }, v.extra || {});
+  if (v.mux === 'avc') cfg.avc = { format: 'avc' };
+  let sup; try { sup = await VideoEncoder.isConfigSupported(cfg); } catch (e) { return { ok: false, error: '非対応（' + e.message + '）' }; }
+  if (!sup || !sup.supported) return { ok: false, error: '非対応' };
+  const chunks = []; let decoderConfig = null, err = null;
+  const writer = new J.Mp4Writer({ target: 'buffer', video: { codec: v.mux, width: W, height: H, frameRate: FPS }, fastStart: 'in-memory' });
+  const enc = new VideoEncoder({
+    output(chunk, meta) {
+      if (meta && meta.decoderConfig && !decoderConfig) decoderConfig = meta.decoderConfig;
+      const data = new Uint8Array(chunk.byteLength); chunk.copyTo(data);
+      chunks.push({ type: chunk.type, timestamp: chunk.timestamp, duration: chunk.duration, data });
+      try { writer.addVideoChunk(chunk, meta); } catch (e) { err = err || e; }
+    },
+    error(e) { err = err || e; }
+  });
+  enc.configure(cfg);
+  const canvas = document.createElement('canvas'); canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext('2d', { alpha: false });
+  const t0 = performance.now();
+  for (let i = 0; i < FRAMES; i++) {
+    if (err) throw err;
+    drawFrame(ctx, i);
+    const f = new VideoFrame(canvas, { timestamp: Math.round(i * 1e6 / FPS), duration: Math.round(1e6 / FPS) });
+    try { enc.encode(f, { keyFrame: v.keyEvery ? (i % v.keyEvery === 0) : (i % (FPS * 2) === 0) }); } finally { f.close(); }
+    while (enc.encodeQueueSize > 4 && !err) await new Promise(r => setTimeout(r, 2));
+    if (i % 10 === 0) { status(`${v.label}：書き出し中 ${i} / ${FRAMES}`); await tick(); }
+  }
+  await enc.flush(); enc.close();
+  if (err) throw err;
+  const encodeSec = (performance.now() - t0) / 1000;
+  const mp4 = await writer.finalize();
+  files[v.id] = new Blob([mp4], { type: 'video/mp4' });
+
+  /* 読み戻して元の絵と比べる */
+  let dcfg = { codec: decoderConfig?.codec || v.codec, codedWidth: W, codedHeight: H };
+  if (decoderConfig?.description) {
+    let desc = decoderConfig.description;
+    if (v.mux === 'avc') { const key = chunks.find(c => c.type === 'key'); const fixed = J.repairAvcC(desc, key && key.data); if (fixed) desc = fixed; }
+    dcfg.description = desc;
+  }
+  const psnr = new Array(FRAMES).fill(NaN);
+  const cc = document.createElement('canvas'); cc.width = CROP.w; cc.height = CROP.h;
+  const cx = cc.getContext('2d', { willReadFrequently: true });
+  const buf = new Uint8Array(CROP.w * CROP.h);
+  let derr = null, decoded = 0, shift = null;
+  const dec = new VideoDecoder({
+    output(frame) {
+      try {
+        // 出てきた順番＝表示順で比べる（Firefox の H.264 はタイムスタンプがずれて返ることがあるため）
+        const i = decoded;
+        if (shift === null) shift = Math.round(frame.timestamp * FPS / 1e6) - i;
+        cx.drawImage(frame, -CROP.x, -CROP.y);
+        const y = luma(cx.getImageData(0, 0, CROP.w, CROP.h).data, buf), ref = refs[i];
+        if (ref) { let s = 0; for (let k = 0; k < y.length; k++) { const d = y[k] - ref[k]; s += d * d; } const mse = s / y.length; psnr[i] = mse > 0 ? 10 * Math.log10(255 * 255 / mse) : 99; }
+        decoded++;
+      } catch (e) { derr = derr || e; } finally { frame.close(); }
+    },
+    error(e) { derr = derr || e; }
+  });
+  dec.configure(dcfg);
+  for (let k = 0; k < chunks.length; k++) {
+    const c = chunks[k];
+    dec.decode(new EncodedVideoChunk({ type: c.type, timestamp: c.timestamp, duration: c.duration, data: c.data }));
+    while (dec.decodeQueueSize > 4 && !derr) await new Promise(r => setTimeout(r, 2));
+    if (k % 10 === 0) { status(`${v.label}：画質を測定中 ${k} / ${chunks.length}`); await tick(); }
+    if (derr) break;
+  }
+  if (!derr) await dec.flush();
+  try { dec.close(); } catch (_) {}
+  if (derr) throw new Error('読み戻しに失敗：' + (derr.message || derr));
+
+  /* 集計 */
+  const keys = chunks.filter(c => c.type === 'key').map(c => Math.round(c.timestamp * FPS / 1e6) - (shift || 0)).sort((a, b) => a - b);
+  const gaps = keys.slice(1).map((k, j) => k - keys[j]);
+  const gop = gaps.length ? (gaps.every(g => g === gaps[0]) ? `${gaps[0]} フレーム` : `${Math.min(...gaps)}〜${Math.max(...gaps)}`) : '1 回のみ';
+  const keyBytes = chunks.filter(c => c.type === 'key').reduce((s, c) => s + c.data.length, 0);
+  const total = chunks.reduce((s, c) => s + c.data.length, 0);
+  const valid = psnr.filter(x => isFinite(x));
+  // ぼやけの差：キーフレームとその 1 つ前のフレームの PSNR の差（平均）。動きによる差を避けるため最初のキーフレームは除く
+  const pumps = keys.filter(k => k > 0 && isFinite(psnr[k]) && isFinite(psnr[k - 1])).map(k => psnr[k] - psnr[k - 1]);
+  const pump = v.keyEvery === 1 ? 0 : (pumps.length ? pumps.reduce((a, b) => a + b, 0) / pumps.length : NaN);
+  return {
+    ok: true, mbps: total * 8 / SECONDS / 1e6, gop, keyShare: keyBytes / total,
+    psnr: valid.reduce((a, b) => a + b, 0) / valid.length, minPsnr: Math.min(...valid), pump,
+    decoded, frames: chunks.length, shift, encodeSec, codecOut: decoderConfig?.codec || '', psnrSeries: psnr.map(x => +x.toFixed(2)),
+    config: cfg
+  };
+}
+
+$('run').onclick = async () => {
+  if (typeof VideoEncoder === 'undefined') { status('このブラウザは WebCodecs に対応していません。'); return; }
+  $('run').disabled = true; $('copy').disabled = true; $('saveAll').disabled = true;
+  results.length = 0; $('table').tBodies[0].innerHTML = ''; $('report').value = '';
+  const pv = $('preview').getContext('2d');
+  /* 元の絵（比べる部分だけ）を先に作っておく */
+  const refs = [];
+  const canvas = document.createElement('canvas'); canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext('2d', { alpha: false, willReadFrequently: true });
+  for (let i = 0; i < FRAMES; i++) {
+    drawFrame(ctx, i);
+    refs.push(luma(ctx.getImageData(CROP.x, CROP.y, CROP.w, CROP.h).data, new Uint8Array(CROP.w * CROP.h)));
+    if (i % 10 === 0) { pv.drawImage(canvas, 0, 0); status(`元の映像を準備中 ${i} / ${FRAMES}`); await tick(); }
+  }
+  for (const v of VARIANTS) {
+    let r;
+    try { r = await runVariant(v, refs); } catch (e) { console.error(v.id, e); r = { ok: false, error: 'エラー：' + (e && e.message ? e.message : e) }; }
+    results.push(Object.assign({ id: v.id, label: v.label }, r)); show(v, r);
+  }
+  const lines = ['JIZURA改 書き出し画質テスト', 'UA: ' + navigator.userAgent, `映像: ${W}x${H} ${FPS}fps ${SECONDS}秒`, ''];
+  for (const r of results) {
+    if (!r.ok) { lines.push(`${r.id}\t${r.label}\t${r.error}`); continue; }
+    lines.push(`${r.id}\t${r.label}\tcodec=${r.codecOut}\t${r.mbps.toFixed(2)}Mbps\tGOP=${r.gop}\tkey割合=${(r.keyShare * 100).toFixed(0)}%\tPSNR=${r.psnr.toFixed(2)}\tmin=${r.minPsnr.toFixed(2)}\tぼやけ差=${r.pump.toFixed(2)}\t時間=${r.encodeSec.toFixed(1)}s\tframes=${r.frames}/${r.decoded}\tずれ=${r.shift}`);
+  }
+  lines.push('', '--- フレームごとの PSNR ---');
+  for (const r of results) if (r.ok) lines.push(r.id + ': ' + r.psnrSeries.join(','));
+  $('report').value = lines.join('\n');
+  status('完了しました。「結果をコピー」でコピーして、チャットに貼り付けてください。');
+  $('run').disabled = false; $('copy').disabled = false; $('saveAll').disabled = !Object.keys(files).length;
+};
+$('copy').onclick = async () => {
+  try { await navigator.clipboard.writeText($('report').value); status('コピーしました。'); }
+  catch (e) { $('report').select(); document.execCommand('copy'); status('コピーしました。'); }
+};
+$('saveAll').onclick = () => { Object.keys(files).forEach((id, k) => setTimeout(() => save(id), k * 400)); };
+</script>
+</body>
+</html>

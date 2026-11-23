@@ -1,3 +1,15 @@
+## 1.5.2-fc.7 — 2026-11-24（Firefox Compatible）
+
+- Firefox の MP4 書き出しを x264（WebAssembly）に。Firefox の H.264 エンコーダーはキーフレームが1秒ごとに固定で、間のフレームの細部が崩れて「1秒おきにぼやけて戻る」ため、画質一定（CRF：高 16 / 標準 19 / 軽量 23）でエンコードします。キーフレームは最大5秒ごと。うまくいかないときは従来のブラウザのエンコーダーで再試行。Chrome / Edge は従来どおり。
+- ページをクロスオリジン分離（サービスワーカーが COOP / COEP: credentialless を付ける）にして、x264 を複数スレッド（最大16）で動かす。分離されていないとき（はじめて開いたとき・ローカルのファイルを開いたとき）は1スレッド。
+- x264 を含むため、ライセンスを GNU GPL v2 以降に変更（原版・cityedge 版・fc.6 までの改変は MIT のまま）。x264 のソース・変更点・ビルド手順を vendor/x264/ に同梱。
+- Use x264 (WebAssembly, constant-quality CRF) for H.264 MP4 export in Firefox, whose built-in encoder forces a key frame every second and blurs between them; fall back to the browser encoder on failure. Cross-origin isolation via the service worker enables multithreaded x264. Licensed under GPL-2.0-or-later because of x264; x264 source, patch and build script in vendor/x264/.
+
+## 1.5.2-fc.6 — 2026-11-24（Firefox Compatible）
+
+- Firefox で書き出した MP4 が 1 秒ごとにぼやけて戻る（キーフレームの間のフレームの画質が落ちる）問題を軽減：Firefox では映像のビットレートを 2 倍に（上限は従来どおり）。Chrome / Edge は変わりません。
+- Reduce the once-a-second blur in MP4s exported from Firefox (frames between keyframes were starved of data): Firefox now uses twice the video bitrate (same caps). Chrome / Edge are unchanged.
+
 ## 1.5.2-fc.5 — 2026-11-22（Firefox Compatible）
 
 - Chrome が自動で出すインストールの案内は止め、インストールは「︙」メニューか「設定」の「アプリとしてインストール」（インストールできるときだけ表示）から任意で。

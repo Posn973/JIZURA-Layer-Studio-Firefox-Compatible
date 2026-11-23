@@ -38,7 +38,10 @@ const VIDEO_CANDS = [
 J.normalizeQuality = q => (q === 'high' || q === 'max') ? 'high' : q === 'light' ? 'light' : 'standard';
 J.videoBitrate = (w, h, fps, quality) => {
   const q = J.normalizeQuality(quality);
-  const want = w * h * fps * (q === 'high' ? 0.28 : q === 'light' ? 0.08 : 0.16);
+  /* JIZURA改: Firefox の H.264 エンコーダーはキーフレーム（1秒ごと）にデータの大半を使い、間のフレームが細かい部分から崩れて
+     「1秒おきにぼやけて戻る」ように見える。Chrome と同じ指定では間のフレームが足りないので、Firefox では 2 倍にする */
+  const boost = (typeof navigator !== 'undefined' && /firefox/i.test(navigator.userAgent || '')) ? 2 : 1;
+  const want = w * h * fps * (q === 'high' ? 0.28 : q === 'light' ? 0.08 : 0.16) * boost;
   const px = w * h, cap = px <= 2.2e6 ? 40e6 : px <= 3.8e6 ? 60e6 : 90e6;
   return Math.round(Math.min(want, cap));
 };
@@ -64,6 +67,9 @@ J.pickVideoCodec = (w, h, fps, bitrate) => {
 J.videoAttempts = async (w, h, fps, bitrate) => {
   if (typeof VideoEncoder === 'undefined') return [];
   const out = [], seen = new Set();
+  // JIZURA改: Firefox は x264（画質一定）を最初に試す。だめならブラウザのエンコーダーへ
+  const x264 = J.x264Attempt ? J.x264Attempt(w, h, fps) : null;
+  if (x264) out.push(x264);
   const add = async (c, hw, br) => {
     const key = c.codec + '|' + (hw || '') + '|' + br;
     if (seen.has(key) || out.length >= 5) return;
@@ -142,7 +148,7 @@ J.exportMP4 = async (o) => {
   const err = new Error('MP4 を書き出せませんでした。' + (file ? '' : '「大きな動画用（ファイルに直接保存）」か、') + '解像度・fps・画質を下げて試してください。詳細：' + tried.join(' ／ '));
   err.detail = tried; throw err;
 };
-async function encodeMP4({ plan, project, audio, onProgress, signal, range, file, w, h, vc, note }) {
+async function encodeMP4({ plan, project, audio, quality, onProgress, signal, range, file, w, h, vc, note }) {
   const span = J.exportSpan(plan, range);
   const fps = plan.fps;
   let ac = null;
@@ -156,28 +162,27 @@ async function encodeMP4({ plan, project, audio, onProgress, signal, range, file
   const muxer = new J.Mp4Writer({ target: file || { onWrite: (data, pos) => store.write(data, pos) }, video: { codec: vc.mux, width: w, height: h, frameRate: fps },
     audio: ac ? { codec: ac.mux } : null, fastStart: false });
   let err = null, outFrames = 0;
-  const venc = new VideoEncoder({ output: (chunk, meta) => { outFrames++; try { muxer.addVideoChunk(chunk, meta); } catch (e) { err = e; } }, error: e => { err = e; } });
-  venc.configure(Object.assign({}, vc.cfg, { latencyMode: 'quality' }));
+  let venc = null;
   const canvas = document.createElement('canvas'); canvas.width = w; canvas.height = h;
   const ctx = canvas.getContext('2d', { alpha: false });
   const R = new J.Renderer();
   const total = Math.max(1, Math.round(span.dur * fps));
   const scale = w / plan.W;
   const prevRes = J.glyphs.maxRes; J.glyphs.maxRes = h >= 1000 ? 768 : 512;
-  const closeEnc = () => { try { if (venc.state !== 'closed') venc.close(); } catch (e) {} };
+  const closeEnc = () => { try { if (venc && venc.state !== 'closed') venc.close(); } catch (e) {} };
   try {
+    venc = await J.openVideoEncoder(vc, { width: w, height: h, fps, quality, output: (chunk, meta) => { outFrames++; try { muxer.addVideoChunk(chunk, meta); } catch (e) { err = e; } }, error: e => { err = e; } });
     for (let i = 0; i < total; i++) {
       if (signal && signal.aborted) { closeEnc(); throw new Error('キャンセルしました'); }
       if (err) throw err;
       if (venc.state === 'closed') throw new Error('エンコーダーが停止しました');
       R.frame(ctx, plan, span.t0 + i / fps, { scale });
-      const vf = new VideoFrame(canvas, { timestamp: Math.round(i * 1e6 / fps), duration: Math.round(1e6 / fps) });
-      try { venc.encode(vf, { keyFrame: i % (fps * 2) === 0 }); } finally { vf.close(); }
+      venc.encode(canvas, i);
       let spins = 0;
       // (time in the background doesn't count: a phone pauses the encoder while the page is hidden)
       while (venc.encodeQueueSize > 4 && !err) { await new Promise(r => setTimeout(r, 2)); if (!document.hidden && ++spins > 15000) throw new Error('エンコーダーが応答しません'); }
       // an encoder that accepts frames but never returns any has failed silently (seen with some GPU drivers)
-      if (i === Math.min(total - 1, fps * 3) && outFrames === 0) { await venc.flush(); if (!outFrames) throw new Error('エンコーダーが出力を返しません'); }
+      if (!venc.x264 && i === Math.min(total - 1, fps * 3) && outFrames === 0) { await venc.flush(); if (!outFrames) throw new Error('エンコーダーが出力を返しません'); }
       await muxer.settle();
       if (i % 3 === 0) { onProgress && onProgress(i / total, `フレーム ${i + 1}/${total}${note || ''}`); await new Promise(r => setTimeout(r, 0)); }
     }
@@ -222,7 +227,7 @@ async function encodeMP4({ plan, project, audio, onProgress, signal, range, file
   if (file) await file.close();
   onProgress && onProgress(1, '完了');
   const size = file ? null : store.end;
-  return { blob: file ? null : store.blob('video/mp4'), size, codec: vc.label + (vc.hw === 'prefer-software' ? '（ソフトウェア）' : ''), audio: ac ? ac.mux : null, audioWanted: !!(audio && audio.buffer && project.includeAudio !== false), width: w, height: h, toFile: !!file };
+  return { blob: file ? null : store.blob('video/mp4'), size, codec: ((venc && venc.label) || vc.label) + (vc.hw === 'prefer-software' ? '（ソフトウェア）' : ''), audio: ac ? ac.mux : null, audioWanted: !!(audio && audio.buffer && project.includeAudio !== false), width: w, height: h, toFile: !!file };
 }
 
 /* ---------- PNG sequence as ZIP (store, no compression) ---------- */

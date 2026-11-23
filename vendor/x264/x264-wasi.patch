@@ -1,0 +1,36 @@
+diff --git a/common/cpu.c b/common/cpu.c
+index fb7c07d..582f894 100644
+--- a/common/cpu.c
++++ b/common/cpu.c
+@@ -502,8 +502,8 @@ uint32_t x264_cpu_detect( void )
+ 
+ int x264_cpu_num_processors( void )
+ {
+-#if !HAVE_THREAD
+-    return 1;
++#if !HAVE_THREAD || defined(__wasi__)
++    return 1; /* JIZURA改: WebAssembly; the thread count is always given by the caller */
+ 
+ #elif SYS_WINDOWS
+     return x264_pthread_num_processors_np();
+diff --git a/common/osdep.h b/common/osdep.h
+index ca24455..9a89ade 100644
+--- a/common/osdep.h
++++ b/common/osdep.h
+@@ -381,7 +381,16 @@ static inline int x264_pthread_create( x264_pthread_t *t, void *a, void *(*f)(vo
+ #elif HAVE_POSIXTHREAD
+ #include <pthread.h>
+ #define x264_pthread_t               pthread_t
++#ifdef __wasi__
++/* JIZURA改: WebAssembly threads get a small default stack; x264's analysis needs more */
++static inline int x264_pthread_create( pthread_t *t, const pthread_attr_t *a, void *(*f)(void *), void *d )
++{
++    pthread_attr_t attr; pthread_attr_init( &attr ); pthread_attr_setstacksize( &attr, 4 << 20 );
++    int r = pthread_create( t, &attr, f, d ); pthread_attr_destroy( &attr ); (void)a; return r;
++}
++#else
+ #define x264_pthread_create          pthread_create
++#endif
+ #define x264_pthread_join            pthread_join
+ #define x264_pthread_mutex_t         pthread_mutex_t
+ #define x264_pthread_mutex_init      pthread_mutex_init

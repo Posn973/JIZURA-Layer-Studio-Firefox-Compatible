@@ -1,3 +1,26 @@
+JIZURA Layer Studio Firefox Compatible
+
+Copyright (c) 2026 hakoniwa
+Copyright (c) 2026 cityedge (modifications for JIZURA Layer Studio)
+Copyright (c) 2026 Posn973 (modifications for JIZURA Layer Studio Firefox Compatible)
+
+From version 1.5.2-fc.7 this application includes x264 (vendor/x264/), which is
+licensed under the GNU General Public License version 2 or later. The application
+as a whole, including the built index.html and en/index.html, is therefore
+distributed under the terms of the GNU General Public License as published by the
+Free Software Foundation; either version 2 of the License, or (at your option)
+any later version. The full text of the license is in COPYING.
+
+This program is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+The original JIZURA (hakoniwa), the cityedge fork and Posn973's modifications up
+to version 1.5.2-fc.6 were released under the MIT License below. That code, taken
+on its own without x264, may still be used under the MIT License.
+
+----------------------------------------------------------------------------
+
 MIT License
 
 Copyright (c) 2026 hakoniwa

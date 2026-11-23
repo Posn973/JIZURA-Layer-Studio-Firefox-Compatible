@@ -48,9 +48,12 @@ J.Mp4Writer = class {
     const t = packet.timestamp - this[key];
     return t === packet.timestamp ? packet : packet.clone({ timestamp: t });
   }
+  /* chunk: an EncodedVideoChunk from WebCodecs, or { data, type, timestamp, duration } (µs) from x264 */
   addVideoChunk(chunk, meta) {
     if (this.error) throw this.error;
-    const packet = this.shift(MB().EncodedPacket.fromEncodedChunk(chunk), 'firstVideo');
+    const M = MB();
+    const raw = chunk.data instanceof Uint8Array ? new M.EncodedPacket(chunk.data, chunk.type, chunk.timestamp / 1e6, (chunk.duration || 0) / 1e6) : M.EncodedPacket.fromEncodedChunk(chunk);
+    const packet = this.shift(raw, 'firstVideo');
     const desc = meta?.decoderConfig?.description;
     if (desc && /^avc[13]/.test(meta.decoderConfig.codec || '')) {
       const fixed = J.repairAvcC(desc, packet.data);
@@ -107,6 +110,7 @@ const buildAvcC = (sps, pps, lengthSize) => {
   if (high) { a[o++] = 0xfd; a[o++] = 0xf8; a[o++] = 0xf8; a[o++] = 0; }   // 4:2:0, 8-bit, no SPS extensions
   return a;
 };
+J.buildAvcC = buildAvcC;
 J.repairAvcC = (description, sample) => {
   try {
     const a = description instanceof Uint8Array ? description : ArrayBuffer.isView(description)

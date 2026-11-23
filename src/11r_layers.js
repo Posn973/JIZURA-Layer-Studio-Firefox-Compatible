@@ -425,8 +425,9 @@ J.exportLayerPair = async ({ plan, project, spectrum = null, range = null, signa
       for (const name of frontOnly ? ['front'] : ['front', 'matte']) {
         const mux = new J.Mp4Writer({ video: { codec: codec.mux, width: w, height: h, frameRate: fps }, fastStart: 'in-memory' });
         const state = { name, mux, error: null, count: 0 };
-        state.encoder = new VideoEncoder({ output(chunk, meta) { try { mux.addVideoChunk(chunk, meta); state.count++; } catch (e) { state.error = e; } }, error(e) { state.error = e; } });
-        writers.push(state); state.encoder.configure(Object.assign({}, codec.cfg, { latencyMode: 'quality' }));
+        writers.push(state);
+        state.encoder = await J.openVideoEncoder(codec, { width: w, height: h, fps, quality: project.quality,
+          output(chunk, meta) { try { mux.addVideoChunk(chunk, meta); state.count++; } catch (e) { state.error = e; } }, error(e) { state.error = e; } });
       }
       const mode = J.normalizeLayerMode(project.layerMode), render = new J.LayerRenderer(w, h, mode, project.layerBackgroundOpacity, project.hideDecorativeText);
       for (let i = 0; i < total; i++) {
@@ -437,8 +438,7 @@ J.exportLayerPair = async ({ plan, project, spectrum = null, range = null, signa
         const pair = frontOnly ? { front: render.frontFrame(pixels, spectrumPixels) } : render.pair(pixels);
         for (const state of writers) {
           if (state.error) throw state.error;
-          const vf = new VideoFrame(pair[state.name], { timestamp: Math.round(i * 1e6 / fps), duration: Math.round((i + 1) * 1e6 / fps) - Math.round(i * 1e6 / fps) });
-          try { state.encoder.encode(vf, { keyFrame: i % (fps * 2) === 0 }); } finally { vf.close(); }
+          state.encoder.encode(pair[state.name], i);
         }
         const deadline = performance.now() + 30000;
         while (writers.some(s => s.encoder.encodeQueueSize > 3)) {

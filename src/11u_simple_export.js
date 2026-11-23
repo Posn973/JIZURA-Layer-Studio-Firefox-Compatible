@@ -202,8 +202,8 @@ J.exportSimpleVideo = async ({ plan, project, background = null, spectrum = null
       if (spectrum) reader = await J.createSpectrumReader(spectrum, w, h, span.t0, fps, span.frames, signal, project.layerMode);
       if (background?.video) backgroundReader = await J.VideoBackgroundReader.create(background, span, fps, signal);
       mux = new J.Mp4Writer({ video: { codec: 'avc', width: w, height: h, frameRate: fps }, audio: audioConfig ? { codec: audioConfig.mux } : null, fastStart: 'in-memory' });
-      encoder = new VideoEncoder({ output(chunk, meta) { try { mux.addVideoChunk(chunk, meta); count++; } catch (e) { error = e; } }, error(e) { error = e; } });
-      encoder.configure({ ...codec.cfg, latencyMode: 'quality' });
+      encoder = await J.openVideoEncoder(codec, { width: w, height: h, fps, quality: project.quality,
+        output(chunk, meta) { try { mux.addVideoChunk(chunk, meta); count++; } catch (e) { error = e; } }, error(e) { error = e; } });
       const mode = J.normalizeLayerMode(project.layerMode);
       const render = new J.LayerRenderer(w, h, mode, project.layerBackgroundOpacity, project.hideDecorativeText), canvas = J.layerCanvas(w, h), base = J.layerCanvas(w, h);
       const ctx = canvas.getContext('2d'), bx = base.getContext('2d');
@@ -224,8 +224,7 @@ J.exportSimpleVideo = async ({ plan, project, background = null, spectrum = null
         render.layer.getContext('2d').putImageData(new ImageData(pixels, w, h), 0, 0);
         ctx.drawImage(render.layer, 0, 0);
         J.drawSimpleTitle(ctx, title, 'text');
-        const frame = new VideoFrame(canvas, { timestamp: Math.round(i * 1e6 / fps), duration: Math.round((i + 1) * 1e6 / fps) - Math.round(i * 1e6 / fps) });
-        try { encoder.encode(frame, { keyFrame: i % (fps * 2) === 0 }); } finally { frame.close(); }
+        encoder.encode(canvas, i);
         await drain(encoder, () => error, signal);
         await mux.settle();
         if (i % 3 === 0) { onProgress?.((audioConfig ? 0.9 : 0.99) * (i + 1) / span.frames, `${i + 1} / ${span.frames}`); await tick(); }

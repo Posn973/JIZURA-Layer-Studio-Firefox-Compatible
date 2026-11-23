@@ -18,6 +18,10 @@ js = '\n'.join(read(f) for f in sources)
 # JIZURA改: MP4 files are written with Mediabunny (src/10b_mp4_writer.js); mp4-muxer is no longer embedded
 mux = ''
 demux = read('vendor/mediabunny.min.js')
+# JIZURA改: x264（GPL-2.0-or-later）を WebAssembly にしたもの。ソースとビルド手順は vendor/x264/
+import base64
+_b64 = lambda p: base64.b64encode(open(p, 'rb').read()).decode('ascii')
+x264 = '<script>window.JZ_X264_WASM={st:"%s",mt:"%s"};</script>' % (_b64('vendor/x264/x264.wasm'), _b64('vendor/x264/x264-mt.wasm'))
 
 def build(lang):
     english = lang == 'en'
@@ -68,6 +72,7 @@ def build(lang):
 </head>
 <body>
 {body}
+{x264}
 <script>
 {demux}
 </script>
