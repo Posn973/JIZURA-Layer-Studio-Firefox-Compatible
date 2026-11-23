@@ -158,7 +158,7 @@ class X264Encoder {
     const headers = await opened;
     this.config = avcConfig(headers, width, height);
     this.state = 'configured';
-    this.label = 'H.264 (x264' + (mt ? ', ' + threads + ' threads' : '') + ')';
+    this.label = 'H.264 (x264, ' + (mt ? threads + ' threads' : '1 thread') + ')';
     return this;
   }
   fail(err) {
@@ -225,5 +225,6 @@ J.openVideoEncoder = async (vc, { width, height, fps, quality, output, error }) 
     close() { try { if (enc.state !== 'closed') enc.close(); } catch (_) {} },
   };
 };
+J.x264Label = () => { const t = J.x264Threads(); return 'H.264 (x264' + (t > 1 && WASM && WASM.mt ? ', ' + t + ' threads' : ', 1 thread') + ')'; };
 J.x264Attempt = (w, h, fps) => J.useX264() ? { codec: 'x264', mux: 'avc', label: 'H.264 (x264)', x264: true, hw: 'x264', cfg: { width: w, height: h, framerate: fps } } : null;
 })();

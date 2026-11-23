@@ -1595,7 +1595,8 @@ function syncOut() {
 function codecNoteSoon() { (window.requestIdleCallback || (f => setTimeout(f, 400)))(() => codecNote(), { timeout: 1500 }); }
 async function codecNote() {
   const [w, h] = J.outputSize(S.project);
-  const vc = await J.pickVideoCodec(w, h, S.project.fps, 12e6);
+  const vc0 = await J.pickVideoCodec(w, h, S.project.fps, 12e6);
+  const vc = vc0 && J.useX264 && J.useX264() ? { label: J.x264Label() } : vc0;   // JIZURA改: Firefox は x264
   $('codecNote').textContent = vc ? `このブラウザでは ${vc.label} で書き出します（${w}×${h} / ${S.project.fps}fps）。書き出し中はタブを開いたままにしてください。` : 'このブラウザは動画エンコード（WebCodecs）に対応していません。Chrome / Edge の最新版で開くか、連番PNGを使ってください。';
   $('btnMP4').disabled = !vc; $('eMP4').disabled = !vc;
   ['btnMP4File', 'eMP4File'].forEach(id => { $(id).hidden = !vc || !canPickFile(); });

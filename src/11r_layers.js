@@ -448,7 +448,7 @@ J.exportLayerPair = async ({ plan, project, spectrum = null, range = null, signa
           await new Promise(r => setTimeout(r, 5));
         }
         for (const s of writers) await s.mux.settle();
-        if (i % 3 === 0) { onProgress?.(i / total, (i + 1) + ' / ' + total); await new Promise(r => setTimeout(r, 0)); }
+        if (i % 3 === 0) { onProgress?.(i / total, (i + 1) + ' / ' + total + '・' + (writers[0].encoder.label || codec.label)); await new Promise(r => setTimeout(r, 0)); }
       }
       for (const s of writers) {
         await Promise.race([s.encoder.flush(), new Promise((_, reject) => { const timer = setTimeout(() => reject(new Error('Encoder flush timeout')), 30000); s.flushTimer = timer; })]);

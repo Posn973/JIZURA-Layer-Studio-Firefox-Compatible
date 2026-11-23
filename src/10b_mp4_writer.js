@@ -18,7 +18,7 @@ J.MP4_COPY_AUDIO = ['aac', 'opus', 'mp3'];
 J.Mp4Writer = class {
   /* target: 'buffer' | { onWrite(data, position) } | FileSystemWritableFileStream
      video: { codec: 'avc'|'vp9'|'av1', width, height, frameRate }
-     audio: { codec: 'aac'|'opus'|'mp3' } (optional)
+     audio: { codec: 'aac'|'opus'|'mp3', encode?: true, bitrate? } (optional; encode = PCM in, encoded by Mediabunny) 
      fastStart: false | 'in-memory' */
   constructor({ target = 'buffer', video, audio = null, fastStart = 'in-memory' }) {
     const M = MB();
@@ -32,7 +32,8 @@ J.Mp4Writer = class {
     this.output = new M.Output({ format: new M.Mp4OutputFormat({ fastStart }), target: this.target });
     this.video = new M.EncodedVideoPacketSource(video.codec);
     this.output.addVideoTrack(this.video, video.frameRate ? { frameRate: video.frameRate } : undefined);
-    if (audio) { this.audio = new M.EncodedAudioPacketSource(audio.codec); this.output.addAudioTrack(this.audio); }
+    if (audio && audio.encode) { this.audioEnc = new M.AudioBufferSource({ codec: audio.codec, bitrate: audio.bitrate || 192000 }); this.output.addAudioTrack(this.audioEnc); }
+    else if (audio) { this.audio = new M.EncodedAudioPacketSource(audio.codec); this.output.addAudioTrack(this.audio); }
     this.error = null; this.queued = 0; this.firstVideo = null; this.firstAudio = null;
     this.chain = this.output.start().catch(e => { this.error = this.error || e; });
   }
@@ -65,6 +66,11 @@ J.Mp4Writer = class {
     if (this.error) throw this.error;
     const packet = this.shift(MB().EncodedPacket.fromEncodedChunk(chunk), 'firstAudio');
     this.push(() => this.audio.add(packet, meta));
+  }
+  /* PCM (an AudioBuffer) for the audio track opened with { encode: true }; pieces follow each other in time */
+  addAudioBuffer(buffer) {
+    if (this.error) throw this.error;
+    this.push(() => this.audioEnc.add(buffer));
   }
   /* an already encoded packet (audio copied from the source file); its timestamp is used as is */
   addAudioPacket(packet, meta) {
@@ -111,6 +117,18 @@ const buildAvcC = (sps, pps, lengthSize) => {
   return a;
 };
 J.buildAvcC = buildAvcC;
+
+/* JIZURA改: AAC encoding — the browser's own (WebCodecs, Chrome / Edge) or, where there is none (Firefox),
+   FFmpeg's AAC encoder through @mediabunny/aac-encoder. 'native' | 'mediabunny' | 'none' */
+let aacRegistered = false;
+J.aacEncodeMode = async (sampleRate = 48000, channels = 2) => {
+  try {
+    if (typeof AudioEncoder !== 'undefined' && (await AudioEncoder.isConfigSupported({ codec: 'mp4a.40.2', sampleRate, numberOfChannels: channels, bitrate: 192000 })).supported) return 'native';
+  } catch (e) {}
+  if (typeof MediabunnyAacEncoder === 'undefined' || typeof Mediabunny === 'undefined') return 'none';
+  try { if (!aacRegistered) { MediabunnyAacEncoder.registerAacEncoder(); aacRegistered = true; } return 'mediabunny'; }
+  catch (e) { console.warn('AAC encoder not available', e); return 'none'; }
+};
 J.repairAvcC = (description, sample) => {
   try {
     const a = description instanceof Uint8Array ? description : ArrayBuffer.isView(description)

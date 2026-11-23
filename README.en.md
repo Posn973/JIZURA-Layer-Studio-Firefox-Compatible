@@ -2,7 +2,7 @@
 
 **[Open the app](https://posn973.github.io/JIZURA-Layer-Studio-Firefox-Compatible/en/)** · [日本語](https://posn973.github.io/JIZURA-Layer-Studio-Firefox-Compatible/)
 
-A modified version of [JIZURA Layer Studio (cityedge fork)](https://github.com/cityedge/jizura_layer_studio) by Posn973: MP4 export works in Firefox (Mediabunny muxer with B-frame support and avcC repair), AAC audio from the music file is copied without re-encoding, a "Match background" aspect ratio, an orange "MP4 export" button on the right panel, and H.264 encoding with x264 (WebAssembly, constant quality) in Firefox, whose built-in encoder blurs once a second. See [CHANGELOG.md](CHANGELOG.md). Because it includes x264, the app is licensed under the GNU GPL v2 or later.
+A modified version of [JIZURA Layer Studio (cityedge fork)](https://github.com/cityedge/jizura_layer_studio) by Posn973: MP4 export works in Firefox (Mediabunny muxer with B-frame support and avcC repair), AAC audio from the music file is copied without re-encoding (other audio is encoded to AAC, in Firefox with FFmpeg's AAC encoder via @mediabunny/aac-encoder), a "Match background" aspect ratio, an orange "MP4 export" button on the right panel, and H.264 encoding with x264 (WebAssembly, constant quality) in Firefox, whose built-in encoder blurs once a second. See [CHANGELOG.md](CHANGELOG.md). Because it includes x264, the app is licensed under the GNU GPL v2 or later.
 
 ---
 

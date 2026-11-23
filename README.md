@@ -5,7 +5,7 @@
 [JIZURA Layer Studio（cityedge fork）](https://github.com/cityedge/jizura_layer_studio) をPosn973が改変した版です。主な変更点：
 
 - **Firefoxで MP4 を書き出せる**：MP4の書き込みを mp4-muxer から Mediabunny に変更し、Bフレームを使うH.264エンコーダー（Firefox）に対応。Firefoxのエンコーダーが渡す壊れた設定情報（avcC）も自動で修復し、Windowsのサムネイル・標準プレーヤーで扱える形で保存します。
-- **AAC音声をそのままコピー**：読み込んだ曲がAAC（.m4a など）なら再エンコードせずにMP4へ入れます（無劣化。AACエンコーダーのないFirefoxでもAAC）。それ以外はAAC → Opus の順でエンコード。
+- **AAC音声をそのままコピー**：読み込んだ曲がAAC（.m4a など）なら再エンコードせずにMP4へ入れます（無劣化。AACエンコーダーのないFirefoxでもAAC）。それ以外は AAC にエンコードします（Firefox では FFmpeg の AAC エンコーダー＝@mediabunny/aac-encoder を使用）。
 - **画面比「背景に合わせる」**：背景画像・背景動画の縦横比で書き出し（例：3:2の背景 → 1620×1080）。
 - **Firefox の MP4 は x264 でエンコード**：Firefox に入っている H.264 エンコーダーは1秒ごとに画質が落ちて戻る（ぼやける）ため、x264（WebAssembly）で画質一定（CRF）に書き出します。ページがクロスオリジン分離されていれば複数スレッドで動きます。Chrome / Edge は従来どおりブラウザのエンコーダー。
 - **右側に「MP4書き出し」「MP4書き出し設定」**：かんたんパネルの一番下、詳細の「書き出し」タブの一番下に配置（左パネルの簡易動画出力ボタンは削除）。

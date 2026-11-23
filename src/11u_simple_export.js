@@ -170,6 +170,24 @@ async function encodeSound(buffer, mux, span, config, signal, progress) {
     if (!count) throw new Error(tr('音声が出力されませんでした。', 'No encoded audio was produced.'));
   } finally { try { encoder.close(); } catch (_) {} }
 }
+// JIZURA改: the same five-second pieces, encoded to AAC by FFmpeg's encoder inside Mediabunny (Firefox has no AAC encoder)
+async function encodeSoundMB(buffer, mux, span, config, signal, progress) {
+  const sr = config.sampleRate, channels = config.numberOfChannels, total = Math.round(span.duration * sr);
+  for (let offset = 0; offset < total; offset += sr * 5) {
+    abort(signal);
+    const length = Math.min(sr * 5, total - offset), sourceTime = span.t0 + offset / sr;
+    let block = null;
+    if (sourceTime < buffer.length / buffer.sampleRate) {
+      const offline = new OfflineAudioContext(channels, length, sr), source = offline.createBufferSource();
+      source.buffer = buffer; source.connect(offline.destination); source.start(0, sourceTime);
+      block = await bounded(offline.startRendering(), signal);
+    }
+    mux.addAudioBuffer(block || new AudioBuffer({ length, numberOfChannels: channels, sampleRate: sr }));
+    await mux.settle(2);
+    progress?.(0.9 + 0.09 * (offset + length) / total, tr('音声を AAC にエンコード中', 'Encoding audio (AAC)')); await tick();
+  }
+  await mux.settle(0);
+}
 J.exportSimpleVideo = async ({ plan, project, background = null, spectrum = null, audio = null, range = null, signal, onProgress }) => {
   if (background?.simpleError) throw new Error(background.simpleError);
   const settings = J.normalizeSimpleExport(project.simpleExport), span = J.simpleExportSpan(settings.duration, plan.fps, range);
@@ -184,10 +202,12 @@ J.exportSimpleVideo = async ({ plan, project, background = null, spectrum = null
   if (settings.includeAudio && audio?.buffer) {
     const channels = Math.min(2, audio.buffer.numberOfChannels);
     const encodable = async codec => typeof AudioEncoder !== 'undefined' && await AudioEncoder.isConfigSupported({ codec, sampleRate: 48000, numberOfChannels: channels, bitrate: 192000 }).then(r => r.supported).catch(() => false);
+    // JIZURA改: AAC を作れるか（ブラウザのエンコーダー、なければ FFmpeg の AAC＝Firefox）
+    const aacMode = await J.aacEncodeMode(48000, channels), aacOk = aacMode !== 'none';
     audioCopy = audio.file ? await J.openAudioCopy(audio.file) : null;
-    if (audioCopy && audioCopy.codec !== 'aac' && await encodable('mp4a.40.2')) { audioCopy.dispose(); audioCopy = null; }
+    if (audioCopy && audioCopy.codec !== 'aac' && aacOk) { audioCopy.dispose(); audioCopy = null; }
     if (audioCopy) audioConfig = { copy: true, mux: audioCopy.codec };
-    else if (await encodable('mp4a.40.2')) audioConfig = { codec: 'mp4a.40.2', mux: 'aac', sampleRate: 48000, numberOfChannels: channels, bitrate: 192000 };
+    else if (aacOk) audioConfig = { codec: 'mp4a.40.2', mux: 'aac', sampleRate: 48000, numberOfChannels: channels, bitrate: 192000, mb: aacMode === 'mediabunny' };
     else if (await encodable('opus')) audioConfig = { codec: 'opus', mux: 'opus', sampleRate: 48000, numberOfChannels: channels, bitrate: 192000 };
     else throw new Error(tr('この環境では音声を出力できません。「音源を含めない」を選ぶか、AAC（.m4a）の音源を読み込んでください。', 'Audio encoding is unavailable. Select “Exclude audio” or load an AAC (.m4a) music file.'));
   }
@@ -201,7 +221,7 @@ J.exportSimpleVideo = async ({ plan, project, background = null, spectrum = null
       abort(signal);
       if (spectrum) reader = await J.createSpectrumReader(spectrum, w, h, span.t0, fps, span.frames, signal, project.layerMode);
       if (background?.video) backgroundReader = await J.VideoBackgroundReader.create(background, span, fps, signal);
-      mux = new J.Mp4Writer({ video: { codec: 'avc', width: w, height: h, frameRate: fps }, audio: audioConfig ? { codec: audioConfig.mux } : null, fastStart: 'in-memory' });
+      mux = new J.Mp4Writer({ video: { codec: 'avc', width: w, height: h, frameRate: fps }, audio: audioConfig ? { codec: audioConfig.mux, encode: !!audioConfig.mb, bitrate: 192000 } : null, fastStart: 'in-memory' });
       encoder = await J.openVideoEncoder(codec, { width: w, height: h, fps, quality: project.quality,
         output(chunk, meta) { try { mux.addVideoChunk(chunk, meta); count++; } catch (e) { error = e; } }, error(e) { error = e; } });
       const mode = J.normalizeLayerMode(project.layerMode);
@@ -227,7 +247,7 @@ J.exportSimpleVideo = async ({ plan, project, background = null, spectrum = null
         encoder.encode(canvas, i);
         await drain(encoder, () => error, signal);
         await mux.settle();
-        if (i % 3 === 0) { onProgress?.((audioConfig ? 0.9 : 0.99) * (i + 1) / span.frames, `${i + 1} / ${span.frames}`); await tick(); }
+        if (i % 3 === 0) { onProgress?.((audioConfig ? 0.9 : 0.99) * (i + 1) / span.frames, `${i + 1} / ${span.frames}・${encoder.label || codec.label}`); await tick(); }
       }
       await bounded(encoder.flush(), signal); if (error) throw error;
       if (count !== span.frames) throw new Error(tr('映像フレームが不足しています。', 'Encoded video frames are incomplete.'));
@@ -235,9 +255,9 @@ J.exportSimpleVideo = async ({ plan, project, background = null, spectrum = null
         audioPhase = true; onProgress?.(0.95, tr('音声をコピー中', 'Copying audio'));
         const copied = await audioCopy.copyTo(mux, span.t0, span.duration, signal);
         if (!copied && audio.buffer.duration > span.t0 + 0.5) throw new Error(tr('音声をコピーできませんでした。', 'Could not copy the audio.'));
-      } else if (audioConfig) { audioPhase = true; await encodeSound(audio.buffer, mux, span, audioConfig, signal, onProgress); }
+      } else if (audioConfig) { audioPhase = true; await (audioConfig.mb ? encodeSoundMB : encodeSound)(audio.buffer, mux, span, audioConfig, signal, onProgress); }
       abort(signal); const buffer = await mux.finalize(); done = true; audioCopy?.dispose(); onProgress?.(1, tr('完了', 'Done'));
-      return { files: [{ name: 'simple_video.mp4', blob: new Blob([buffer], { type: 'video/mp4' }) }], ...span, audio: audioConfig ? audioConfig.mux : null };
+      return { files: [{ name: 'simple_video.mp4', blob: new Blob([buffer], { type: 'video/mp4' }) }], ...span, audio: audioConfig ? audioConfig.mux : null, codec: encoder.label || codec.label };
     } catch (e) {
       if (signal?.aborted || e.name === 'AbortError') { audioCopy?.dispose(); throw new DOMException('Cancelled', 'AbortError'); }
       if (audioPhase) { audioCopy?.dispose(); throw e; }

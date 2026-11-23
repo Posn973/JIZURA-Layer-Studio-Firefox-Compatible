@@ -1,3 +1,10 @@
+## 1.5.2-fc.8 — 2026-11-24（Firefox Compatible）
+
+- Firefox でも音声を AAC に：曲が AAC 以外（Opus・MP3・WAV、中身が Opus の .m4a など）のとき、これまでは Opus のまま入り X などで「互換性のない音声」になっていた。@mediabunny/aac-encoder（FFmpeg の AAC エンコーダー、192kbps）で AAC に変換する。AAC の曲は従来どおり無劣化でコピー。
+- 書き出し中の表示にエンコーダー名とスレッド数（例：H.264 (x264, 16 threads)）を表示。簡易動画の完了時にも映像と音声の形式を表示。「書き出し」タブの案内も Firefox では x264 と表示。
+- 更新の確認で version.json を毎回問い合わせる（ブラウザが覚えた古い写しで「最新」と判断して、PC だけ更新されないことがあった）。
+- Encode non-AAC audio to AAC in Firefox via @mediabunny/aac-encoder (FFmpeg), show the encoder and thread count while exporting, and always revalidate version.json when checking for updates.
+
 ## 1.5.2-fc.7 — 2026-11-24（Firefox Compatible）
 
 - Firefox の MP4 書き出しを x264（WebAssembly）に。Firefox の H.264 エンコーダーはキーフレームが1秒ごとに固定で、間のフレームの細部が崩れて「1秒おきにぼやけて戻る」ため、画質一定（CRF：高 16 / 標準 19 / 軽量 23）でエンコードします。キーフレームは最大5秒ごと。うまくいかないときは従来のブラウザのエンコーダーで再試行。Chrome / Edge は従来どおり。

@@ -10,6 +10,18 @@ Source of the exact version (commit c24e06c2e184), the WebAssembly patch, the wr
 `vendor/x264/`. Upstream: https://code.videolan.org/videolan/x264
 
 
+## @mediabunny/aac-encoder 1.60.0 (bundled, MPL-2.0) and FFmpeg's AAC encoder (LGPL-2.1-or-later)
+
+Copyright (c) 2026-present, Vanilagy and contributors. The unchanged browser bundle
+`vendor/mediabunny-aac-encoder.min.js` is embedded in each HTML edition and encodes AAC audio in browsers
+without an AAC encoder (Firefox). License: `vendor/mediabunny-aac-encoder.LICENSE.txt` (MPL-2.0).
+Source distribution: `vendor/mediabunny-aac-encoder-1.60.0.tgz`
+(https://registry.npmjs.org/@mediabunny/aac-encoder/-/aac-encoder-1.60.0.tgz).
+It contains a WebAssembly build of FFmpeg's AAC encoder (libavcodec 62.23.103), licensed under the
+GNU Lesser General Public License version 2.1 or later: `vendor/ffmpeg-LICENSE.md.txt`,
+`vendor/ffmpeg-COPYING.LGPLv2.1.txt`. FFmpeg source code: https://ffmpeg.org/download.html
+(git: https://git.ffmpeg.org/ffmpeg.git). The bridge code is `src/bridge.c` in the source distribution above.
+
 ## Mediabunny 1.60.0 (bundled, MPL-2.0)
 
 Copyright (c) 2026-present, Vanilagy and contributors.

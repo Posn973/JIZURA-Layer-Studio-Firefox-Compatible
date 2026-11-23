@@ -35,7 +35,7 @@ async function readCurrent() {
   return current;
 }
 async function fetchManifest() {
-  const r = await fetch(root + 'version.json');            // 印は付けない（配信の拠点の写しで答えてもらう）
+  const r = await fetch(root + 'version.json', { cache: 'no-cache' });   // 印は付けない（配信の拠点の写しで答えてもらう）。JIZURA改: ブラウザが覚えた古い写しは使わず、毎回変わっていないか問い合わせる
   if (!r.ok) throw new Error('HTTP ' + r.status);
   const text = await r.text();
   return { text, man: JSON.parse(text) };

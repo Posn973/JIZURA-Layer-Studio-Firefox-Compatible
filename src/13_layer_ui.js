@@ -312,7 +312,7 @@ async function exportVideo(simple, frontOnly = false) {
       const pair = simple ? await J.exportSimpleVideo({ ...args, background: session.background, audio: J.ui.audio }) : frontOnly ? await J.exportLayerFront(args) : await J.exportLayerPair(args);
       if (ac.signal.aborted) throw new DOMException('Cancelled', 'AbortError');
       offerDownloads(pair.files, project.title);
-      status(simple ? tr('簡易動画MP4を生成しました。保存されない場合はリンクから保存してください。', 'Simple video MP4 is ready. Use the save link if needed.') : frontOnly ? tr('フロントMP4を生成しました。保存されない場合はリンクから保存してください。', 'Front MP4 is ready. Use the save link if needed.') : tr('2本のMP4を生成し、ダウンロードを開始しました。保存されない場合は下のリンクから個別に保存してください。', 'Two MP4s are ready and downloads have started. If either is missing, save it using the links below.'));
+      status(simple ? tr('簡易動画MP4を生成しました（', 'Simple video MP4 is ready (') + pair.codec + (pair.audio ? ' + ' + pair.audio.toUpperCase() : '') + tr('）。保存されない場合はリンクから保存してください。', '). Use the save link if needed.') : frontOnly ? tr('フロントMP4を生成しました。保存されない場合はリンクから保存してください。', 'Front MP4 is ready. Use the save link if needed.') : tr('2本のMP4を生成し、ダウンロードを開始しました。保存されない場合は下のリンクから個別に保存してください。', 'Two MP4s are ready and downloads have started. If either is missing, save it using the links below.'));
     } finally {
       awake();
       controls.forEach((e, i) => { e.disabled = disabled[i]; });

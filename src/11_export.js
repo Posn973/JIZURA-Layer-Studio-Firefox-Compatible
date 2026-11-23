@@ -85,8 +85,12 @@ J.videoAttempts = async (w, h, fps, bitrate) => {
   return out;
 };
 J.pickAudioCodec = async (sr, chn) => {
+  // JIZURA改: AAC first — the browser's encoder, or FFmpeg's (Firefox). Opus only when neither works
+  const aac = await J.aacEncodeMode(48000, chn);
+  if (aac === 'native') return { codec: 'mp4a.40.2', mux: 'aac', sr: 48000 };
+  if (aac === 'mediabunny') return { codec: 'mp4a.40.2', mux: 'aac', sr: 48000, mb: true };
   if (typeof AudioEncoder === 'undefined') return null;
-  for (const c of [{ codec: 'mp4a.40.2', mux: 'aac', sr: 48000 }, { codec: 'opus', mux: 'opus', sr: 48000 }]) {
+  for (const c of [{ codec: 'opus', mux: 'opus', sr: 48000 }]) {
     try { const s = await AudioEncoder.isConfigSupported({ codec: c.codec, sampleRate: c.sr, numberOfChannels: chn, bitrate: 192000 }); if (s.supported) return c; } catch (e) {}
   }
   return null;
@@ -160,7 +164,7 @@ async function encodeMP4({ plan, project, audio, quality, onProgress, signal, ra
   if (copy) ac = { codec: copy.codec, mux: copy.codec, sr: copy.sampleRate, copy: true };
   const store = file ? null : new BlockStore();
   const muxer = new J.Mp4Writer({ target: file || { onWrite: (data, pos) => store.write(data, pos) }, video: { codec: vc.mux, width: w, height: h, frameRate: fps },
-    audio: ac ? { codec: ac.mux } : null, fastStart: false });
+    audio: ac ? { codec: ac.mux, encode: !!ac.mb, bitrate: 192000 } : null, fastStart: false });
   let err = null, outFrames = 0;
   let venc = null;
   const canvas = document.createElement('canvas'); canvas.width = w; canvas.height = h;
@@ -184,7 +188,7 @@ async function encodeMP4({ plan, project, audio, quality, onProgress, signal, ra
       // an encoder that accepts frames but never returns any has failed silently (seen with some GPU drivers)
       if (!venc.x264 && i === Math.min(total - 1, fps * 3) && outFrames === 0) { await venc.flush(); if (!outFrames) throw new Error('エンコーダーが出力を返しません'); }
       await muxer.settle();
-      if (i % 3 === 0) { onProgress && onProgress(i / total, `フレーム ${i + 1}/${total}${note || ''}`); await new Promise(r => setTimeout(r, 0)); }
+      if (i % 3 === 0) { onProgress && onProgress(i / total, `フレーム ${i + 1}/${total}・${venc.label || vc.label}${note || ''}`); await new Promise(r => setTimeout(r, 0)); }
     }
     await venc.flush();
     if (err) throw err;
@@ -199,6 +203,11 @@ async function encodeMP4({ plan, project, audio, quality, onProgress, signal, ra
       if (!copied && audio.buffer.duration > span.t0 + 0.5) { const e = new Error('音声をコピーできませんでした。もう一度書き出してください'); e.jzFatal = true; throw e; }
     } catch (e) { await muxer.cancel(); throw e; }
     finally { copy.dispose(); }
+  } else if (ac && ac.mb) {
+    onProgress && onProgress(0.99, '音声を AAC にエンコード中');
+    const rs = await resample(audio.buffer, ac.sr, span.dur, span.t0);
+    try { muxer.addAudioBuffer(rs); await muxer.settle(0); }
+    catch (e) { const f = new Error('音声のエンコードに失敗しました: ' + (e.message || e)); f.jzFatal = true; throw f; }
   } else if (ac) {
     onProgress && onProgress(0.99, '音声をエンコード中');
     const rs = await resample(audio.buffer, ac.sr, span.dur, span.t0);
